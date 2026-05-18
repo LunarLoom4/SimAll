@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.22)
+add_executable(simall_rb main.cpp)
+target_include_directories(simall_rb PRIVATE ${CMAKE_SOURCE_DIR}/tests)
+target_link_libraries(simall_rb PRIVATE SimAll::CompilerFlags)
+install(TARGETS simall_rb RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)

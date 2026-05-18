@@ -1,0 +1,20 @@
+simall_add_module(radiation
+    SOURCES
+        Radiation.cpp
+        DiscreteOrdinates.cpp
+        P1Radiation.cpp
+        Rosseland.cpp
+        MonteCarloRte.cpp
+        SurfaceToSurface.cpp
+        SolarLoad.cpp
+        WsggSpectral.cpp
+    HEADERS
+        Radiation.hpp
+        DiscreteOrdinates.hpp
+        P1Radiation.hpp
+        Rosseland.hpp
+        MonteCarloRte.hpp
+        SurfaceToSurface.hpp
+        SolarLoad.hpp
+        WsggSpectral.hpp
+    PUBLIC_DEPS SimAll::Solver)

@@ -1,0 +1,59 @@
+# SimAll Beta — clang-tidy configuration.
+# Curated subset chosen to surface real bugs without drowning a CFD
+# code base in cosmetic warnings.
+
+Checks: >
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  -bugprone-unchecked-optional-access,
+  clang-analyzer-*,
+  -clang-analyzer-cplusplus.NewDeleteLeaks,
+  concurrency-*,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-avoid-c-arrays,
+  -cppcoreguidelines-avoid-do-while,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-pro-type-union-access,
+  misc-*,
+  -misc-no-recursion,
+  -misc-non-private-member-variables-in-classes,
+  -misc-include-cleaner,
+  modernize-*,
+  -modernize-use-trailing-return-type,
+  -modernize-avoid-c-arrays,
+  -modernize-use-nodiscard,
+  performance-*,
+  -performance-avoid-endl,
+  portability-*,
+  readability-*,
+  -readability-identifier-length,
+  -readability-magic-numbers,
+  -readability-implicit-bool-conversion,
+  -readability-function-cognitive-complexity,
+  -readability-named-parameter
+
+WarningsAsErrors: ''
+HeaderFilterRegex: '^(src|plugins|applications|tests)/.*\.(hpp|h)$'
+FormatStyle: file
+SystemHeaders: false
+
+CheckOptions:
+  - { key: readability-identifier-naming.ClassCase,           value: CamelCase  }
+  - { key: readability-identifier-naming.StructCase,          value: CamelCase  }
+  - { key: readability-identifier-naming.EnumCase,            value: CamelCase  }
+  - { key: readability-identifier-naming.NamespaceCase,       value: lower_case }
+  - { key: readability-identifier-naming.FunctionCase,        value: camelBack  }
+  - { key: readability-identifier-naming.MethodCase,          value: camelBack  }
+  - { key: readability-identifier-naming.VariableCase,        value: camelBack  }
+  - { key: readability-identifier-naming.MemberCase,          value: camelBack  }
+  - { key: readability-identifier-naming.PrivateMemberSuffix, value: _          }
+  - { key: readability-identifier-naming.ConstantCase,        value: CamelCase  }
+  - { key: readability-identifier-naming.ConstantPrefix,      value: k          }
+  - { key: readability-identifier-naming.MacroDefinitionCase, value: UPPER_CASE }

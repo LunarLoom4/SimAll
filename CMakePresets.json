@@ -1,0 +1,83 @@
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Release (Windows MSVC)",
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "SIMALL_BUILD_TESTS": "ON",
+                "SIMALL_USE_AVX2": "ON"
+            }
+        },
+        {
+            "name": "debug",
+            "inherits": "default",
+            "displayName": "Debug + Sanitizers",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "SIMALL_ENABLE_SANITIZERS": "ON"
+            }
+        },
+        {
+            "name": "relwithdebinfo",
+            "inherits": "default",
+            "displayName": "RelWithDebInfo (Windows MSVC)",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
+            "name": "linux-release",
+            "displayName": "Linux Release (GCC)",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_COMPILER": "g++",
+                "SIMALL_ENABLE_OPENMP": "ON",
+                "SIMALL_ENABLE_TBB": "ON"
+            }
+        },
+        {
+            "name": "linux-clang-release",
+            "inherits": "linux-release",
+            "displayName": "Linux Release (Clang)",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_C_COMPILER":   "clang"
+            }
+        },
+        {
+            "name": "linux-asan",
+            "inherits": "linux-release",
+            "displayName": "Linux ASan + UBSan (Clang)",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_C_COMPILER":   "clang",
+                "SIMALL_ENABLE_SANITIZERS": "ON"
+            }
+        },
+        {
+            "name": "hpc",
+            "inherits": "linux-release",
+            "displayName": "HPC (MPI + OpenMP + AVX-512)",
+            "cacheVariables": {
+                "SIMALL_ENABLE_MPI": "ON",
+                "SIMALL_USE_AVX512": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        { "name": "default",        "configurePreset": "default" },
+        { "name": "debug",          "configurePreset": "debug" },
+        { "name": "relwithdebinfo", "configurePreset": "relwithdebinfo" },
+        { "name": "linux",          "configurePreset": "linux-release" },
+        { "name": "linux-clang",    "configurePreset": "linux-clang-release" },
+        { "name": "linux-asan",     "configurePreset": "linux-asan" },
+        { "name": "hpc",            "configurePreset": "hpc" }
+    ]
+}

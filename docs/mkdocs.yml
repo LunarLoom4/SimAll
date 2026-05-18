@@ -1,0 +1,72 @@
+site_name: SimAll Beta Documentation
+site_description: Industrial multiphysics CFD/CAE platform
+site_author: SimAll Beta contributors
+repo_name: SimAll_Beta
+docs_dir: .
+site_dir: ../build/docs-site
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: blue
+      accent:  cyan
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - toc.integrate
+    - content.code.copy
+
+nav:
+  - Home: README.md
+  - Architecture:
+      - Overview:        architecture/overview.md
+      - Layers:          architecture/layers.md
+      - Threading model: architecture/threading.md
+      - Data ownership:  architecture/data-ownership.md
+      - Plugin model:    architecture/plugins.md
+  - Pipelines:
+      - CAD pipeline:    pipelines/cad.md
+      - Mesh pipeline:   pipelines/mesh.md
+      - Solver pipeline: pipelines/solver.md
+      - Post pipeline:   pipelines/postprocessing.md
+  - Theory:
+      - Finite volume:   theory/finite-volume.md
+      - Turbulence:      theory/turbulence.md
+      - Combustion:      theory/combustion.md
+      - Multiphase:      theory/multiphase.md
+      - Radiation:       theory/radiation.md
+      - Particles:       theory/particles.md
+  - User Guide:
+      - Quick start:     user/quick-start.md
+      - Workflow tree:   user/workflow.md
+      - Boundary cond.:  user/boundary-conditions.md
+      - Monitors:        user/monitors.md
+      - Scripting:       user/scripting.md
+  - Plugin SDK:
+      - Authoring:       sdk/authoring.md
+      - ABI contract:    sdk/abi.md
+      - Examples:        sdk/examples.md
+  - Validation:
+      - Cavity:          validation/cavity.md
+      - BFS:             validation/bfs.md
+      - Taylor-Green:    validation/taylor-green.md
+      - Sandia Flame D:  validation/flameD.md
+  - API reference:       api/index.md
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.details
+
+extra_javascript:
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js

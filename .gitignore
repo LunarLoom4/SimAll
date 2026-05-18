@@ -1,0 +1,21 @@
+# Build outputs
+build/
+out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Testing/
+compile_commands.json
+
+# IDE / editor scratch
+.vs/
+.vscode/
+.idea/
+*.user
+
+# MSBuild / native build artifacts
+*.tlog
+
+# Logs & runtime artifacts
+*.log
+*.simall

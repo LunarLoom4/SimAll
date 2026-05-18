@@ -1,0 +1,62 @@
+{
+  "$schema": "./manifest.schema.json",
+  "version": 1,
+  "assets": [
+    {
+      "path": "stl/unit_cube.stl",
+      "origin": "in-house",
+      "license": "SimAll Beta project license",
+      "purpose": "minimal closed-manifold STL for importer round-trip tests",
+      "format": "STL ASCII",
+      "bytes": 1284,
+      "sha256": "computed-on-first-verify"
+    },
+    {
+      "path": "stl/tetrahedron.stl",
+      "origin": "in-house",
+      "license": "SimAll Beta project license",
+      "purpose": "smallest valid closed STL for unit tests",
+      "format": "STL ASCII",
+      "bytes": 528,
+      "sha256": "computed-on-first-verify"
+    },
+    {
+      "path": "stl/sphere_low.stl",
+      "origin": "in-house procedural icosphere",
+      "license": "SimAll Beta project license",
+      "purpose": "low-poly closed surface for cut-cell mesher demo",
+      "format": "STL ASCII",
+      "bytes": 0,
+      "sha256": "generated-by-scripts/generate_samples.ps1"
+    },
+    {
+      "path": "cad/pipe_elbow.step",
+      "origin": "scripts/generate_samples.py via OpenCASCADE primitives",
+      "license": "SimAll Beta project license",
+      "purpose": "CAD import + healing + meshing tutorial",
+      "format": "STEP AP214",
+      "bytes": 0,
+      "sha256": "generated-on-first-build"
+    },
+    {
+      "path": "mesh/cavity_64x64x64.cgns",
+      "origin": "lid-driven cavity reference grid",
+      "license": "SimAll Beta project license",
+      "purpose": "regression: lid-driven cavity Re=100/400/1000",
+      "format": "CGNS HDF5",
+      "bytes": 0,
+      "sha256": "fetched-on-demand",
+      "downloadUrl": null
+    },
+    {
+      "path": "fields/taylor_green_ref_re1600.h5",
+      "origin": "DNS reference from van Rees et al. (2011)",
+      "license": "public domain (NASA TM-equivalent reproduction)",
+      "purpose": "Taylor-Green Re=1600 dissipation reference",
+      "format": "HDF5",
+      "bytes": 0,
+      "sha256": "fetched-on-demand",
+      "downloadUrl": null
+    }
+  ]
+}

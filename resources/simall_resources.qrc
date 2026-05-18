@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RCC version="1.0">
+  <qresource prefix="/themes">
+    <file alias="dark.qss">themes/dark.qss</file>
+  </qresource>
+  <qresource prefix="/icons">
+    <file alias="app.svg">icons/app.svg</file>
+    <file alias="close.svg">icons/close.svg</file>
+    <file alias="restore.svg">icons/restore.svg</file>
+    <file alias="file-new.svg">icons/file-new.svg</file>
+    <file alias="file-open.svg">icons/file-open.svg</file>
+    <file alias="file-save.svg">icons/file-save.svg</file>
+    <file alias="undo.svg">icons/undo.svg</file>
+    <file alias="redo.svg">icons/redo.svg</file>
+    <file alias="cad-import.svg">icons/cad-import.svg</file>
+    <file alias="mesh-generate.svg">icons/mesh-generate.svg</file>
+    <file alias="solver-run.svg">icons/solver-run.svg</file>
+    <file alias="solver-stop.svg">icons/solver-stop.svg</file>
+    <file alias="post-contour.svg">icons/post-contour.svg</file>
+    <file alias="post-slice.svg">icons/post-slice.svg</file>
+    <file alias="post-streamline.svg">icons/post-streamline.svg</file>
+    <file alias="chevron-down.svg">icons/chevron-down.svg</file>
+    <file alias="branch-open.svg">icons/branch-open.svg</file>
+    <file alias="branch-closed.svg">icons/branch-closed.svg</file>
+  </qresource>
+  <qresource prefix="/splash">
+    <file alias="splash.svg">splash/splash.svg</file>
+  </qresource>
+</RCC>

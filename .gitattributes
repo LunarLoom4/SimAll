@@ -1,0 +1,36 @@
+# ---------------------------------------------------------------------
+# SimAll Beta — line-ending and binary-attribute rules.
+# ---------------------------------------------------------------------
+
+* text=auto eol=lf
+
+*.ps1   text eol=crlf
+*.psm1  text eol=crlf
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+
+*.sh    text eol=lf
+*.py    text eol=lf
+*.cpp   text eol=lf
+*.hpp   text eol=lf
+*.h     text eol=lf
+*.cu    text eol=lf
+*.cuh   text eol=lf
+*.cmake text eol=lf
+CMakeLists.txt text eol=lf
+
+# binary assets
+*.png  binary
+*.jpg  binary
+*.ico  binary
+*.icns binary
+*.ttf  binary
+*.otf  binary
+*.zip  binary
+*.tar  binary
+*.gz   binary
+*.h5   binary
+*.cgns binary
+*.step binary
+*.iges binary
+*.brep binary

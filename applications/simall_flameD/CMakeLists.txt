@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.22)
+add_executable(simall_flameD main.cpp)
+target_include_directories(simall_flameD PRIVATE ${CMAKE_SOURCE_DIR}/tests)
+target_link_libraries(simall_flameD PRIVATE SimAll::CompilerFlags)
+install(TARGETS simall_flameD RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT runtime)

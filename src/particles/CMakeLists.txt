@@ -1,0 +1,26 @@
+simall_add_module(particles
+    SOURCES
+        LagrangianTracker.cpp
+        DemCollision.cpp
+        SprayBreakup.cpp
+        RosinRammlerInjector.cpp
+        BlobInjector.cpp
+        ConeInjector.cpp
+        ParticleEvaporation.cpp
+        ParticleHeating.cpp
+        ParcelCoalescence.cpp
+        WallFilm.cpp
+        ChargedParticleField.cpp
+    HEADERS
+        LagrangianTracker.hpp
+        DemCollision.hpp
+        SprayBreakup.hpp
+        RosinRammlerInjector.hpp
+        BlobInjector.hpp
+        ConeInjector.hpp
+        ParticleEvaporation.hpp
+        ParticleHeating.hpp
+        ParcelCoalescence.hpp
+        WallFilm.hpp
+        ChargedParticleField.hpp
+    PUBLIC_DEPS SimAll::Core SimAll::Utilities SimAll::Meshing SimAll::Solver)

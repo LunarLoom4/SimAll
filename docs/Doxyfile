@@ -1,0 +1,48 @@
+# Doxygen configuration for SimAll Beta — API reference generation.
+# Output is consumed by `mkdocs` via `mkdoxy` / `breathe`.
+
+PROJECT_NAME           = "SimAll Beta"
+PROJECT_NUMBER         = 0.1.0
+PROJECT_BRIEF          = "Industrial multiphysics CFD/CAE platform"
+OUTPUT_DIRECTORY       = ../build/doxygen
+CREATE_SUBDIRS         = YES
+
+INPUT                  = ../src ../plugins
+RECURSIVE              = YES
+FILE_PATTERNS          = *.hpp *.h *.cpp *.cc *.cu
+EXTENSION_MAPPING      = cu=C++
+
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+GENERATE_XML           = YES
+XML_OUTPUT             = xml
+HTML_OUTPUT            = html
+
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = YES
+MULTILINE_CPP_IS_BRIEF = NO
+INLINE_INHERITED_MEMB  = YES
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+STRIP_CODE_COMMENTS    = NO
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+
+WARN_IF_UNDOCUMENTED   = NO
+WARN_NO_PARAMDOC       = NO
+WARN_AS_ERROR          = NO
+QUIET                  = YES
+
+USE_MATHJAX            = YES
+MATHJAX_RELPATH        = https://cdn.jsdelivr.net/npm/mathjax@3
+HAVE_DOT               = NO
+CLASS_DIAGRAMS         = YES
+
+EXCLUDE_PATTERNS       = */build/* */third_party/*
+EXCLUDE_SYMBOLS        = detail::*
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
+PREDEFINED             = SIMALL_DOXYGEN \
+                         "SIMALL_API=" \
+                         "SIMALL_INLINE=inline"

@@ -1,0 +1,110 @@
+# SimAll Beta — clang-format configuration (project-wide, mandatory).
+# Based on Microsoft style; deviations make the result match the
+# existing hand-formatted source: 4-space indent, 100-col limit,
+# braces on next line for namespaces/classes/functions, attached
+# braces for control flow, no bin-packing.
+
+Language:                                  Cpp
+Standard:                                  c++20
+BasedOnStyle:                              Microsoft
+
+ColumnLimit:                               100
+IndentWidth:                               4
+TabWidth:                                  4
+UseTab:                                    Never
+ContinuationIndentWidth:                   4
+
+AccessModifierOffset:                      -4
+NamespaceIndentation:                      None
+FixNamespaceComments:                      true
+ShortNamespaceLines:                       2
+
+AlignAfterOpenBracket:                     Align
+AlignConsecutiveAssignments:               None
+AlignConsecutiveDeclarations:              None
+AlignOperands:                             Align
+AlignTrailingComments:                     true
+AllowAllArgumentsOnNextLine:               true
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowShortBlocksOnASingleLine:             Empty
+AllowShortCaseLabelsOnASingleLine:         false
+AllowShortFunctionsOnASingleLine:          Inline
+AllowShortIfStatementsOnASingleLine:       Never
+AllowShortLambdasOnASingleLine:            All
+AllowShortLoopsOnASingleLine:              false
+
+BinPackArguments:                          false
+BinPackParameters:                         false
+BreakBeforeBraces:                         Custom
+BraceWrapping:
+  AfterCaseLabel:        false
+  AfterClass:            true
+  AfterControlStatement: Never
+  AfterEnum:             true
+  AfterFunction:         true
+  AfterNamespace:        true
+  AfterStruct:           true
+  AfterUnion:            true
+  AfterExternBlock:      true
+  BeforeCatch:           false
+  BeforeElse:            false
+  BeforeLambdaBody:      false
+  BeforeWhile:           false
+  IndentBraces:          false
+  SplitEmptyFunction:    true
+  SplitEmptyRecord:      true
+  SplitEmptyNamespace:   true
+
+BreakBeforeBinaryOperators:                NonAssignment
+BreakBeforeTernaryOperators:               true
+BreakConstructorInitializers:              BeforeComma
+BreakInheritanceList:                      BeforeComma
+BreakStringLiterals:                       true
+
+CompactNamespaces:                         false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth:         4
+Cpp11BracedListStyle:                      true
+DerivePointerAlignment:                    false
+PointerAlignment:                          Left
+ReferenceAlignment:                        Left
+SortIncludes:                              CaseInsensitive
+SortUsingDeclarations:                     true
+
+IncludeBlocks:                             Regroup
+IncludeCategories:
+  - Regex:    '^"[A-Za-z0-9_\-]+\.hpp"$'   # paired header
+    Priority: 1
+  - Regex:    '^"simall/'
+    Priority: 2
+  - Regex:    '^".*/'
+    Priority: 3
+  - Regex:    '^<Qt'
+    Priority: 4
+  - Regex:    '^<vtk'
+    Priority: 5
+  - Regex:    '^<.*/.*>'
+    Priority: 6
+  - Regex:    '^<[A-Za-z0-9_]+>'
+    Priority: 7
+
+SpaceAfterCStyleCast:                      true
+SpaceAfterLogicalNot:                      false
+SpaceAfterTemplateKeyword:                 true
+SpaceBeforeAssignmentOperators:            true
+SpaceBeforeCpp11BracedList:                false
+SpaceBeforeCtorInitializerColon:           true
+SpaceBeforeInheritanceColon:               true
+SpaceBeforeParens:                         ControlStatements
+SpaceBeforeRangeBasedForLoopColon:         true
+SpaceInEmptyParentheses:                   false
+SpacesBeforeTrailingComments:              1
+SpacesInAngles:                            false
+SpacesInCStyleCastParentheses:             false
+SpacesInContainerLiterals:                 false
+SpacesInParentheses:                       false
+SpacesInSquareBrackets:                    false
+
+MaxEmptyLinesToKeep:                       2
+KeepEmptyLinesAtTheStartOfBlocks:          false
+ReflowComments:                            true

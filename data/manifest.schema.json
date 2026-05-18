@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SimAll Beta data manifest",
+  "type": "object",
+  "required": ["version", "assets"],
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "origin", "license", "purpose", "format", "bytes", "sha256"],
+        "properties": {
+          "path":        { "type": "string" },
+          "origin":      { "type": "string" },
+          "license":     { "type": "string" },
+          "purpose":     { "type": "string" },
+          "format":      { "type": "string" },
+          "bytes":       { "type": "integer", "minimum": 0 },
+          "sha256":      { "type": "string" },
+          "downloadUrl": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

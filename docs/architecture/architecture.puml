@@ -1,0 +1,108 @@
+@startuml SimAll Beta — Layer Architecture
+'Generated from docs/architecture/architecture.puml
+'Render: plantuml -tsvg docs/architecture/architecture.puml
+
+skinparam backgroundColor #1E1E1E
+skinparam shadowing false
+skinparam defaultFontColor #DDDDDD
+skinparam ArrowColor #007ACC
+skinparam ComponentBackgroundColor #252526
+skinparam ComponentBorderColor #3C3C3C
+skinparam PackageBackgroundColor #2D2D30
+skinparam PackageBorderColor #3C3C3C
+
+title SimAll Beta — Strict Layer Architecture (spec §1.3)
+
+package "Presentation" {
+  [Qt6 GUI]                  as GUI
+  [VTK Visualization]        as VIS
+}
+
+package "Workflow" {
+  [Project Graph]            as PRJ
+  [Command / Undo Stack]     as CMD
+  [Event Bus]                as EBS
+}
+
+package "Physics" {
+  [Turbulence]               as TUR
+  [Combustion]               as COM
+  [Multiphase]               as MUL
+  [Radiation]                as RAD
+  [Heat Transfer]            as HTX
+  [Particles]                as PRT
+  [Acoustics / EMag / Adj]   as MIX
+}
+
+package "Numerics" {
+  [Solver Framework]         as SOL
+  [Linear Solvers + Precon]  as LIN
+  [Sparse Matrix (CSR)]      as CSR
+  [FieldRegistry (SoA)]      as FLD
+}
+
+package "Discretisation" {
+  [Meshing]                  as MSH
+  [AMR / IBM / Overset]      as ADAPT
+  [CAD (OpenCASCADE)]        as CAD
+}
+
+package "Foundation" {
+  [Core Runtime]             as CORE
+  [Utilities (math, mem)]    as UTIL
+  [Parallel (MPI/OMP/TBB)]   as PAR
+  [GPU (CUDA)]               as GPU
+  [IO (Project, CGNS, VTK)]  as IOX
+  [Scripting (Python)]       as PYX
+  [Materials Database]       as MAT
+}
+
+GUI  --> EBS
+GUI  --> CMD
+GUI  --> VIS
+VIS  ..> FLD : read-only
+VIS  ..> MSH : read-only
+EBS  --> PRJ
+PRJ  --> SOL
+PRJ  --> MSH
+PRJ  --> CAD
+SOL  --> LIN
+LIN  --> CSR
+SOL  --> FLD
+TUR  --> SOL
+COM  --> SOL
+MUL  --> SOL
+RAD  --> SOL
+HTX  --> SOL
+PRT  --> MSH
+MIX  --> SOL
+MSH  --> CAD
+ADAPT --> MSH
+SOL  --> PAR
+SOL  --> GPU
+SOL  --> MAT
+IOX  --> PRJ
+PYX  --> EBS
+CORE <-- GUI
+CORE <-- SOL
+UTIL <-- SOL
+UTIL <-- MSH
+
+note bottom of GUI
+  GUI NEVER mutates physics
+  state directly — only via
+  Command + EventBus.
+end note
+
+note bottom of VIS
+  VIS is read-only on
+  Mesh and FieldRegistry.
+end note
+
+note bottom of CAD
+  Exact geometry only.
+  NEVER feeds visualization
+  triangles into meshing.
+end note
+
+@enduml

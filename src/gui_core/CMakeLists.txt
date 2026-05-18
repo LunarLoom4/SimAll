@@ -1,0 +1,14 @@
+simall_add_module(gui_core
+    SOURCES
+        PropertyDescriptor.cpp
+        DockPerspective.cpp
+        PanelRegistry.cpp
+        ThemePaths.cpp
+    HEADERS
+        PropertyDescriptor.hpp
+        DockPerspective.hpp
+        PanelRegistry.hpp
+        ThemePaths.hpp
+    PUBLIC_DEPS
+        SimAll::Core
+        SimAll::Utilities)
