@@ -6,7 +6,7 @@
 // growth rate over a sweep of Ra values.  Acceptance: solver onset Ra
 // within 5 % of 1707.762 on a 64×64 mesh after 5000 steps.
 // =============================================================================
-#include "regression/cases/RayleighBenard.hpp"
+#include "../../tests/regression/cases/RayleighBenard.hpp"
 
 #include <cstdio>
 

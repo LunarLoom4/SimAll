@@ -112,6 +112,33 @@ std::size_t MultiblockHex::assemble(Mesh& outMesh) {
         const auto Nj = blk.divisions[1];
         const auto Nk = blk.divisions[2];
         if (Ni == 0 || Nj == 0 || Nk == 0) continue;
+
+        // Parametric coordinates in [0,1] for each direction.  When the
+        // simpleGrading expansion ratio G = (last cell length)/(first cell
+        // length) is 1, the distribution is uniform.  Otherwise cells follow
+        // a geometric progression with per-cell ratio r = G^(1/(N-1)), and
+        //   u[i] = (r^i - 1) / (r^N - 1)
+        // recovers the cumulative parametric position.
+        auto make_param = [](std::uint32_t N, double G) {
+            std::vector<double> u(N + 1);
+            if (N == 0) { u[0] = 0.0; return u; }
+            if (N == 1 || !(G > 0.0) || std::abs(G - 1.0) < 1e-12) {
+                for (std::uint32_t i = 0; i <= N; ++i)
+                    u[i] = double(i) / double(N);
+                return u;
+            }
+            const double r     = std::pow(G, 1.0 / double(N - 1));
+            const double denom = std::pow(r, double(N)) - 1.0;
+            u[0] = 0.0;
+            for (std::uint32_t i = 1; i < N; ++i)
+                u[i] = (std::pow(r, double(i)) - 1.0) / denom;
+            u[N] = 1.0;
+            return u;
+        };
+        const std::vector<double> uPar = make_param(Ni, blk.grading[0]);
+        const std::vector<double> vPar = make_param(Nj, blk.grading[1]);
+        const std::vector<double> wPar = make_param(Nk, blk.grading[2]);
+
         // Build node-id table indexed by (i,j,k) ∈ [0..Ni]·[0..Nj]·[0..Nk].
         std::vector<NodeId> nid((Ni+1)*(Nj+1)*(Nk+1));
         auto NIDX = [&](std::uint32_t i, std::uint32_t j, std::uint32_t k){
@@ -120,8 +147,8 @@ std::size_t MultiblockHex::assemble(Mesh& outMesh) {
         for (std::uint32_t k = 0; k <= Nk; ++k)
         for (std::uint32_t j = 0; j <= Nj; ++j)
         for (std::uint32_t i = 0; i <= Ni; ++i) {
-            const double u = double(i)/Ni, v = double(j)/Nj, w = double(k)/Nk;
-            nid[NIDX(i,j,k)] = get_or_add(trilinear(blk.corners, u, v, w));
+            nid[NIDX(i,j,k)] = get_or_add(
+                trilinear(blk.corners, uPar[i], vPar[j], wPar[k]));
         }
         // Build hex cells.
         for (std::uint32_t k = 0; k < Nk; ++k)

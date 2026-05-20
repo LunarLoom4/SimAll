@@ -9,16 +9,16 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include "regression/cases/LidDrivenCavity.hpp"
-#include "regression/cases/BackwardFacingStep.hpp"
-#include "regression/cases/Channel.hpp"
-#include "regression/cases/TaylorGreenVortex.hpp"
-#include "regression/cases/NacaAirfoil.hpp"
-#include "regression/cases/Shocktube.hpp"
-#include "regression/cases/RayleighBenard.hpp"
-#include "regression/cases/FlameD.hpp"
-#include "regression/cases/Cylinder.hpp"
-#include "regression/cases/Pipe.hpp"
+#include "cases/LidDrivenCavity.hpp"
+#include "cases/BackwardFacingStep.hpp"
+#include "cases/Channel.hpp"
+#include "cases/TaylorGreenVortex.hpp"
+#include "cases/NacaAirfoil.hpp"
+#include "cases/Shocktube.hpp"
+#include "cases/RayleighBenard.hpp"
+#include "cases/FlameD.hpp"
+#include "cases/Cylinder.hpp"
+#include "cases/Pipe.hpp"
 
 using Catch::Matchers::WithinAbs;
 using Catch::Matchers::WithinRel;

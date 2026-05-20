@@ -133,4 +133,14 @@ void DomainPartition::install_into(GhostExchange& gx,
     for (const auto& nc : plan.neighbours) gx.add_neighbour(nc);
 }
 
+meshing::ops::SubdomainStats DomainPartition::extract_local_mesh(
+    const meshing::Mesh& globalMesh,
+    const DomainPlan&    plan,
+    meshing::Mesh&       outMesh) const
+{
+    return meshing::ops::extract_subdomain(
+        globalMesh, plan.cellRank, ctx_.rank(),
+        /*includeGhostLayer=*/true, outMesh);
+}
+
 }  // namespace simall::parallel

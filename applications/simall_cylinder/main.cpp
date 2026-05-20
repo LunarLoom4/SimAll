@@ -5,7 +5,7 @@
 // the Roshko Strouhal-Re curve and the Henderson drag fit at the
 // canonical Reynolds-number points used by the DES regression suite.
 // =============================================================================
-#include "regression/cases/Cylinder.hpp"
+#include "../../tests/regression/cases/Cylinder.hpp"
 
 #include <cstdio>
 

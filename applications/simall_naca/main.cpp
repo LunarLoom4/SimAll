@@ -6,7 +6,7 @@
 // distribution at quarter-chord stations.  Acceptance criterion: numerical
 // post-processor must reproduce Cl(α) within 2 % for α ≤ 5°.
 // =============================================================================
-#include "regression/cases/NacaAirfoil.hpp"
+#include "../../tests/regression/cases/NacaAirfoil.hpp"
 
 #include <cstdio>
 

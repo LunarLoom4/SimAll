@@ -85,11 +85,13 @@ simall_find_optional_dependencies()
 # -----------------------------------------------------------------------------
 add_subdirectory(src/utilities)        # Phase 24: memory, math, SoA primitives
 add_subdirectory(src/core)             # Phase 1.3: service locator, events, log, undo
-add_subdirectory(src/io)               # Phase 22: serializers (depends: core, utilities)
+add_subdirectory(src/workbench)        # Phase 22: project schematic + state machine (depends: core, utilities)
+add_subdirectory(src/io)               # Phase 22: serializers (depends: core, utilities, workbench)
 add_subdirectory(src/parallel)         # Phase 17: MPI / OpenMP / TBB facades
 add_subdirectory(src/gpu)              # Phase 18: device abstraction
 add_subdirectory(src/materials)        # Phase 15: material database
 add_subdirectory(src/cad)              # Phase 4 : OpenCASCADE wrapper
+add_subdirectory(src/cad_sketch)       # Phase 23: parametric 2D sketcher (OCCT-free)
 add_subdirectory(src/meshing)          # Phase 5 : mesh data + meshers
 add_subdirectory(src/solver)           # Phase 6 : finite-volume infrastructure
 add_subdirectory(src/turbulence)       # Phase 8 : RANS/LES/Hybrid plugins
@@ -135,7 +137,7 @@ set(SIMALL_SUBSYSTEMS
     utilities core io parallel gpu materials cad meshing solver
     turbulence heat_transfer radiation combustion multiphase particles
     morphing ibm porous rotating dynamics acoustics emag rom zones amr
-    scripting optimization adjoint visualization_core visualization gui_core gui)
+    scripting workbench optimization adjoint visualization_core visualization gui_core gui)
 
 foreach(_mod IN LISTS SIMALL_SUBSYSTEMS)
     if(TARGET simall_${_mod})

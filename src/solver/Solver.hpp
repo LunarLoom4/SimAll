@@ -28,8 +28,12 @@ enum class SpatialScheme { FirstOrderUpwind, SecondOrderUpwind, QUICK, MUSCL,
                            Central, BoundedCentral, SuperBeeTVD, VanLeerTVD };
 enum class TemporalScheme { ExplicitEuler, ImplicitEuler, CrankNicolson, BDF2, DualTime };
 
-// ---------------- Pressure-velocity coupling (Phase 6.3) -------------------
-enum class CouplingAlgorithm { SIMPLE, SIMPLEC, PISO, Coupled };
+// ---------------- Pressure-velocity coupling (Phase 6.3 + 22.1) ------------
+// PIMPLE = transient SIMPLE-outer / PISO-inner hybrid (Issa+Patankar).
+//   nOuterCorrectors == 1  → degrades to PISO (no momentum/pressure URF).
+//   nOuterCorrectors  > 1  → SIMPLE-style outer loop with URF on each step,
+//                            PISO-style inner pressure correctors per outer.
+enum class CouplingAlgorithm { SIMPLE, SIMPLEC, PISO, PIMPLE, Coupled };
 
 // ---------------- Linear solver interface (Phase 7) ------------------------
 enum class LinearSolverKind { GMRES, BiCGSTAB, CG, TFQMR };

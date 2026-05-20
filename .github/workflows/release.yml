@@ -1,0 +1,136 @@
+# =============================================================================
+# release.yml -- Build self-contained Windows installer + portable ZIP
+#
+# Triggered by:
+#   * Pushing a tag matching v*.*.* (creates a GitHub Release with artefacts)
+#   * Manual run via the "Actions" tab (uploads artefacts only, no Release)
+#
+# What you get:
+#   * SimAll-Beta-<version>-win64.exe   (NSIS installer, double-click to install)
+#   * SimAll-Beta-<version>-win64.zip   (portable -- unzip anywhere, run exe)
+#
+# End-user experience:
+#   1. Open https://github.com/LunarLoom4/SimAll/releases/latest
+#   2. Download the .exe or .zip
+#   3. Run it. No prerequisites -- every Qt6 / VTK / OpenCASCADE / HDF5 /
+#      MSVC runtime DLL is bundled.
+#
+# Caveat: unsigned binaries trigger Windows SmartScreen on first run
+#   ("Windows protected your PC" -> "More info" -> "Run anyway").  Paying for
+#   an OV/EV code-signing cert ($400-1500/yr) is the only way to silence it.
+#
+# Build time:
+#   * First run on a fresh cache: ~2-3 hours (Qt6 + VTK + OCCT from source)
+#   * Subsequent runs: ~15 minutes (vcpkg binary cache restores deps)
+# =============================================================================
+
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag for the artefact filenames (e.g. 0.1.0-dev)'
+        required: false
+        default: '0.0.0-dev'
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-windows-installer:
+    name: Windows installer + portable ZIP
+    runs-on: windows-2022
+    timeout-minutes: 360  # 6 h (vcpkg first build can use most of this)
+
+    env:
+      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Export GitHub Actions cache env (for vcpkg)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: Set up vcpkg (with binary cache)
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: ${{ github.workspace }}/vcpkg
+          vcpkgJsonGlob: 'vcpkg.json'
+
+      - name: Set up MSVC dev environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Set up CMake + Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Configure (vcpkg manifest mode)
+        env:
+          VCPKG_ROOT: ${{ github.workspace }}/vcpkg
+        run: cmake --preset windows-vcpkg
+
+      - name: Build (Release)
+        run: cmake --build build/windows-vcpkg --config Release -j
+
+      - name: Test
+        working-directory: build/windows-vcpkg
+        # Tests are best-effort here -- main gating happens in ci.yml.
+        # We do not want a flaky test to block a release build.
+        continue-on-error: true
+        run: ctest --output-on-failure -j --build-config Release
+
+      - name: Package (NSIS installer + portable ZIP)
+        working-directory: build/windows-vcpkg
+        run: cpack -G "NSIS;ZIP" -C Release
+
+      - name: List produced artefacts
+        working-directory: build/windows-vcpkg
+        run: Get-ChildItem -Filter 'SimAll-Beta-*' | Format-Table Name, Length, LastWriteTime
+
+      - name: Upload artefacts (always, for manual / PR / tag runs alike)
+        uses: actions/upload-artifact@v4
+        with:
+          name: simall-beta-windows-x64
+          path: |
+            build/windows-vcpkg/SimAll-Beta-*.exe
+            build/windows-vcpkg/SimAll-Beta-*.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Attach artefacts to GitHub Release (tag pushes only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: SimAll Beta ${{ github.ref_name }}
+          draft: true
+          generate_release_notes: true
+          files: |
+            build/windows-vcpkg/SimAll-Beta-*.exe
+            build/windows-vcpkg/SimAll-Beta-*.zip
+          body: |
+            ## SimAll Beta ${{ github.ref_name }}
+
+            Self-contained Windows build. No prerequisites required.
+
+            ### Downloads
+            - **Installer** (`*.exe`): standard install to Program Files
+            - **Portable** (`*.zip`): extract anywhere, run `simall_beta.exe` -- no admin needed
+
+            > **SmartScreen note**: these binaries are unsigned. On first run Windows
+            > may show *"Windows protected your PC"*. Click **More info** ->
+            > **Run anyway**.  This is normal for unsigned open-source builds.
+
+            See `CHANGELOG.md` for full notes.

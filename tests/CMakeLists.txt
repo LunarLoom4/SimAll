@@ -13,12 +13,16 @@ add_executable(simall_core_tests
     unit/test_event_bus.cpp
     unit/test_undo.cpp
     unit/test_aligned.cpp
+    unit/test_memory_pool.cpp
+    unit/test_cache_padded.cpp
     unit/core/test_thread_pool.cpp
     unit/core/test_task_graph.cpp
     unit/core/test_config_store.cpp
     unit/core/test_unit_system.cpp
     unit/core/test_composite_command.cpp
     unit/core/test_rotating_sink.cpp
+    unit/core/test_bc_registry.cpp
+    unit/core/test_plugin_category.cpp
     unit/cad/test_topology_graph.cpp
     ${CMAKE_SOURCE_DIR}/src/cad/TopologyGraph.cpp)
 target_link_libraries(simall_core_tests PRIVATE
@@ -41,7 +45,10 @@ target_link_libraries(simall_materials_tests PRIVATE
 add_executable(simall_solver_tests
     unit/solver/test_ssor_preconditioner.cpp
     unit/solver/test_tfqmr_solver.cpp
-    unit/solver/test_fct_zalesak.cpp)
+    unit/solver/test_fct_zalesak.cpp
+    unit/solver/test_pimple_algorithm.cpp
+    unit/solver/test_wall_distance_service.cpp
+    unit/solver/test_map_fields.cpp)
 target_link_libraries(simall_solver_tests PRIVATE
     SimAll::CompilerFlags SimAll::Solver SimAll::Meshing SimAll::Materials
     SimAll::Core SimAll::Utilities Catch2::Catch2WithMain)
@@ -102,7 +109,13 @@ target_link_libraries(simall_radiation_tests PRIVATE
 # agglomeration, boundary recovery, medial-axis decomposition, METIS /
 # Scotch partitioners, and AMR adaptor modules.
 add_executable(simall_meshing_advanced_tests
-    unit/meshing/test_meshing_advanced.cpp)
+    unit/meshing/test_meshing_advanced.cpp
+    unit/meshing/test_snappy_hex_mesher.cpp
+    unit/meshing/test_mesh_ops.cpp
+    unit/meshing/test_octree_cutcell.cpp
+    unit/meshing/test_blockmesh_dict.cpp
+    unit/meshing/test_mesh_quality_report.cpp
+    unit/meshing/test_mesh_decomposition.cpp)
 target_link_libraries(simall_meshing_advanced_tests PRIVATE
     SimAll::CompilerFlags SimAll::Meshing SimAll::Solver SimAll::Materials
     SimAll::Core SimAll::Utilities SimAll::Cad Catch2::Catch2WithMain)
@@ -155,16 +168,45 @@ target_link_libraries(simall_scripting_tests PRIVATE
     SimAll::CompilerFlags SimAll::Scripting
     SimAll::Core SimAll::Utilities Catch2::Catch2WithMain)
 
+# Workbench (Phase 22). Pure data model + state machine: Cell, CellPort,
+# CellLink, Schematic, StateMachine.  No Qt, no I/O -- runs on any host.
+add_executable(simall_workbench_tests
+    unit/workbench/test_workbench_models.cpp
+    unit/workbench/test_workflow_engine.cpp
+    unit/workbench/test_workbench_commands.cpp
+    unit/workbench/test_cell_adapters.cpp)
+target_link_libraries(simall_workbench_tests PRIVATE
+    SimAll::CompilerFlags SimAll::Workbench
+    SimAll::Core SimAll::Utilities Catch2::Catch2WithMain)
+
+# Parametric sketcher (Phase 23 Pass 23.1).  Pure data model + Gauss-Newton
+# constraint solver.  Links Eigen3 for dense QR; no Qt / OpenCASCADE.
+add_executable(simall_cad_sketch_tests
+    unit/cad_sketch/test_sketch_model.cpp
+    unit/cad_sketch/test_constraint_solver.cpp)
+target_link_libraries(simall_cad_sketch_tests PRIVATE
+    SimAll::CompilerFlags SimAll::CadSketch
+    SimAll::Utilities Catch2::Catch2WithMain)
+
 # IO subsystem (Week 17).  Fluent .msh + Plot3D readers, CGNS native
 # round-trip, Tecplot ASCII writer, native SRS result store, project
 # graph hash-commit, .simall chunked container, APNG movie encoder.
 # All backends ship a native fallback so the suite runs without libhdf5,
 # libcgns or ffmpeg on the host.
 add_executable(simall_io_tests
-    unit/io/test_io_models.cpp)
+    unit/io/test_io_models.cpp
+    unit/io/test_gmsh_reader.cpp
+    unit/io/test_unv_reader.cpp
+    unit/io/test_starcd_reader.cpp
+    unit/io/test_face_based_mesh_reader.cpp
+    unit/io/test_cgns_native_roundtrip.cpp
+    unit/io/test_gambit_reader.cpp
+    unit/io/test_tetgen_reader.cpp
+    unit/io/test_vtu_reader.cpp
+    unit/io/test_schematic_json.cpp)
 target_link_libraries(simall_io_tests PRIVATE
     SimAll::CompilerFlags SimAll::Io
-    SimAll::Core SimAll::Utilities Catch2::Catch2WithMain)
+    SimAll::Core SimAll::Utilities SimAll::Workbench Catch2::Catch2WithMain)
 
 # Long-tail modules (Week 18).  Adjoint (discrete GMRES on Aᵀ + continuous
 # shape sensitivity), Optimization (MMA, CMA-ES, LHS / Sobol / full-factorial
@@ -234,6 +276,8 @@ catch_discover_tests(simall_gpu_tests)
 catch_discover_tests(simall_visualization_tests)
 catch_discover_tests(simall_gui_core_tests)
 catch_discover_tests(simall_scripting_tests)
+catch_discover_tests(simall_workbench_tests)
+catch_discover_tests(simall_cad_sketch_tests)
 catch_discover_tests(simall_io_tests)
 catch_discover_tests(simall_longtail_tests)
 catch_discover_tests(simall_regression_tests

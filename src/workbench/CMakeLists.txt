@@ -1,0 +1,27 @@
+simall_add_module(workbench
+    SOURCES
+        Workbench.cpp
+        Cell.cpp
+        Schematic.cpp
+        StateMachine.cpp
+        RefreshPolicy.cpp
+        WorkflowEngine.cpp
+        ChangeJournal.cpp
+        Commands.cpp
+        CellAdapterRegistry.cpp
+    HEADERS
+        Workbench.hpp
+        CellPort.hpp
+        CellLink.hpp
+        Cell.hpp
+        Schematic.hpp
+        StateMachine.hpp
+        RefreshPolicy.hpp
+        WorkflowEngine.hpp
+        ChangeJournal.hpp
+        Commands.hpp
+        CellAdapter.hpp
+        CellAdapterRegistry.hpp
+    PUBLIC_DEPS
+        SimAll::Core
+        SimAll::Utilities)

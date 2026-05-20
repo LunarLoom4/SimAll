@@ -74,6 +74,36 @@ TEST_CASE("DomainPartition on one rank assigns all cells locally", "[parallel][p
     REQUIRE(gx.owned_count() == plan.localCells.size());
 }
 
+TEST_CASE("DomainPartition::extract_local_mesh wraps ops::extract_subdomain",
+          "[parallel][partition][decomposition]") {
+    auto& ctx = parallel::MpiContext::world();
+    meshing::CartesianGridSpec spec{}; spec.Nx = 4; spec.Ny = 2; spec.Nz = 2;
+    spec.origin = {0,0,0}; spec.extent = {4,2,2};
+    meshing::CartesianMesher cm(spec);
+    meshing::Mesh mesh;
+    cm.generate(mesh);
+
+    parallel::DomainPartition dp(ctx);
+    parallel::DomainPartitionProps props;
+    props.nParts = ctx.size();
+    dp.initialize(props);
+    parallel::DomainPlan plan;
+    dp.partition(mesh, plan);
+
+    meshing::Mesh local;
+    auto stats = dp.extract_local_mesh(mesh, plan, local);
+
+    REQUIRE(stats.ownedCells == plan.localCells.size());
+    if (ctx.size() == 1) {
+        REQUIRE(stats.ghostCells     == 0);
+        REQUIRE(stats.interfaceFaces == 0);
+        REQUIRE(local.cells().size() == mesh.cells().size());
+    } else {
+        REQUIRE(local.cells().size() ==
+                stats.ownedCells + stats.ghostCells);
+    }
+}
+
 TEST_CASE("FieldReducer scalar reductions match serial values", "[parallel][reducer]") {
     auto& ctx = parallel::MpiContext::world();
     parallel::FieldReducer red(ctx);

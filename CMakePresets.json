@@ -13,6 +13,32 @@
             }
         },
         {
+            "name": "windows-vcpkg",
+            "displayName": "Windows Release (Ninja + vcpkg)",
+            "description": "Resolves Qt6/VTK/OpenCASCADE/Eigen3/HDF5/Catch2 via vcpkg manifest. Requires VCPKG_ROOT env var.",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/windows-vcpkg",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "SIMALL_BUILD_TESTS": "ON",
+                "SIMALL_USE_AVX2": "ON"
+            },
+            "environment": {
+                "VCPKG_FEATURE_FLAGS": "manifests,versions"
+            }
+        },
+        {
+            "name": "windows-vcpkg-debug",
+            "inherits": "windows-vcpkg",
+            "displayName": "Windows Debug (Ninja + vcpkg)",
+            "binaryDir": "${sourceDir}/build/windows-vcpkg-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
             "name": "debug",
             "inherits": "default",
             "displayName": "Debug + Sanitizers",
@@ -72,12 +98,14 @@
         }
     ],
     "buildPresets": [
-        { "name": "default",        "configurePreset": "default" },
-        { "name": "debug",          "configurePreset": "debug" },
-        { "name": "relwithdebinfo", "configurePreset": "relwithdebinfo" },
-        { "name": "linux",          "configurePreset": "linux-release" },
-        { "name": "linux-clang",    "configurePreset": "linux-clang-release" },
-        { "name": "linux-asan",     "configurePreset": "linux-asan" },
-        { "name": "hpc",            "configurePreset": "hpc" }
+        { "name": "default",             "configurePreset": "default" },
+        { "name": "windows-vcpkg",       "configurePreset": "windows-vcpkg" },
+        { "name": "windows-vcpkg-debug", "configurePreset": "windows-vcpkg-debug" },
+        { "name": "debug",               "configurePreset": "debug" },
+        { "name": "relwithdebinfo",      "configurePreset": "relwithdebinfo" },
+        { "name": "linux",               "configurePreset": "linux-release" },
+        { "name": "linux-clang",         "configurePreset": "linux-clang-release" },
+        { "name": "linux-asan",          "configurePreset": "linux-asan" },
+        { "name": "hpc",                 "configurePreset": "hpc" }
     ]
 }

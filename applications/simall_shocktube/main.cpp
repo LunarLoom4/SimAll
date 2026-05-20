@@ -5,7 +5,7 @@
 // Riemann-solution star-region values (p*, u*, ρ*) and the shock-front
 // position at t = 0.2.  Acceptance: solver star-pressure within 1 %.
 // =============================================================================
-#include "regression/cases/Shocktube.hpp"
+#include "../../tests/regression/cases/Shocktube.hpp"
 
 #include <cstdio>
 

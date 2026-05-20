@@ -1,0 +1,37 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "simall-beta",
+  "version-string": "0.1.0",
+  "description": "Industrial-grade CFD suite (Phase 23+: parametric CAD sketcher, mesher, solver, GUI).",
+  "homepage": "https://example.org/simall",
+  "builtin-baseline": "b4097dd14b05a86289e1eaa20387e09d16c7bb36",
+  "dependencies": [
+    "eigen3",
+    {
+      "name": "qtbase",
+      "default-features": false,
+      "features": [
+        "concurrent",
+        "gui",
+        "network",
+        "opengl",
+        "openglwidgets",
+        "widgets"
+      ]
+    },
+    "qttools",
+    "vtk",
+    "opencascade",
+    {
+      "name": "hdf5",
+      "default-features": false,
+      "features": [ "cpp" ]
+    },
+    "catch2",
+    {
+      "name": "tbb",
+      "platform": "windows"
+    }
+  ]
+}
+

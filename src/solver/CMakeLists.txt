@@ -8,6 +8,7 @@ simall_add_module(solver
         SimpleAlgorithm.cpp
         SimplecAlgorithm.cpp
         PisoAlgorithm.cpp
+        PimpleAlgorithm.cpp
         CoupledPressureVelocity.cpp
         RhieChowInterpolation.cpp
         DualTimeStepping.cpp
@@ -15,12 +16,14 @@ simall_add_module(solver
         OversetCouplingDriver.cpp
         ScalarTransport.cpp
         WallDistance.cpp
+        WallDistanceService.cpp
         EnergyEquation.cpp
         PeriodicPairing.cpp
         SlidingInterface.cpp
         CompressibleFlux.cpp
         NscbcBoundary.cpp
         AndersonAcceleration.cpp
+        MapFields.cpp
         bc/WallBc.cpp
         bc/InletBc.cpp
         bc/OutletBc.cpp
@@ -43,6 +46,8 @@ simall_add_module(solver
         SimpleAlgorithm.hpp
         SimplecAlgorithm.hpp
         PisoAlgorithm.hpp
+        PimpleAlgorithm.hpp
+        WallDistanceService.hpp
         CoupledPressureVelocity.hpp
         RhieChowInterpolation.hpp
         DualTimeStepping.hpp
@@ -56,6 +61,7 @@ simall_add_module(solver
         CompressibleFlux.hpp
         NscbcBoundary.hpp
         AndersonAcceleration.hpp
+        MapFields.hpp
         bc/Bc.hpp
         bc/WallBc.hpp
         bc/InletBc.hpp

@@ -1,0 +1,73 @@
+# Type stubs for the C++-embedded `simall` Python module.
+#
+# `simall` is exposed via PYBIND11_EMBEDDED_MODULE in
+# src/scripting/PyBindings.cpp.  It only exists at run-time inside the
+# SimAll Beta application's embedded interpreter, so the standard Python
+# tooling (Pylance / pyright) can't import it.  This .pyi file is a
+# **stub** that mirrors the bound surface so editor IntelliSense works
+# in scripts/examples/*.py and any other script the user writes.
+#
+# Keep this file in sync with PyBindings.cpp.  Stubs are type-only --
+# no actual code lives here.
+
+from __future__ import annotations
+
+from typing import Callable, List, Tuple
+
+
+# ---------------------------------------------------------------------------
+# Context (bound as simall.Context; obtained via simall.ctx()).
+# ---------------------------------------------------------------------------
+class Context:
+    @staticmethod
+    def instance() -> "Context": ...
+    def get(self, key: str) -> str: ...
+    def set(self, key: str, value: str) -> None: ...
+    def erase(self, key: str) -> None: ...
+    def keys(self) -> List[str]: ...
+    def clear(self) -> None: ...
+
+
+# ---------------------------------------------------------------------------
+# Command + CommandBus.
+# ---------------------------------------------------------------------------
+class Command:
+    name: str
+    args: List[Tuple[str, str]]
+    def __init__(self) -> None: ...
+    def to_python_call(self, module: str = "simall") -> str: ...
+
+
+class CommandBus:
+    @staticmethod
+    def instance() -> "CommandBus": ...
+    def dispatch(self, cmd: Command) -> bool: ...
+    def has_handler(self, name: str) -> bool: ...
+    def registered_commands(self) -> List[str]: ...
+
+
+# ---------------------------------------------------------------------------
+# UdfHost — accepts any Python callable, dispatches by return type.
+# ---------------------------------------------------------------------------
+_ScalarT      = Callable[[float], float]
+_ScalarTXYZ   = Callable[[float, float, float, float], float]
+_VectorTXYZ   = Callable[[float, float, float, float], Tuple[float, float, float]]
+
+
+class UdfHost:
+    @staticmethod
+    def instance() -> "UdfHost": ...
+    def register_scalar_t(self, name: str, fn: _ScalarT) -> None: ...
+    def register_scalar_txyz(self, name: str, fn: _ScalarTXYZ) -> None: ...
+    def register_vector_txyz(self, name: str, fn: _VectorTXYZ) -> None: ...
+    def has(self, name: str) -> bool: ...
+    def names(self) -> List[str]: ...
+    def clear(self) -> None: ...
+    def unregister(self, name: str) -> bool: ...
+
+
+# ---------------------------------------------------------------------------
+# Top-level convenience helpers.
+# ---------------------------------------------------------------------------
+def log(msg: str) -> None: ...
+def ctx() -> Context: ...

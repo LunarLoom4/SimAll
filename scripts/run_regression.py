@@ -40,7 +40,7 @@ def to_junit(test_xml: Path, junit_xml: Path) -> tuple[int, int]:
         status = t.get("Status", "passed")
         name   = t.findtext("Name") or "?"
         time   = t.find(".//NamedMeasurement[@name='Execution Time']/Value")
-        secs   = float(time.text) if time is not None else 0.0
+        secs   = float(time.text) if time is not None and time.text is not None else 0.0
         case   = ET.Element("testcase", {"name": name, "classname": "simall.regression", "time": f"{secs:.3f}"})
         if status != "passed":
             failed += 1

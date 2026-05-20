@@ -10,6 +10,7 @@ simall_add_module(core
         ResourceMonitor.cpp
         UnitSystem.cpp
         RotatingFileSink.cpp
+        BoundaryConditionRegistry.cpp
     HEADERS
         Application.hpp
         Command.hpp
@@ -26,6 +27,7 @@ simall_add_module(core
         TaskGraph.hpp
         ThreadPool.hpp
         UnitSystem.hpp
+        BoundaryConditionRegistry.hpp
     PUBLIC_DEPS
         SimAll::Utilities)
 

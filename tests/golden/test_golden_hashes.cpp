@@ -14,11 +14,11 @@
 // =============================================================================
 #include <catch2/catch_test_macros.hpp>
 
-#include "golden/GoldenHash.hpp"
-#include "regression/cases/LidDrivenCavity.hpp"
-#include "regression/cases/Shocktube.hpp"
-#include "regression/cases/Cylinder.hpp"
-#include "regression/cases/Pipe.hpp"
+#include "GoldenHash.hpp"
+#include "../regression/cases/LidDrivenCavity.hpp"
+#include "../regression/cases/Shocktube.hpp"
+#include "../regression/cases/Cylinder.hpp"
+#include "../regression/cases/Pipe.hpp"
 
 namespace sr = simall::regression;
 

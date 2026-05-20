@@ -6,7 +6,7 @@
 // reported peak temperature location.  Acceptance: solver ξ within 8 %
 // at x/D ∈ {15, 30, 45, 60}.
 // =============================================================================
-#include "regression/cases/FlameD.hpp"
+#include "../../tests/regression/cases/FlameD.hpp"
 
 #include <cstdio>
 

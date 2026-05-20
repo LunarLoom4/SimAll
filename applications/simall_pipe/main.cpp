@@ -5,7 +5,7 @@
 // parabolic velocity profile, Darcy laminar friction factor, and the
 // Prandtl smooth-pipe turbulent friction factor at a sweep of Re points.
 // =============================================================================
-#include "regression/cases/Pipe.hpp"
+#include "../../tests/regression/cases/Pipe.hpp"
 
 #include <cstdio>
 

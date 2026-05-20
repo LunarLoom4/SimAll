@@ -19,6 +19,7 @@
 // =============================================================================
 #pragma once
 
+#include "meshing/MeshOps.hpp"
 #include "meshing/MeshStorage.hpp"
 #include "parallel/GhostExchange.hpp"
 #include "parallel/MpiContext.hpp"
@@ -56,6 +57,16 @@ public:
 
     /// Convenience: configure a GhostExchange from the produced plan.
     void install_into(GhostExchange& gx, const DomainPlan& plan) const;
+
+    /// Materialise the rank-local subdomain mesh (owned cells + one-deep
+    /// ghost halo) from a previously built `plan`.  Thin wrapper around
+    /// `meshing::ops::extract_subdomain` using `ctx.rank()` as the local
+    /// rank.  Returns the standard SubdomainStats reporting owned/ghost
+    /// counts plus the wrapped split_mesh result.
+    meshing::ops::SubdomainStats extract_local_mesh(
+        const meshing::Mesh& globalMesh,
+        const DomainPlan&    plan,
+        meshing::Mesh&       outMesh) const;
 
     const DomainPartitionProps& props() const noexcept { return p_; }
 

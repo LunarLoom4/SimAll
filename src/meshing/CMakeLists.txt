@@ -22,6 +22,9 @@ simall_add_module(meshing
         PartitionerMetis.cpp
         PartitionerScotch.cpp
         AmrAdaptor.cpp
+        SnappyHexMesher.cpp
+        MeshOps.cpp
+        BlockMeshDict.cpp
     HEADERS
         MeshStorage.hpp
         Mesher.hpp
@@ -45,5 +48,8 @@ simall_add_module(meshing
         PartitionerMetis.hpp
         PartitionerScotch.hpp
         AmrAdaptor.hpp
+        SnappyHexMesher.hpp
+        MeshOps.hpp
+        BlockMeshDict.hpp
     PUBLIC_DEPS
         SimAll::Core SimAll::Utilities SimAll::Cad)

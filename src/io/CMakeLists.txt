@@ -3,17 +3,25 @@ simall_add_module(io
         Project.cpp VtkXmlWriter.cpp SolutionMonitors.cpp ForcesReport.cpp
         Checkpoint.cpp EnSightGoldWriter.cpp
         MeshFormats.cpp FluentMshReader.cpp Plot3dReader.cpp
+        GmshReader.cpp UnvReader.cpp StarCdReader.cpp
+        FaceBasedMeshReader.cpp GambitReader.cpp TetgenReader.cpp
+        VtuReader.cpp
         CgnsReader.cpp CgnsWriter.cpp TecplotWriter.cpp
         Hdf5ResultStore.cpp ProjectGraph.cpp ProjectSerializer.cpp
+        SchematicJson.cpp
         MovieEncoder.cpp
     HEADERS
         Project.hpp ProjectNode.hpp VtkXmlWriter.hpp SolutionMonitors.hpp
         ForcesReport.hpp Checkpoint.hpp EnSightGoldWriter.hpp
         MeshFormats.hpp FluentMshReader.hpp Plot3dReader.hpp
+        GmshReader.hpp UnvReader.hpp StarCdReader.hpp
+        FaceBasedMeshReader.hpp GambitReader.hpp TetgenReader.hpp
+        VtuReader.hpp
         CgnsReader.hpp CgnsWriter.hpp TecplotWriter.hpp
         Hdf5ResultStore.hpp ProjectGraph.hpp ProjectSerializer.hpp
+        SchematicJson.hpp
         MovieEncoder.hpp
-    PUBLIC_DEPS SimAll::Core SimAll::Utilities SimAll::Meshing SimAll::Solver)
+    PUBLIC_DEPS SimAll::Core SimAll::Utilities SimAll::Meshing SimAll::Solver SimAll::Workbench)
 
 if(SIMALL_HAVE_HDF5)
     target_compile_definitions(simall_io PUBLIC SIMALL_HAVE_HDF5=1)

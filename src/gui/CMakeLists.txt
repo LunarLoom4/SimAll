@@ -15,6 +15,7 @@ simall_add_module(gui
         SolverMonitorPanel.cpp
         PythonConsolePanel.cpp
         Dialogs.cpp
+        workbench/WorkbenchSchematicView.cpp
     HEADERS
         MainWindow.hpp
         RibbonBar.hpp
@@ -31,6 +32,7 @@ simall_add_module(gui
         SolverMonitorPanel.hpp
         PythonConsolePanel.hpp
         Dialogs.hpp
+        workbench/WorkbenchSchematicView.hpp
     PUBLIC_DEPS
         SimAll::Core
         SimAll::Io
@@ -40,4 +42,5 @@ simall_add_module(gui
         SimAll::Visualization
         SimAll::GuiCore
         SimAll::Scripting
+        SimAll::Workbench
         Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent)

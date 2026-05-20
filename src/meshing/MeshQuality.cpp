@@ -7,8 +7,11 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iomanip>
 #include <limits>
+#include <map>
 #include <sstream>
+#include <string>
 
 namespace simall::meshing {
 
@@ -123,6 +126,19 @@ MeshQualityReport MeshQuality::evaluate(const Mesh& m) {
     R.histSkewness = make_hist(R.skewness);
     R.histNonOrtho = make_hist(R.nonOrthoDeg);
     R.histAspect   = make_hist(R.aspectRatio);
+    R.histVolume   = make_hist(C.volume);
+
+    if (nC > 0) {
+        R.minVolume = std::numeric_limits<double>::infinity();
+        R.maxVolume = -std::numeric_limits<double>::infinity();
+        for (std::size_t c = 0; c < nC; ++c) {
+            const double v = C.volume[c];
+            R.minVolume   = std::min(R.minVolume, v);
+            R.maxVolume   = std::max(R.maxVolume, v);
+            R.totalVolume += v;
+        }
+        R.meanVolume = R.totalVolume / static_cast<double>(nC);
+    }
     return R;
 }
 
@@ -134,7 +150,132 @@ std::string MeshQuality::format(const MeshQualityReport& r) {
     s << "  max skewness        = " << r.maxSkewness   << "\n";
     s << "  max non-orthogonality (deg) = " << r.maxNonOrtho << "\n";
     s << "  max face-area aspect ratio  = " << r.maxAspect   << "\n";
+    s << "  cell volume: min=" << r.minVolume
+      <<              "  max=" << r.maxVolume
+      <<              "  mean=" << r.meanVolume
+      <<              "  total=" << r.totalVolume << "\n";
+    s << format_histogram(r.histSkewness, "skewness");
+    s << format_histogram(r.histNonOrtho, "non-orthogonality (deg)");
+    s << format_histogram(r.histAspect,   "aspect ratio");
+    s << format_histogram(r.histVolume,   "cell volume");
     return s.str();
+}
+
+std::string MeshQuality::format_histogram(const QualityHistogram& h,
+                                          std::string_view        label,
+                                          std::size_t             barWidth) {
+    std::ostringstream s;
+    s << "  histogram: " << label
+      << "  [" << h.vmin << " .. " << h.vmax << "]\n";
+    std::size_t peak = 0;
+    for (auto n : h.bins) peak = std::max(peak, n);
+    if (peak == 0) {
+        s << "    (no samples)\n";
+        return s.str();
+    }
+    const double span    = h.vmax - h.vmin;
+    const double binStep = (span > 0.0) ? span / static_cast<double>(h.bins.size())
+                                        : 0.0;
+    for (std::size_t i = 0; i < h.bins.size(); ++i) {
+        const double lo  = h.vmin + binStep * static_cast<double>(i);
+        const double hi  = h.vmin + binStep * static_cast<double>(i + 1);
+        const std::size_t bars =
+            (barWidth * h.bins[i] + peak / 2) / peak;
+        s << "    [" << std::setw(10) << lo << " .. "
+                     << std::setw(10) << hi << "] "
+          << std::setw(8) << h.bins[i] << " | "
+          << std::string(bars, '#') << "\n";
+    }
+    return s.str();
+}
+
+std::string MeshQuality::to_csv_faces(const MeshQualityReport& r) {
+    std::ostringstream s;
+    s << "faceId,skewness,nonOrthoDeg\n";
+    s.precision(17);
+    for (std::size_t f = 0; f < r.skewness.size(); ++f) {
+        s << f << ',' << r.skewness[f] << ',' << r.nonOrthoDeg[f] << '\n';
+    }
+    return s.str();
+}
+
+std::string MeshQuality::to_csv_cells(const MeshQualityReport& r) {
+    std::ostringstream s;
+    s << "cellId,aspectRatio,negativeVolume\n";
+    s.precision(17);
+    for (std::size_t c = 0; c < r.aspectRatio.size(); ++c) {
+        s << c << ',' << r.aspectRatio[c] << ','
+          << static_cast<int>(r.negativeVolume[c]) << '\n';
+    }
+    return s.str();
+}
+
+std::vector<ZoneQualityStats>
+MeshQuality::per_zone_stats(const Mesh& mesh, const MeshQualityReport& r) {
+    const auto& F = mesh.faces();
+    const std::size_t nF = F.size();
+
+    struct Accum {
+        std::size_t n = 0;
+        double sumSkew = 0.0, maxSkew = 0.0;
+        double sumNonO = 0.0, maxNonO = 0.0;
+    };
+    std::map<ZoneId, Accum> agg;
+
+    for (std::size_t f = 0; f < nF; ++f) {
+        if (F.neighbor[f] != kBoundaryCell) continue;
+        const ZoneId z = F.boundaryZone[f];
+        if (z == 0) continue;                  // unassigned boundary face
+        auto& a = agg[z];
+        const double sk = (f < r.skewness.size())    ? r.skewness[f]    : 0.0;
+        const double no = (f < r.nonOrthoDeg.size()) ? r.nonOrthoDeg[f] : 0.0;
+        a.n++;
+        a.sumSkew += sk;
+        a.sumNonO += no;
+        a.maxSkew = std::max(a.maxSkew, sk);
+        a.maxNonO = std::max(a.maxNonO, no);
+    }
+
+    std::vector<ZoneQualityStats> out;
+    out.reserve(agg.size());
+    Mesh& m = const_cast<Mesh&>(mesh);    // find_zone is non-const-only
+    for (const auto& [z, a] : agg) {
+        ZoneQualityStats s;
+        s.id           = z;
+        if (auto* zi = m.find_zone(z)) s.name = zi->name;
+        s.nFaces       = a.n;
+        s.maxSkewness  = a.maxSkew;
+        s.maxNonOrtho  = a.maxNonO;
+        s.meanSkewness = (a.n > 0) ? a.sumSkew / static_cast<double>(a.n) : 0.0;
+        s.meanNonOrtho = (a.n > 0) ? a.sumNonO / static_cast<double>(a.n) : 0.0;
+        out.push_back(std::move(s));
+    }
+    return out;
+}
+
+std::string MeshQuality::format_per_zone(const std::vector<ZoneQualityStats>& s) {
+    std::ostringstream o;
+    o << "Per-zone quality\n";
+    o << "  " << std::left << std::setw(20) << "zone"
+      <<        std::right << std::setw(8)  << "faces"
+      <<        std::setw(12) << "maxSkew"
+      <<        std::setw(12) << "meanSkew"
+      <<        std::setw(12) << "maxNonO"
+      <<        std::setw(12) << "meanNonO" << '\n';
+    if (s.empty()) {
+        o << "    (no boundary zones)\n";
+        return o.str();
+    }
+    for (const auto& z : s) {
+        o << "  " << std::left << std::setw(20)
+          << (z.name.empty() ? std::string("zone") + std::to_string(z.id) : z.name)
+          << std::right << std::setw(8)  << z.nFaces
+          << std::setw(12) << z.maxSkewness
+          << std::setw(12) << z.meanSkewness
+          << std::setw(12) << z.maxNonOrtho
+          << std::setw(12) << z.meanNonOrtho << '\n';
+    }
+    return o.str();
 }
 
 }  // namespace simall::meshing

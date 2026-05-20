@@ -21,3 +21,12 @@ vtk_module_autoinit(TARGETS simall_beta MODULES ${VTK_LIBRARIES})
 set_target_properties(simall_beta PROPERTIES
     FOLDER "SimAll/Applications"
     WIN32_EXECUTABLE TRUE)
+
+# Install the GUI exe into bin/ (runtime component) and bundle every
+# third-party DLL it transitively needs (Qt6 via windeployqt, the rest via
+# file(GET_RUNTIME_DEPENDENCIES)) so the resulting MSI / NSIS installer is
+# self-contained.  See cmake/SimAllInstall.cmake.
+install(TARGETS simall_beta
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    COMPONENT runtime)
+simall_install_runtime_deps(simall_beta)
