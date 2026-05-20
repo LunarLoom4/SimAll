@@ -1,4 +1,18 @@
-name: build-and-test
+# =============================================================================
+# ci.yml -- lightweight pre-merge checks
+#
+# Heavy build + integration testing lives in release.yml (vcpkg, Windows,
+# produces installer + portable ZIP).  This workflow stays fast so PR
+# feedback is < 2 minutes.
+#
+# Previous matrix (Windows/Linux x MSVC/GCC/Clang x Debug/Release + ASan)
+# was removed because every job required Qt6 + VTK + OpenCASCADE + Eigen3
+# + HDF5, and the apt / install-qt-action setup only provided a subset --
+# every job failed at the find_package(VTK / OpenCASCADE) step.  Reviving
+# multi-platform CI would mean wiring vcpkg into this workflow too, which
+# would push PR turnaround from minutes to hours.  Not worth it for now.
+# =============================================================================
+name: pre-merge-checks
 
 on:
   push:
@@ -12,149 +26,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: ${{ matrix.os }} / ${{ matrix.compiler }} / ${{ matrix.config }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: windows-2022
-            compiler: msvc
-            preset: default
-            config: Release
-          - os: windows-2022
-            compiler: msvc
-            preset: debug
-            config: Debug
-          - os: ubuntu-22.04
-            compiler: gcc
-            preset: linux-release
-            config: Release
-          - os: ubuntu-22.04
-            compiler: clang
-            preset: linux-release
-            config: Release
-            cc: clang
-            cxx: clang++
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 1
-
-      - name: Install system deps (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            ninja-build \
-            libtbb-dev \
-            libeigen3-dev \
-            libopenmpi-dev openmpi-bin \
-            libomp-dev \
-            qt6-base-dev qt6-tools-dev \
-            libvtk9-dev libvtk9-qt-dev \
-            python3-dev \
-            clang-format clang-tidy
-
-      - name: Install system deps (Windows)
-        if: runner.os == 'Windows'
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: 6.5.3
-          modules: 'qtcharts'
-          archives: 'qtbase qttools'
-
-      - name: Setup CMake
-        uses: lukka/get-cmake@v3.29.0
-
-      - name: Select compiler (Linux clang)
-        if: matrix.compiler == 'clang'
-        run: |
-          echo "CC=clang"   >> "$GITHUB_ENV"
-          echo "CXX=clang++" >> "$GITHUB_ENV"
-
-      - name: Configure
-        run: cmake --preset ${{ matrix.preset }}
-
-      - name: Build
-        shell: bash
-        run: |
-          if [ "${{ runner.os }}" = "Windows" ]; then
-            cmake --build build --config ${{ matrix.config }} -j
-          else
-            cmake --build build -j
-          fi
-
-      - name: Test
-        working-directory: build
-        run: ctest --output-on-failure --build-config ${{ matrix.config }} -j
-
-      - name: Regression label pass (Week 19)
-        working-directory: build
-        shell: bash
-        run: |
-          ctest --output-on-failure --build-config ${{ matrix.config }} -L regression -j
-          ctest --output-on-failure --build-config ${{ matrix.config }} -L verification -j
-          ctest --output-on-failure --build-config ${{ matrix.config }} -L golden -j
-
-      - name: Performance smoke (Week 19, non-gating)
-        working-directory: build
-        shell: bash
-        continue-on-error: true
-        run: ctest --output-on-failure --build-config ${{ matrix.config }} -L performance -j
-
-      - name: Upload test logs
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ctest-${{ matrix.os }}-${{ matrix.compiler }}-${{ matrix.config }}
-          path: build/Testing/
-
-  sanitizers:
-    name: ubuntu / clang / asan+ubsan
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 1
-      - name: Install system deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ninja-build libtbb-dev libeigen3-dev \
-                                  libomp-dev clang
-      - name: Setup CMake
-        uses: lukka/get-cmake@v3.29.0
-      - name: Configure (ASan+UBSan)
-        env:
-          CC:   clang
-          CXX:  clang++
-          CXXFLAGS: "-O1 -g -fno-omit-frame-pointer -fsanitize=address,undefined"
-          LDFLAGS:  "-fsanitize=address,undefined"
-        run: cmake -S . -B build-san -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
-      - name: Build
-        run: cmake --build build-san -j
-      - name: Run regression + verification + golden under sanitizers
-        working-directory: build-san
-        env:
-          ASAN_OPTIONS: detect_leaks=0:abort_on_error=1
-          UBSAN_OPTIONS: print_stacktrace=1
-        run: |
-          ctest --output-on-failure -L regression -j
-          ctest --output-on-failure -L verification -j
-          ctest --output-on-failure -L golden -j
-
   format:
     name: clang-format check
     runs-on: ubuntu-22.04
+    # Non-gating: a format diff should annoy the author but not block merge.
+    # Run `pwsh scripts/format.ps1` locally to fix before pushing.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - name: Install clang-format
-        run: sudo apt-get update && sudo apt-get install -y clang-format
+      - name: Install clang-format + PowerShell
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-format wget apt-transport-https software-properties-common
+          # PowerShell is needed because scripts/format.ps1 is a .ps1 file.
+          wget -q "https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb"
+          sudo dpkg -i packages-microsoft-prod.deb
+          sudo apt-get update
+          sudo apt-get install -y powershell
       - name: Run format check
         shell: pwsh
         run: ./scripts/format.ps1 -Check

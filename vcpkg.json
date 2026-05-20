@@ -11,11 +11,9 @@
       "name": "qtbase",
       "default-features": false,
       "features": [
-        "concurrent",
         "gui",
         "network",
         "opengl",
-        "openglwidgets",
         "widgets"
       ]
     },
