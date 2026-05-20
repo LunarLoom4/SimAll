@@ -20,39 +20,43 @@
 // =============================================================================
 #pragma once
 
-#include "turbulence/ITurbulenceModel.hpp"
+#include "solver/LinearSolvers.hpp"
 #include "solver/ScalarTransport.hpp"
 #include "solver/Solver.hpp"
-#include "solver/LinearSolvers.hpp"
+#include "turbulence/ITurbulenceModel.hpp"
 #include "utilities/AlignedAllocator.hpp"
 
 #include <memory>
 #include <vector>
 
-namespace simall::turbulence {
+namespace simall::turbulence
+{
 
-class KEpsilonRealizable_Full final : public ITurbulenceModel {
+class KEpsilonRealizable_Full final : public ITurbulenceModel
+{
 public:
     std::string name() const override { return "kEpsilonRealizable"; }
-    void   initialize(meshing::Mesh& m, solver::FieldRegistry& f) override;
-    void   solve(double dt, solver::FieldRegistry& f) override;
+    void initialize(meshing::Mesh& m, solver::FieldRegistry& f) override;
+    void solve(double dt, solver::FieldRegistry& f) override;
     double turbulent_viscosity(std::size_t c) const override
-        { return c < mut_.size() ? mut_[c] : 0.0; }
+    {
+        return c < mut_.size() ? mut_[c] : 0.0;
+    }
 
     void set_boundaries(const std::vector<solver::BoundarySpec>& bcs) { bcs_ = bcs; }
-    void set_density(double rho)   { rho_ = rho; }
-    void set_viscosity(double mu)  { mu_  = mu;  }
+    void set_density(double rho) { rho_ = rho; }
+    void set_viscosity(double mu) { mu_ = mu; }
 
 private:
-    meshing::Mesh*                    mesh_ = nullptr;
+    meshing::Mesh* mesh_ = nullptr;
     std::vector<solver::BoundarySpec> bcs_;
     double rho_ = 1.0, mu_ = 1.0e-3;
 
-    std::unique_ptr<solver::ILinearSolver>   lin_;
+    std::unique_ptr<solver::ILinearSolver> lin_;
     std::unique_ptr<solver::ScalarTransport> kEq_;
     std::unique_ptr<solver::ScalarTransport> eEq_;
 
     util::aligned_vector<double> mut_;
 };
 
-}  // namespace simall::turbulence
+} // namespace simall::turbulence

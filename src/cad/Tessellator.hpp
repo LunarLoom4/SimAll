@@ -19,12 +19,14 @@
 
 #include "cad/CadKernel.hpp"
 
-namespace simall::cad {
+namespace simall::cad
+{
 
-class Tessellator {
+class Tessellator
+{
 public:
     TriangleMesh tessellate(const ShapeHandle& shape, const TessellationParams& p = {});
-    TriangleMesh adaptive  (const ShapeHandle& shape, double maxEdge, double chordalEpsilon);
+    TriangleMesh adaptive(const ShapeHandle& shape, double maxEdge, double chordalEpsilon);
 };
 
-}  // namespace simall::cad
+} // namespace simall::cad

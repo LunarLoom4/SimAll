@@ -4,9 +4,10 @@
 // Phase  : 18.5 — Linear-algebra kernels for GPU Krylov solvers (W13).
 // =============================================================================
 #include "gpu/GpuKernels.hpp"
+
+#include "core/Logger.hpp"
 #include "gpu/CudaContext.hpp"
 #include "gpu/StreamScheduler.hpp"
-#include "core/Logger.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -14,19 +15,22 @@
 #include <vector>
 
 #ifdef SIMALL_HAVE_CUDA
-    #include <cuda_runtime.h>
-    #include <cublas_v2.h>
-    #include <cusparse.h>
+#include <cublas_v2.h>
+#include <cuda_runtime.h>
+#include <cusparse.h>
 #endif
 
-namespace simall::gpu {
+namespace simall::gpu
+{
 
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
-namespace {
+namespace
+{
 
-inline bool use_cuda() {
+inline bool use_cuda()
+{
 #ifdef SIMALL_HAVE_CUDA
     return is_cuda_available();
 #else
@@ -35,25 +39,42 @@ inline bool use_cuda() {
 }
 
 #ifdef SIMALL_HAVE_CUDA
-inline cudaStream_t to_stream(void* s) {
+inline cudaStream_t to_stream(void* s)
+{
     return s ? static_cast<cudaStream_t>(s) : cudaStream_t(0);
 }
-inline cublasHandle_t   blas()   { return static_cast<cublasHandle_t>  (CudaContext::current().cublas_handle());   }
-inline cusparseHandle_t sparse() { return static_cast<cusparseHandle_t>(CudaContext::current().cusparse_handle()); }
+inline cublasHandle_t blas()
+{
+    return static_cast<cublasHandle_t>(CudaContext::current().cublas_handle());
+}
+inline cusparseHandle_t sparse()
+{
+    return static_cast<cusparseHandle_t>(CudaContext::current().cusparse_handle());
+}
 #endif
 
 // Host fall-back views (interpret void* as double* / int*).
-inline       double* hd(void* p)         { return static_cast<double*>(p);       }
-inline const double* hd(const void* p)   { return static_cast<const double*>(p); }
-inline const int*    hi(const void* p)   { return static_cast<const int*>(p);    }
+inline double* hd(void* p)
+{
+    return static_cast<double*>(p);
+}
+inline const double* hd(const void* p)
+{
+    return static_cast<const double*>(p);
+}
+inline const int* hi(const void* p)
+{
+    return static_cast<const int*>(p);
+}
 
-}  // namespace
+} // namespace
 
 // =============================================================================
 // vector ops
 // =============================================================================
 
-void axpy(double alpha, const void* x, void* y, std::size_t n, void* stream) {
+void axpy(double alpha, const void* x, void* y, std::size_t n, void* stream)
+{
 #ifdef SIMALL_HAVE_CUDA
     if (use_cuda()) {
         auto h = blas();
@@ -62,13 +83,16 @@ void axpy(double alpha, const void* x, void* y, std::size_t n, void* stream) {
         return;
     }
 #else
-    (void)stream;
+    (void) stream;
 #endif
-    const double* xp = hd(x); double* yp = hd(y);
-    for (std::size_t i = 0; i < n; ++i) yp[i] += alpha * xp[i];
+    const double* xp = hd(x);
+    double* yp = hd(y);
+    for (std::size_t i = 0; i < n; ++i)
+        yp[i] += alpha * xp[i];
 }
 
-void scal(double alpha, void* x, std::size_t n, void* stream) {
+void scal(double alpha, void* x, std::size_t n, void* stream)
+{
 #ifdef SIMALL_HAVE_CUDA
     if (use_cuda()) {
         auto h = blas();
@@ -77,13 +101,15 @@ void scal(double alpha, void* x, std::size_t n, void* stream) {
         return;
     }
 #else
-    (void)stream;
+    (void) stream;
 #endif
     double* xp = hd(x);
-    for (std::size_t i = 0; i < n; ++i) xp[i] *= alpha;
+    for (std::size_t i = 0; i < n; ++i)
+        xp[i] *= alpha;
 }
 
-void copy(const void* src, void* dst, std::size_t n, void* stream) {
+void copy(const void* src, void* dst, std::size_t n, void* stream)
+{
     const std::size_t bytes = n * sizeof(double);
 #ifdef SIMALL_HAVE_CUDA
     if (use_cuda()) {
@@ -91,12 +117,13 @@ void copy(const void* src, void* dst, std::size_t n, void* stream) {
         return;
     }
 #else
-    (void)stream;
+    (void) stream;
 #endif
     std::memcpy(dst, src, bytes);
 }
 
-double dot(const void* x, const void* y, std::size_t n, void* stream) {
+double dot(const void* x, const void* y, std::size_t n, void* stream)
+{
 #ifdef SIMALL_HAVE_CUDA
     if (use_cuda()) {
         auto h = blas();
@@ -107,15 +134,18 @@ double dot(const void* x, const void* y, std::size_t n, void* stream) {
         return r;
     }
 #else
-    (void)stream;
+    (void) stream;
 #endif
-    const double* xp = hd(x); const double* yp = hd(y);
+    const double* xp = hd(x);
+    const double* yp = hd(y);
     double s = 0.0;
-    for (std::size_t i = 0; i < n; ++i) s += xp[i] * yp[i];
+    for (std::size_t i = 0; i < n; ++i)
+        s += xp[i] * yp[i];
     return s;
 }
 
-double nrm2(const void* x, std::size_t n, void* stream) {
+double nrm2(const void* x, std::size_t n, void* stream)
+{
 #ifdef SIMALL_HAVE_CUDA
     if (use_cuda()) {
         auto h = blas();
@@ -125,15 +155,17 @@ double nrm2(const void* x, std::size_t n, void* stream) {
         return r;
     }
 #else
-    (void)stream;
+    (void) stream;
 #endif
     const double* xp = hd(x);
     double s = 0.0;
-    for (std::size_t i = 0; i < n; ++i) s += xp[i] * xp[i];
+    for (std::size_t i = 0; i < n; ++i)
+        s += xp[i] * xp[i];
     return std::sqrt(s);
 }
 
-void axpby(double a, const void* x, double b, void* y, std::size_t n, void* stream) {
+void axpby(double a, const void* x, double b, void* y, std::size_t n, void* stream)
+{
 #ifdef SIMALL_HAVE_CUDA
     if (use_cuda()) {
         auto h = blas();
@@ -143,13 +175,16 @@ void axpby(double a, const void* x, double b, void* y, std::size_t n, void* stre
         return;
     }
 #else
-    (void)stream;
+    (void) stream;
 #endif
-    const double* xp = hd(x); double* yp = hd(y);
-    for (std::size_t i = 0; i < n; ++i) yp[i] = a * xp[i] + b * yp[i];
+    const double* xp = hd(x);
+    double* yp = hd(y);
+    for (std::size_t i = 0; i < n; ++i)
+        yp[i] = a * xp[i] + b * yp[i];
 }
 
-void xpby(const void* x, double beta, void* y, std::size_t n, void* stream) {
+void xpby(const void* x, double beta, void* y, std::size_t n, void* stream)
+{
     // y ← x + β·y
     axpby(1.0, x, beta, y, n, stream);
 }
@@ -159,8 +194,12 @@ void xpby(const void* x, double beta, void* y, std::size_t n, void* stream) {
 // =============================================================================
 
 void spmv_csr(std::size_t n,
-              const void* rowPtr, const void* colIdx, const void* values,
-              const void* x, void* y, void* stream)
+              const void* rowPtr,
+              const void* colIdx,
+              const void* values,
+              const void* x,
+              void* y,
+              void* stream)
 {
 #ifdef SIMALL_HAVE_CUDA
     if (use_cuda()) {
@@ -172,44 +211,66 @@ void spmv_csr(std::size_t n,
         // cusparseSpMatDescr_t; CgGpu / BicgstabGpu do exactly that, so this
         // generic path is the fall-back for one-off launches.
         cusparseSpMatDescr_t mat = nullptr;
-        cusparseDnVecDescr_t vx  = nullptr, vy = nullptr;
+        cusparseDnVecDescr_t vx = nullptr, vy = nullptr;
         const int nnz = static_cast<int>(static_cast<const int*>(rowPtr)[n]);
 
-        cusparseCreateCsr(&mat, n, n, nnz,
-            const_cast<void*>(rowPtr), const_cast<void*>(colIdx),
-            const_cast<void*>(values),
-            CUSPARSE_INDEX_32I, CUSPARSE_INDEX_32I,
-            CUSPARSE_INDEX_BASE_ZERO, CUDA_R_64F);
+        cusparseCreateCsr(&mat,
+                          n,
+                          n,
+                          nnz,
+                          const_cast<void*>(rowPtr),
+                          const_cast<void*>(colIdx),
+                          const_cast<void*>(values),
+                          CUSPARSE_INDEX_32I,
+                          CUSPARSE_INDEX_32I,
+                          CUSPARSE_INDEX_BASE_ZERO,
+                          CUDA_R_64F);
         cusparseCreateDnVec(&vx, n, const_cast<void*>(x), CUDA_R_64F);
-        cusparseCreateDnVec(&vy, n, y,                    CUDA_R_64F);
+        cusparseCreateDnVec(&vy, n, y, CUDA_R_64F);
 
         const double alpha = 1.0, beta = 0.0;
         std::size_t bufBytes = 0;
-        cusparseSpMV_bufferSize(h, CUSPARSE_OPERATION_NON_TRANSPOSE,
-            &alpha, mat, vx, &beta, vy, CUDA_R_64F,
-            CUSPARSE_SPMV_ALG_DEFAULT, &bufBytes);
+        cusparseSpMV_bufferSize(h,
+                                CUSPARSE_OPERATION_NON_TRANSPOSE,
+                                &alpha,
+                                mat,
+                                vx,
+                                &beta,
+                                vy,
+                                CUDA_R_64F,
+                                CUSPARSE_SPMV_ALG_DEFAULT,
+                                &bufBytes);
         void* buf = nullptr;
-        if (bufBytes > 0) cudaMalloc(&buf, bufBytes);
+        if (bufBytes > 0)
+            cudaMalloc(&buf, bufBytes);
 
-        cusparseSpMV(h, CUSPARSE_OPERATION_NON_TRANSPOSE,
-            &alpha, mat, vx, &beta, vy, CUDA_R_64F,
-            CUSPARSE_SPMV_ALG_DEFAULT, buf);
+        cusparseSpMV(h,
+                     CUSPARSE_OPERATION_NON_TRANSPOSE,
+                     &alpha,
+                     mat,
+                     vx,
+                     &beta,
+                     vy,
+                     CUDA_R_64F,
+                     CUSPARSE_SPMV_ALG_DEFAULT,
+                     buf);
 
-        if (buf) cudaFree(buf);
+        if (buf)
+            cudaFree(buf);
         cusparseDestroyDnVec(vx);
         cusparseDestroyDnVec(vy);
         cusparseDestroySpMat(mat);
         return;
     }
 #else
-    (void)stream;
+    (void) stream;
 #endif
     // Host reference.
-    const int*    rp = hi(rowPtr);
-    const int*    ci = hi(colIdx);
+    const int* rp = hi(rowPtr);
+    const int* ci = hi(colIdx);
     const double* vs = hd(values);
     const double* xp = hd(x);
-    double*       yp = hd(y);
+    double* yp = hd(y);
     for (std::size_t i = 0; i < n; ++i) {
         double s = 0.0;
         for (int k = rp[i]; k < rp[i + 1]; ++k)
@@ -222,8 +283,7 @@ void spmv_csr(std::size_t n,
 // preconditioners
 // =============================================================================
 
-void jacobi_apply(const void* diag, const void* r, void* z,
-                  std::size_t n, void* stream)
+void jacobi_apply(const void* diag, const void* r, void* z, std::size_t n, void* stream)
 {
 #ifdef SIMALL_HAVE_CUDA
     if (use_cuda()) {
@@ -250,8 +310,7 @@ void jacobi_apply(const void* diag, const void* r, void* z,
         // ILU written in a .cu file (W18.5 milestone).
         auto h = blas();
         cublasSetStream(h, to_stream(stream));
-        cudaMemcpyAsync(z, r, n * sizeof(double),
-            cudaMemcpyDeviceToDevice, to_stream(stream));
+        cudaMemcpyAsync(z, r, n * sizeof(double), cudaMemcpyDeviceToDevice, to_stream(stream));
         // Per-element multiply: not natively supported by cuBLAS; the
         // serial host fall-back below copies diag down, computes
         // z[i] /= diag[i], and pushes z back.  This is intentionally a
@@ -259,18 +318,18 @@ void jacobi_apply(const void* diag, const void* r, void* z,
         // live in a follow-on .cu translation unit.
         std::vector<double> hostDiag(n), hostZ(n);
         cudaMemcpy(hostDiag.data(), diag, n * sizeof(double), cudaMemcpyDeviceToHost);
-        cudaMemcpy(hostZ.data(),    z,    n * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaMemcpy(hostZ.data(), z, n * sizeof(double), cudaMemcpyDeviceToHost);
         for (std::size_t i = 0; i < n; ++i)
             hostZ[i] /= (hostDiag[i] != 0.0 ? hostDiag[i] : 1.0);
         cudaMemcpy(z, hostZ.data(), n * sizeof(double), cudaMemcpyHostToDevice);
         return;
     }
 #else
-    (void)stream;
+    (void) stream;
 #endif
     const double* dp = hd(diag);
     const double* rp = hd(r);
-    double*       zp = hd(z);
+    double* zp = hd(z);
     for (std::size_t i = 0; i < n; ++i)
         zp[i] = rp[i] / (dp[i] != 0.0 ? dp[i] : 1.0);
 }
@@ -283,38 +342,47 @@ void jacobi_apply(const void* diag, const void* r, void* z,
 // Reference: Saad, "Iterative Methods for Sparse Linear Systems", 2nd ed.,
 // Algorithm 10.4 ("ILU(0) factorization").
 // -----------------------------------------------------------------------------
-bool ilu0_factor_inplace(std::size_t n,
-                         const int* rowPtr, const int* colIdx, double* values)
+bool ilu0_factor_inplace(std::size_t n, const int* rowPtr, const int* colIdx, double* values)
 {
     // diagPos[i] = position in values[] of A(i,i).  -1 means missing.
     std::vector<int> diagPos(n, -1);
     for (std::size_t i = 0; i < n; ++i) {
         for (int k = rowPtr[i]; k < rowPtr[i + 1]; ++k) {
-            if (colIdx[k] == static_cast<int>(i)) { diagPos[i] = k; break; }
+            if (colIdx[k] == static_cast<int>(i)) {
+                diagPos[i] = k;
+                break;
+            }
         }
-        if (diagPos[i] < 0) return false;  // no diagonal entry
+        if (diagPos[i] < 0)
+            return false; // no diagonal entry
     }
 
     for (std::size_t i = 1; i < n; ++i) {
         // For each k in row i with k < i, scale by U(k,k) and eliminate.
         for (int p = rowPtr[i]; p < rowPtr[i + 1]; ++p) {
             const int k = colIdx[p];
-            if (k >= static_cast<int>(i)) break;        // (rowPtr assumed sorted)
+            if (k >= static_cast<int>(i))
+                break; // (rowPtr assumed sorted)
             const double Ukk = values[diagPos[k]];
-            if (Ukk == 0.0) return false;
+            if (Ukk == 0.0)
+                return false;
             const double lik = values[p] / Ukk;
-            values[p] = lik;                            // L(i,k) ← lik
+            values[p] = lik; // L(i,k) ← lik
             // Subtract lik * U(k, j) from A(i, j) for j ∈ row k, j > k that
             // also appears in row i (zero-fill preserves pattern of A).
             for (int q = diagPos[k] + 1; q < rowPtr[k + 1]; ++q) {
                 const int j = colIdx[q];
                 // Linear search inside row i for column j (rows are short).
                 for (int r = p + 1; r < rowPtr[i + 1]; ++r) {
-                    if (colIdx[r] == j) { values[r] -= lik * values[q]; break; }
+                    if (colIdx[r] == j) {
+                        values[r] -= lik * values[q];
+                        break;
+                    }
                 }
             }
         }
-        if (values[diagPos[i]] == 0.0) return false;
+        if (values[diagPos[i]] == 0.0)
+            return false;
     }
     return true;
 }
@@ -333,41 +401,50 @@ bool ilu0_factor_inplace(std::size_t n,
 // generic helper is the correctness reference exercised by the unit tests.
 // -----------------------------------------------------------------------------
 void ilu0_apply(std::size_t n,
-                const int* rowPtr, const int* colIdx, const double* values,
-                const double* r, double* z, void* stream)
+                const int* rowPtr,
+                const int* colIdx,
+                const double* values,
+                const double* r,
+                double* z,
+                void* stream)
 {
-    (void)stream;
+    (void) stream;
 #ifdef SIMALL_HAVE_CUDA
     if (use_cuda()) {
         // Host sweep with explicit copies.  See header note.
-        std::vector<int>    hRow(n + 1);
-        std::vector<int>    hCol;
+        std::vector<int> hRow(n + 1);
+        std::vector<int> hCol;
         std::vector<double> hVal, hR(n), hZ(n);
-        cudaMemcpy(hRow.data(), rowPtr, (n + 1) * sizeof(int),    cudaMemcpyDeviceToHost);
+        cudaMemcpy(hRow.data(), rowPtr, (n + 1) * sizeof(int), cudaMemcpyDeviceToHost);
         const int nnz = hRow[n];
-        hCol.resize(nnz); hVal.resize(nnz);
-        cudaMemcpy(hCol.data(), colIdx, nnz * sizeof(int),    cudaMemcpyDeviceToHost);
+        hCol.resize(nnz);
+        hVal.resize(nnz);
+        cudaMemcpy(hCol.data(), colIdx, nnz * sizeof(int), cudaMemcpyDeviceToHost);
         cudaMemcpy(hVal.data(), values, nnz * sizeof(double), cudaMemcpyDeviceToHost);
-        cudaMemcpy(hR.data(),   r,      n   * sizeof(double), cudaMemcpyDeviceToHost);
+        cudaMemcpy(hR.data(), r, n * sizeof(double), cudaMemcpyDeviceToHost);
 
         // Forward
         for (std::size_t i = 0; i < n; ++i) {
             double s = hR[i];
             for (int k = hRow[i]; k < hRow[i + 1]; ++k) {
                 const int j = hCol[k];
-                if (j < static_cast<int>(i)) s -= hVal[k] * hZ[j];
-                else break;  // remainder belongs to U
+                if (j < static_cast<int>(i))
+                    s -= hVal[k] * hZ[j];
+                else
+                    break; // remainder belongs to U
             }
             hZ[i] = s;
         }
         // Backward
-        for (std::size_t ii = n; ii-- > 0; ) {
+        for (std::size_t ii = n; ii-- > 0;) {
             double s = hZ[ii];
             double diag = 1.0;
             for (int k = hRow[ii]; k < hRow[ii + 1]; ++k) {
                 const int j = hCol[k];
-                if (j > static_cast<int>(ii)) s    -= hVal[k] * hZ[j];
-                else if (j == static_cast<int>(ii)) diag = hVal[k];
+                if (j > static_cast<int>(ii))
+                    s -= hVal[k] * hZ[j];
+                else if (j == static_cast<int>(ii))
+                    diag = hVal[k];
             }
             hZ[ii] = s / (diag != 0.0 ? diag : 1.0);
         }
@@ -380,21 +457,25 @@ void ilu0_apply(std::size_t n,
         double s = r[i];
         for (int k = rowPtr[i]; k < rowPtr[i + 1]; ++k) {
             const int j = colIdx[k];
-            if (j < static_cast<int>(i)) s -= values[k] * z[j];
-            else break;
+            if (j < static_cast<int>(i))
+                s -= values[k] * z[j];
+            else
+                break;
         }
         z[i] = s;
     }
-    for (std::size_t ii = n; ii-- > 0; ) {
+    for (std::size_t ii = n; ii-- > 0;) {
         double s = z[ii];
         double diag = 1.0;
         for (int k = rowPtr[ii]; k < rowPtr[ii + 1]; ++k) {
             const int j = colIdx[k];
-            if (j > static_cast<int>(ii)) s    -= values[k] * z[j];
-            else if (j == static_cast<int>(ii)) diag = values[k];
+            if (j > static_cast<int>(ii))
+                s -= values[k] * z[j];
+            else if (j == static_cast<int>(ii))
+                diag = values[k];
         }
         z[ii] = s / (diag != 0.0 ? diag : 1.0);
     }
 }
 
-}  // namespace simall::gpu
+} // namespace simall::gpu

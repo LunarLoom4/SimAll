@@ -3,15 +3,18 @@
 // File   : src/turbulence/Wale.cpp
 // =============================================================================
 #include "turbulence/Wale.hpp"
-#include "solver/Gradient.hpp"
+
 #include "core/Logger.hpp"
+#include "solver/Gradient.hpp"
 
 #include <algorithm>
 #include <cmath>
 
-namespace simall::turbulence {
+namespace simall::turbulence
+{
 
-void WALE_LES::initialize(meshing::Mesh& m, solver::FieldRegistry& f) {
+void WALE_LES::initialize(meshing::Mesh& m, solver::FieldRegistry& f)
+{
     mesh_ = &m;
     const std::size_t nC = m.cells().size();
     f.scalar("mut", nC);
@@ -22,11 +25,13 @@ void WALE_LES::initialize(meshing::Mesh& m, solver::FieldRegistry& f) {
     SIMALL_LOG_INFO("Turbulence", "WALE LES initialized (Cw=", Cw_, ", cells=", nC, ")");
 }
 
-void WALE_LES::solve(double /*dt*/, solver::FieldRegistry& f) {
-    if (!mesh_) return;
+void WALE_LES::solve(double /*dt*/, solver::FieldRegistry& f)
+{
+    if (!mesh_)
+        return;
     const std::size_t nC = mesh_->cells().size();
     const auto& U = *f.find_vector("U");
-    auto& mut    = *f.find_scalar("mut");
+    auto& mut = *f.find_scalar("mut");
 
     solver::LeastSquaresGradient G(*mesh_);
     solver::VectorField gUx, gUy, gUz;
@@ -36,11 +41,9 @@ void WALE_LES::solve(double /*dt*/, solver::FieldRegistry& f) {
 
     for (std::size_t c = 0; c < nC; ++c) {
         // g[i][j] = ∂u_i/∂x_j
-        const double g[3][3] = {
-            { gUx.x[c], gUx.y[c], gUx.z[c] },
-            { gUy.x[c], gUy.y[c], gUy.z[c] },
-            { gUz.x[c], gUz.y[c], gUz.z[c] }
-        };
+        const double g[3][3] = {{gUx.x[c], gUx.y[c], gUx.z[c]},
+                                {gUy.x[c], gUy.y[c], gUy.z[c]},
+                                {gUz.x[c], gUz.y[c], gUz.z[c]}};
         // S_ij = ½ (g_ij + g_ji)
         double S[3][3];
         for (int i = 0; i < 3; ++i)
@@ -69,13 +72,12 @@ void WALE_LES::solve(double /*dt*/, solver::FieldRegistry& f) {
                 SdSd += Sd[i][j] * Sd[i][j];
 
         const double num = std::pow(std::max(SdSd, 0.0), 1.5);
-        const double den = std::pow(std::max(SS,   0.0), 2.5)
-                         + std::pow(std::max(SdSd, 0.0), 1.25)
-                         + 1e-30;
-        const double Ls  = Cw_ * delta_[c];
-        mut[c]  = rho_ * Ls * Ls * num / den;
+        const double den =
+            std::pow(std::max(SS, 0.0), 2.5) + std::pow(std::max(SdSd, 0.0), 1.25) + 1e-30;
+        const double Ls = Cw_ * delta_[c];
+        mut[c] = rho_ * Ls * Ls * num / den;
         mut_[c] = mut[c];
     }
 }
 
-}  // namespace simall::turbulence
+} // namespace simall::turbulence

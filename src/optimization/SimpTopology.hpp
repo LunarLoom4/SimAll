@@ -24,22 +24,29 @@
 #include <cstddef>
 #include <memory>
 
-namespace simall::solver { class ILinearSolver; struct LinearSolverConfig; }
+namespace simall::solver
+{
+class ILinearSolver;
+struct LinearSolverConfig;
+}
 
-namespace simall::optimization {
+namespace simall::optimization
+{
 
-struct SimpConfig {
-    double penalty       = 3.0;     ///< SIMP p
-    double K_min         = 1e-9;    ///< Ersatz-material lower bound
-    double K_max         = 1.0;     ///< Solid-phase property
-    double filterRadius  = 0.0;     ///< Helmholtz r (0 ⇒ disable filtering)
-    double volumeFraction= 0.4;     ///< Σρ̃·V / Vtot ≤ this
-    double move          = 0.2;     ///< OC move-limit
-    double damping       = 0.5;     ///< OC damping exponent η
-    double rhoMin        = 1e-3;    ///< Lower density bound
+struct SimpConfig
+{
+    double penalty = 3.0;        ///< SIMP p
+    double K_min = 1e-9;         ///< Ersatz-material lower bound
+    double K_max = 1.0;          ///< Solid-phase property
+    double filterRadius = 0.0;   ///< Helmholtz r (0 ⇒ disable filtering)
+    double volumeFraction = 0.4; ///< Σρ̃·V / Vtot ≤ this
+    double move = 0.2;           ///< OC move-limit
+    double damping = 0.5;        ///< OC damping exponent η
+    double rhoMin = 1e-3;        ///< Lower density bound
 };
 
-class SimpTopology {
+class SimpTopology
+{
 public:
     /// Initialise design field. Creates registry fields:
     ///   "rho"      — raw design variable
@@ -61,12 +68,11 @@ public:
     const SimpConfig& config() const noexcept { return cfg_; }
 
 private:
-    void apply_helmholtz_filter(const meshing::Mesh& mesh,
-                                solver::FieldRegistry& fields);
+    void apply_helmholtz_filter(const meshing::Mesh& mesh, solver::FieldRegistry& fields);
 
     SimpConfig cfg_{};
     const meshing::Mesh* mesh_ = nullptr;
     std::unique_ptr<solver::ILinearSolver> filterSolver_;
 };
 
-}  // namespace simall::optimization
+} // namespace simall::optimization

@@ -19,17 +19,19 @@
 #include <optional>
 #include <vector>
 
-namespace simall::gui_core {
+namespace simall::gui_core
+{
 
-struct ThemeAssetLocations {
-    std::optional<std::filesystem::path> stylesheet;          // simall_dark.qss
-    std::vector<std::filesystem::path>   fonts;               // Inter-*.otf
-    std::vector<std::filesystem::path>   searchedDirectories; // diagnostic
+struct ThemeAssetLocations
+{
+    std::optional<std::filesystem::path> stylesheet;        // simall_dark.qss
+    std::vector<std::filesystem::path> fonts;               // Inter-*.otf
+    std::vector<std::filesystem::path> searchedDirectories; // diagnostic
 };
 
 [[nodiscard]] ThemeAssetLocations locate_theme_assets(
     const std::filesystem::path& executableDir = {},
-    const std::filesystem::path& sourceRoot    = {},
-    std::string_view             themeName     = "dark");
+    const std::filesystem::path& sourceRoot = {},
+    std::string_view themeName = "dark");
 
-}  // namespace simall::gui_core
+} // namespace simall::gui_core

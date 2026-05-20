@@ -10,13 +10,15 @@
 
 #include "../RegressionFramework.hpp"
 
-namespace simall::regression::flameD {
+namespace simall::regression::flameD
+{
 
-[[nodiscard]] inline double centerline_mixture_fraction(double xOverD) {
+[[nodiscard]] inline double centerline_mixture_fraction(double xOverD)
+{
     return (xOverD < 1.0) ? 1.0 : 5.4 / xOverD;
 }
 
 inline constexpr double kPeakTemperatureK = 1900.0;
 inline constexpr double kPeakTemperatureXOverD = 45.0;
 
-}  // namespace simall::regression::flameD
+} // namespace simall::regression::flameD

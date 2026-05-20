@@ -75,13 +75,15 @@
 
 #include <string>
 
-namespace simall::io {
+namespace simall::io
+{
 
-struct GmshReadResult {
-    bool          ok        = false;
-    std::string   error;
-    ImportedMesh  mesh;
-    std::uint8_t  dimension = 0;   ///< 1, 2 or 3 (max element dim observed)
+struct GmshReadResult
+{
+    bool ok = false;
+    std::string error;
+    ImportedMesh mesh;
+    std::uint8_t dimension = 0; ///< 1, 2 or 3 (max element dim observed)
 };
 
 /// Read a Gmsh ASCII `.msh` file from disk.  Supports v2.x and v4.x;
@@ -90,11 +92,10 @@ struct GmshReadResult {
 
 /// Test hook: parse from an in-memory buffer.
 [[nodiscard]] GmshReadResult parse_gmsh_msh_string(const std::string& text,
-                                                    std::string       sourceHint
-                                                    = "<string>");
+                                                   std::string sourceHint = "<string>");
 
 /// Translate a Gmsh element-type code (1..7, 15) to the SimAll element
 /// type enum. Returns ElementType::Unknown for unsupported codes.
 [[nodiscard]] ElementType gmsh_element_type(int gmshCode) noexcept;
 
-}  // namespace simall::io
+} // namespace simall::io

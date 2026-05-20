@@ -16,13 +16,14 @@
 #include <stdexcept>
 #include <vector>
 
-namespace simall::materials {
+namespace simall::materials
+{
 
-class PolynomialFit {
+class PolynomialFit
+{
 public:
     PolynomialFit() = default;
-    PolynomialFit(std::vector<double> coeffs, double Tmin, double Tmax,
-                  bool clampOutside = true)
+    PolynomialFit(std::vector<double> coeffs, double Tmin, double Tmax, bool clampOutside = true)
         : c_(std::move(coeffs)), tmin_(Tmin), tmax_(Tmax), clamp_(clampOutside)
     {
         if (c_.empty())
@@ -32,10 +33,9 @@ public:
     }
 
     /// Horner-form evaluation.
-    double evaluate(double T) const noexcept {
-        const double t = clamp_ ? (T < tmin_ ? tmin_
-                                : (T > tmax_ ? tmax_ : T))
-                                : T;
+    double evaluate(double T) const noexcept
+    {
+        const double t = clamp_ ? (T < tmin_ ? tmin_ : (T > tmax_ ? tmax_ : T)) : T;
         double y = c_.back();
         for (std::size_t k = c_.size() - 1; k-- > 0;)
             y = y * t + c_[k];
@@ -43,11 +43,11 @@ public:
     }
 
     /// d/dT (Horner-style).
-    double derivative(double T) const noexcept {
-        if (c_.size() < 2) return 0.0;
-        const double t = clamp_ ? (T < tmin_ ? tmin_
-                                : (T > tmax_ ? tmax_ : T))
-                                : T;
+    double derivative(double T) const noexcept
+    {
+        if (c_.size() < 2)
+            return 0.0;
+        const double t = clamp_ ? (T < tmin_ ? tmin_ : (T > tmax_ ? tmax_ : T)) : T;
         const std::size_t n = c_.size() - 1;
         double y = c_[n] * static_cast<double>(n);
         for (std::size_t k = n - 1; k > 0; --k)
@@ -62,9 +62,9 @@ public:
 
 private:
     std::vector<double> c_;
-    double              tmin_  = 0.0;
-    double              tmax_  = 0.0;
-    bool                clamp_ = true;
+    double tmin_ = 0.0;
+    double tmax_ = 0.0;
+    bool clamp_ = true;
 };
 
-}  // namespace simall::materials
+} // namespace simall::materials

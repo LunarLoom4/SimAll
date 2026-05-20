@@ -21,37 +21,41 @@
 #include <string>
 #include <vector>
 
-namespace simall::gui_core {
+namespace simall::gui_core
+{
 
-enum class DockArea : uint8_t {
+enum class DockArea : uint8_t
+{
     Left = 0,
     Right,
     Top,
     Bottom,
     Floating,
-    Central,    // central widget — only one panel may claim this
+    Central, // central widget — only one panel may claim this
     Hidden
 };
 
-struct DockPlacement {
-    std::string panelId;            // matches PanelRegistry key
-    DockArea    area    = DockArea::Hidden;
-    bool        visible = true;
-    bool        floating = false;
+struct DockPlacement
+{
+    std::string panelId; // matches PanelRegistry key
+    DockArea area = DockArea::Hidden;
+    bool visible = true;
+    bool floating = false;
     // Floating window rect (ignored when not floating).
-    int         x = 0, y = 0, w = 0, h = 0;
+    int x = 0, y = 0, w = 0, h = 0;
     // Tab index inside the dock area; -1 if not tabbed.
-    int         tabGroupId = -1;
-    int         tabIndex   = 0;
+    int tabGroupId = -1;
+    int tabIndex = 0;
 };
 
-struct DockPerspective {
-    std::string                 name;        // "Default", "Meshing", "Post"
-    std::vector<DockPlacement>  placements;
-    std::string                 qtBlob;      // base64(QMainWindow::saveState())
+struct DockPerspective
+{
+    std::string name; // "Default", "Meshing", "Post"
+    std::vector<DockPlacement> placements;
+    std::string qtBlob; // base64(QMainWindow::saveState())
 
     [[nodiscard]] const DockPlacement* find(std::string_view panelId) const noexcept;
-    [[nodiscard]] DockPlacement*       find(std::string_view panelId)       noexcept;
+    [[nodiscard]] DockPlacement* find(std::string_view panelId) noexcept;
     DockPlacement& upsert(const std::string& panelId);
 };
 
@@ -69,10 +73,10 @@ struct DockPerspective {
 //     tab=2,0
 //     [panel]
 //     ...
-[[nodiscard]] std::string  serialize(const DockPerspective& p);
+[[nodiscard]] std::string serialize(const DockPerspective& p);
 [[nodiscard]] std::optional<DockPerspective> deserialize(std::string_view txt);
 
-[[nodiscard]] std::string  area_to_string(DockArea a);
+[[nodiscard]] std::string area_to_string(DockArea a);
 [[nodiscard]] std::optional<DockArea> area_from_string(std::string_view s);
 
-}  // namespace simall::gui_core
+} // namespace simall::gui_core

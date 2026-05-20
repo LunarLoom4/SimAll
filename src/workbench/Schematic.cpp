@@ -10,28 +10,34 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
 // ---------------------------------------------------------------------------
 // Cells
 // ---------------------------------------------------------------------------
-CellId Schematic::add_cell(CellKind kind, std::string label) {
+CellId Schematic::add_cell(CellKind kind, std::string label)
+{
     const CellId id = next_cell_id_++;
     cells_.emplace_back(id, kind, std::move(label));
     return id;
 }
 
-bool Schematic::remove_cell(CellId id, std::vector<CellLink>* removed_links_out) {
+bool Schematic::remove_cell(CellId id, std::vector<CellLink>* removed_links_out)
+{
     // Resolve cell -- bail if unknown.
-    const auto cit = std::find_if(cells_.begin(), cells_.end(),
-                                  [id](const Cell& c) { return c.id() == id; });
-    if (cit == cells_.end()) return false;
+    const auto cit =
+        std::find_if(cells_.begin(), cells_.end(), [id](const Cell& c) { return c.id() == id; });
+    if (cit == cells_.end())
+        return false;
 
     // Snapshot + erase every incident link (incoming or outgoing).
-    if (removed_links_out) removed_links_out->clear();
-    for (auto it = links_.begin(); it != links_.end(); ) {
+    if (removed_links_out)
+        removed_links_out->clear();
+    for (auto it = links_.begin(); it != links_.end();) {
         if (it->from_cell == id || it->to_cell == id) {
-            if (removed_links_out) removed_links_out->push_back(*it);
+            if (removed_links_out)
+                removed_links_out->push_back(*it);
             it = links_.erase(it);
         } else {
             ++it;
@@ -41,26 +47,33 @@ bool Schematic::remove_cell(CellId id, std::vector<CellLink>* removed_links_out)
     return true;
 }
 
-bool Schematic::restore_cell(Cell c) {
+bool Schematic::restore_cell(Cell c)
+{
     // Refuse id collisions -- undo would otherwise silently shadow an
     // unrelated cell minted in the meantime.
-    if (cell(c.id()) != nullptr) return false;
+    if (cell(c.id()) != nullptr)
+        return false;
     const CellId restored_id = c.id();
     cells_.push_back(std::move(c));
-    if (restored_id >= next_cell_id_) next_cell_id_ = restored_id + 1;
+    if (restored_id >= next_cell_id_)
+        next_cell_id_ = restored_id + 1;
     return true;
 }
 
-Cell* Schematic::cell(CellId id) noexcept {
+Cell* Schematic::cell(CellId id) noexcept
+{
     for (auto& c : cells_) {
-        if (c.id() == id) return &c;
+        if (c.id() == id)
+            return &c;
     }
     return nullptr;
 }
 
-const Cell* Schematic::cell(CellId id) const noexcept {
+const Cell* Schematic::cell(CellId id) const noexcept
+{
     for (const auto& c : cells_) {
-        if (c.id() == id) return &c;
+        if (c.id() == id)
+            return &c;
     }
     return nullptr;
 }
@@ -70,20 +83,24 @@ const Cell* Schematic::cell(CellId id) const noexcept {
 // Cycle detection -- DFS forward from `to` and check whether we can reach
 // `from`.  If yes, adding from -> to would close a cycle.
 // ---------------------------------------------------------------------------
-bool Schematic::would_create_cycle(CellId from, CellId to) const {
-    if (from == to) return true;            // self-loop
+bool Schematic::would_create_cycle(CellId from, CellId to) const
+{
+    if (from == to)
+        return true; // self-loop
 
     std::unordered_set<CellId> visited;
-    std::vector<CellId>        stack{to};
+    std::vector<CellId> stack{to};
 
     while (!stack.empty()) {
         const CellId cur = stack.back();
         stack.pop_back();
-        if (!visited.insert(cur).second) continue;
+        if (!visited.insert(cur).second)
+            continue;
 
         for (const auto& l : links_) {
             if (l.from_cell == cur) {
-                if (l.to_cell == from) return true;
+                if (l.to_cell == from)
+                    return true;
                 stack.push_back(l.to_cell);
             }
         }
@@ -95,20 +112,24 @@ bool Schematic::would_create_cycle(CellId from, CellId to) const {
 // ---------------------------------------------------------------------------
 // Links
 // ---------------------------------------------------------------------------
-bool Schematic::add_link(const CellLink& link) {
+bool Schematic::add_link(const CellLink& link)
+{
     const Cell* from = cell(link.from_cell);
-    const Cell* to   = cell(link.to_cell);
-    if (!from || !to) return false;
+    const Cell* to = cell(link.to_cell);
+    if (!from || !to)
+        return false;
 
     const CellPort* fp = from->find_port(link.from_port);
-    const CellPort* tp = to  ->find_port(link.to_port);
-    if (!fp || !tp) return false;
+    const CellPort* tp = to->find_port(link.to_port);
+    if (!fp || !tp)
+        return false;
 
-    if (fp->direction != PortDirection::Output) return false;
-    if (tp->direction != PortDirection::Input)  return false;
+    if (fp->direction != PortDirection::Output)
+        return false;
+    if (tp->direction != PortDirection::Input)
+        return false;
 
-    if (!fp->data_type.empty() && !tp->data_type.empty()
-        && fp->data_type != tp->data_type) {
+    if (!fp->data_type.empty() && !tp->data_type.empty() && fp->data_type != tp->data_type) {
         return false;
     }
 
@@ -132,9 +153,11 @@ bool Schematic::add_link(const CellLink& link) {
     return true;
 }
 
-bool Schematic::remove_link(const CellLink& link) {
+bool Schematic::remove_link(const CellLink& link)
+{
     const auto it = std::find(links_.begin(), links_.end(), link);
-    if (it == links_.end()) return false;
+    if (it == links_.end())
+        return false;
     links_.erase(it);
     return true;
 }
@@ -143,36 +166,48 @@ bool Schematic::remove_link(const CellLink& link) {
 // ---------------------------------------------------------------------------
 // Graph queries
 // ---------------------------------------------------------------------------
-std::vector<CellId> Schematic::upstream(CellId id) const {
+std::vector<CellId> Schematic::upstream(CellId id) const
+{
     std::vector<CellId> out;
     for (const auto& l : links_) {
-        if (l.to_cell == id) out.push_back(l.from_cell);
+        if (l.to_cell == id)
+            out.push_back(l.from_cell);
     }
     return out;
 }
 
-std::vector<CellId> Schematic::downstream(CellId id) const {
+std::vector<CellId> Schematic::downstream(CellId id) const
+{
     std::vector<CellId> out;
     for (const auto& l : links_) {
-        if (l.from_cell == id) out.push_back(l.to_cell);
+        if (l.from_cell == id)
+            out.push_back(l.to_cell);
     }
     return out;
 }
 
-bool Schematic::inputs_satisfied(CellId id) const {
+bool Schematic::inputs_satisfied(CellId id) const
+{
     const Cell* c = cell(id);
-    if (!c) return false;
+    if (!c)
+        return false;
 
     for (const auto& p : c->ports()) {
-        if (p.direction != PortDirection::Input) continue;
-        if (!p.required) continue;
+        if (p.direction != PortDirection::Input)
+            continue;
+        if (!p.required)
+            continue;
 
         // Look for at least one link feeding this input.
         bool wired = false;
         for (const auto& l : links_) {
-            if (l.to_cell == id && l.to_port == p.id) { wired = true; break; }
+            if (l.to_cell == id && l.to_port == p.id) {
+                wired = true;
+                break;
+            }
         }
-        if (!wired) return false;
+        if (!wired)
+            return false;
     }
     return true;
 }
@@ -182,16 +217,20 @@ bool Schematic::inputs_satisfied(CellId id) const {
 // Kahn's topological sort.  Ties broken by CellId ascending for a stable,
 // deterministic output -- the tests depend on it.
 // ---------------------------------------------------------------------------
-std::vector<CellId> Schematic::topological_order() const {
+std::vector<CellId> Schematic::topological_order() const
+{
     std::unordered_map<CellId, std::size_t> indegree;
     indegree.reserve(cells_.size());
-    for (const auto& c : cells_) indegree[c.id()] = 0;
-    for (const auto& l : links_) ++indegree[l.to_cell];
+    for (const auto& c : cells_)
+        indegree[c.id()] = 0;
+    for (const auto& l : links_)
+        ++indegree[l.to_cell];
 
-    auto cmp = [](CellId a, CellId b) { return a > b; };  // min-heap
+    auto cmp = [](CellId a, CellId b) { return a > b; }; // min-heap
     std::priority_queue<CellId, std::vector<CellId>, decltype(cmp)> ready(cmp);
     for (const auto& [id, n] : indegree) {
-        if (n == 0) ready.push(id);
+        if (n == 0)
+            ready.push(id);
     }
 
     std::vector<CellId> order;
@@ -202,13 +241,15 @@ std::vector<CellId> Schematic::topological_order() const {
         order.push_back(cur);
         for (const auto& l : links_) {
             if (l.from_cell == cur) {
-                if (--indegree[l.to_cell] == 0) ready.push(l.to_cell);
+                if (--indegree[l.to_cell] == 0)
+                    ready.push(l.to_cell);
             }
         }
     }
 
-    if (order.size() != cells_.size()) return {};  // cycle (unreachable)
+    if (order.size() != cells_.size())
+        return {}; // cycle (unreachable)
     return order;
 }
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

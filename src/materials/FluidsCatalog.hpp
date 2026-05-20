@@ -16,24 +16,27 @@
 #include <string>
 #include <vector>
 
-namespace simall::materials {
+namespace simall::materials
+{
 
-struct FluidProperties {
+struct FluidProperties
+{
     std::string name;
-    double      density;              // kg/m^3
-    double      viscosity;            // Pa·s
-    double      conductivity;         // W/(m·K)
-    double      specificHeat;         // J/(kg·K)
-    double      molecularWeight;      // kg/mol
-    double      gamma;                // c_p / c_v   (gases only; -1 for liquids)
-    double      surfaceTension;       // N/m  (liquid–air; -1 for gases)
-    double      vaporPressure300K;    // Pa   (liquids; 0 for gases)
-    bool        isGas;
-    SutherlandViscosity    sutherlandVisc;     // valid if isGas
-    SutherlandConductivity sutherlandCond;     // valid if isGas
+    double density;           // kg/m^3
+    double viscosity;         // Pa·s
+    double conductivity;      // W/(m·K)
+    double specificHeat;      // J/(kg·K)
+    double molecularWeight;   // kg/mol
+    double gamma;             // c_p / c_v   (gases only; -1 for liquids)
+    double surfaceTension;    // N/m  (liquid–air; -1 for gases)
+    double vaporPressure300K; // Pa   (liquids; 0 for gases)
+    bool isGas;
+    SutherlandViscosity sutherlandVisc;    // valid if isGas
+    SutherlandConductivity sutherlandCond; // valid if isGas
 };
 
-class FluidsCatalog {
+class FluidsCatalog
+{
 public:
     FluidsCatalog();
 
@@ -44,4 +47,4 @@ private:
     std::vector<FluidProperties> entries_;
 };
 
-}  // namespace simall::materials
+} // namespace simall::materials

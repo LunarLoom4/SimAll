@@ -26,22 +26,24 @@
 #include <string>
 #include <vector>
 
-namespace simall::multiphase {
+namespace simall::multiphase
+{
 
-struct PbmProps {
-    int    numMoments     = 4;        // even, ≥ 2; ⇒ N = numMoments/2 nodes
-    double growthRateG    = 0.0;      // dL/dt (constant; user can refine)
+struct PbmProps
+{
+    int numMoments = 4;       // even, ≥ 2; ⇒ N = numMoments/2 nodes
+    double growthRateG = 0.0; // dL/dt (constant; user can refine)
     /// Aggregation kernel β(L_i, L_j) [m³/s].
     std::function<double(double, double)> aggregationKernel;
     /// Breakage frequency g(L) [1/s] and fragment distribution PDF β(L, L′).
-    std::function<double(double)>         breakageFrequency;
+    std::function<double(double)> breakageFrequency;
     std::function<double(double, double)> daughterDistribution;
 };
 
-class PopulationBalance {
+class PopulationBalance
+{
 public:
-    void initialize(const meshing::Mesh& mesh, solver::FieldRegistry& fields,
-                    PbmProps props);
+    void initialize(const meshing::Mesh& mesh, solver::FieldRegistry& fields, PbmProps props);
 
     /// Advance moments by `dt` using a first-order forward Euler integration
     /// of the moment source terms (transport handled separately by a
@@ -61,9 +63,9 @@ private:
 
     std::string moment_name(int k) const;
 
-    const meshing::Mesh*   mesh_   = nullptr;
+    const meshing::Mesh* mesh_ = nullptr;
     solver::FieldRegistry* fields_ = nullptr;
-    PbmProps               props_{};
+    PbmProps props_{};
 };
 
-}  // namespace simall::multiphase
+} // namespace simall::multiphase

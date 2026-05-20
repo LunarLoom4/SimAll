@@ -39,9 +39,11 @@
 #include <unordered_map>
 #include <vector>
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
-class CellAdapterRegistry {
+class CellAdapterRegistry
+{
 public:
     // A factory returns a freshly-constructed adapter every call so the
     // engine can run several cells concurrently without aliasing
@@ -49,7 +51,7 @@ public:
     using Factory = std::function<std::unique_ptr<ICellAdapter>()>;
 
     CellAdapterRegistry() = default;
-    CellAdapterRegistry(const CellAdapterRegistry&)            = delete;
+    CellAdapterRegistry(const CellAdapterRegistry&) = delete;
     CellAdapterRegistry& operator=(const CellAdapterRegistry&) = delete;
 
     // Register (or overwrite) a factory under the given id.  Returns
@@ -71,13 +73,13 @@ public:
     [[nodiscard]] std::vector<std::string> keys() const;
 
     [[nodiscard]] std::size_t size() const;
-    [[nodiscard]] bool        empty() const;
+    [[nodiscard]] bool empty() const;
 
     void clear();
 
 private:
-    mutable std::mutex                          mu_;
-    std::unordered_map<std::string, Factory>    factories_;
+    mutable std::mutex mu_;
+    std::unordered_map<std::string, Factory> factories_;
 };
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

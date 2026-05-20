@@ -29,9 +29,11 @@
 #include <queue>
 #include <unordered_set>
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
-CellState StateMachine::derive_state(CellId id) const {
+CellState StateMachine::derive_state(CellId id) const
+{
     if (!schematic_->inputs_satisfied(id)) {
         return CellState::Unfulfilled;
     }
@@ -39,38 +41,42 @@ CellState StateMachine::derive_state(CellId id) const {
     CellState worst = CellState::UpToDate;
     for (const CellId u : schematic_->upstream(id)) {
         const Cell* parent = schematic_->cell(u);
-        if (!parent) continue;
+        if (!parent)
+            continue;
 
         switch (parent->state()) {
-            case CellState::Failed:
-                // Broken producer -> child can't compute -> Unfulfilled.
-                worst = std::max(worst, CellState::Unfulfilled);
-                break;
-            case CellState::Unfulfilled:
-                worst = std::max(worst, CellState::Unfulfilled);
-                break;
-            case CellState::RefreshRequired:
-                worst = std::max(worst, CellState::RefreshRequired);
-                break;
-            case CellState::UpToDate:
-                break;
+        case CellState::Failed:
+            // Broken producer -> child can't compute -> Unfulfilled.
+            worst = std::max(worst, CellState::Unfulfilled);
+            break;
+        case CellState::Unfulfilled:
+            worst = std::max(worst, CellState::Unfulfilled);
+            break;
+        case CellState::RefreshRequired:
+            worst = std::max(worst, CellState::RefreshRequired);
+            break;
+        case CellState::UpToDate:
+            break;
         }
     }
     return worst;
 }
 
 
-void StateMachine::recompute_all() {
+void StateMachine::recompute_all()
+{
     // Pin user-asserted states (UpToDate / Failed) and re-derive the rest.
     const auto order = schematic_->topological_order();
     for (const CellId id : order) {
         Cell* c = schematic_->cell(id);
-        if (!c) continue;
+        if (!c)
+            continue;
 
         // Failed is a sticky terminal user signal -- only mark_modified /
         // mark_solved can clear it.  Everything else (Unfulfilled /
         // RefreshRequired / UpToDate) gets re-derived from the graph.
-        if (c->state() == CellState::Failed) continue;
+        if (c->state() == CellState::Failed)
+            continue;
 
         const CellState derived = derive_state(id);
 
@@ -80,47 +86,54 @@ void StateMachine::recompute_all() {
             continue;
         }
         c->set_state(derived == CellState::UpToDate
-                     ? CellState::RefreshRequired   // ready but not yet solved
-                     : derived);
+                         ? CellState::RefreshRequired // ready but not yet solved
+                         : derived);
     }
 }
 
 
-namespace {
+namespace
+{
 
 // BFS over the downstream subgraph from `seed` (exclusive); invokes `fn`
 // on every transitive child in some topological-friendly order.
-template <typename Fn>
-void visit_downstream(const Schematic& s, CellId seed, Fn fn) {
+template <typename Fn> void visit_downstream(const Schematic& s, CellId seed, Fn fn)
+{
     std::unordered_set<CellId> seen;
-    std::queue<CellId>         q;
-    for (const CellId d : s.downstream(seed)) q.push(d);
+    std::queue<CellId> q;
+    for (const CellId d : s.downstream(seed))
+        q.push(d);
 
     while (!q.empty()) {
         const CellId cur = q.front();
         q.pop();
-        if (!seen.insert(cur).second) continue;
+        if (!seen.insert(cur).second)
+            continue;
         fn(cur);
-        for (const CellId d : s.downstream(cur)) q.push(d);
+        for (const CellId d : s.downstream(cur))
+            q.push(d);
     }
 }
 
-}  // namespace
+} // namespace
 
 
-void StateMachine::mark_modified(CellId id) {
+void StateMachine::mark_modified(CellId id)
+{
     Cell* c = schematic_->cell(id);
-    if (!c) return;
+    if (!c)
+        return;
 
-    const CellState own = schematic_->inputs_satisfied(id)
-        ? CellState::RefreshRequired
-        : CellState::Unfulfilled;
+    const CellState own =
+        schematic_->inputs_satisfied(id) ? CellState::RefreshRequired : CellState::Unfulfilled;
     c->set_state(own);
 
     visit_downstream(*schematic_, id, [&](CellId child) {
         Cell* k = schematic_->cell(child);
-        if (!k) return;
-        if (k->state() == CellState::Failed) return;       // sticky
+        if (!k)
+            return;
+        if (k->state() == CellState::Failed)
+            return; // sticky
         k->set_state(derive_state(child));
         if (k->state() == CellState::UpToDate) {
             // Parent moved; child must re-run.
@@ -130,16 +143,20 @@ void StateMachine::mark_modified(CellId id) {
 }
 
 
-void StateMachine::mark_solved(CellId id) {
+void StateMachine::mark_solved(CellId id)
+{
     Cell* c = schematic_->cell(id);
-    if (!c) return;
+    if (!c)
+        return;
 
     c->set_state(CellState::UpToDate);
 
     visit_downstream(*schematic_, id, [&](CellId child) {
         Cell* k = schematic_->cell(child);
-        if (!k) return;
-        if (k->state() == CellState::Failed) return;       // sticky
+        if (!k)
+            return;
+        if (k->state() == CellState::Failed)
+            return; // sticky
         const CellState derived = derive_state(child);
         // If the child was UpToDate, the freshly solved parent
         // invalidates it -> RefreshRequired.  Otherwise honour the
@@ -153,19 +170,23 @@ void StateMachine::mark_solved(CellId id) {
 }
 
 
-void StateMachine::mark_failed(CellId id) {
+void StateMachine::mark_failed(CellId id)
+{
     Cell* c = schematic_->cell(id);
-    if (!c) return;
+    if (!c)
+        return;
 
     c->set_state(CellState::Failed);
 
     visit_downstream(*schematic_, id, [&](CellId child) {
         Cell* k = schematic_->cell(child);
-        if (!k) return;
-        if (k->state() == CellState::Failed) return;       // sticky
+        if (!k)
+            return;
+        if (k->state() == CellState::Failed)
+            return; // sticky
         // A failed ancestor poisons everyone downstream -> Unfulfilled.
         k->set_state(CellState::Unfulfilled);
     });
 }
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

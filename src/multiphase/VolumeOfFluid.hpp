@@ -17,28 +17,32 @@
 // =============================================================================
 #pragma once
 
-#include "solver/FieldRegistry.hpp"
-#include "solver/Solver.hpp"
-#include "solver/ScalarTransport.hpp"
 #include "meshing/MeshStorage.hpp"
+#include "solver/FieldRegistry.hpp"
+#include "solver/ScalarTransport.hpp"
+#include "solver/Solver.hpp"
 
 #include <memory>
 #include <vector>
 
-namespace simall::multiphase {
+namespace simall::multiphase
+{
 
-struct VOFFluid {
+struct VOFFluid
+{
     double density;
     double viscosity;
 };
 
-class VolumeOfFluid {
+class VolumeOfFluid
+{
 public:
     VolumeOfFluid(meshing::Mesh& mesh,
                   solver::FieldRegistry& fields,
                   solver::ILinearSolver& linear);
 
-    void configure(VOFFluid primary, VOFFluid secondary,
+    void configure(VOFFluid primary,
+                   VOFFluid secondary,
                    const std::vector<solver::BoundarySpec>& bcs);
 
     /// Enable Brackbill 1992 continuum surface force model.
@@ -49,14 +53,14 @@ public:
     void step();
 
 private:
-    meshing::Mesh&                   mesh_;
-    solver::FieldRegistry&           F_;
-    solver::ILinearSolver&           lin_;
-    VOFFluid                         f1_{1000.0, 1.0e-3};
-    VOFFluid                         f2_{1.225,  1.8e-5};
-    double                           sigma_ = 0.0;   // [N/m] surface tension
+    meshing::Mesh& mesh_;
+    solver::FieldRegistry& F_;
+    solver::ILinearSolver& lin_;
+    VOFFluid f1_{1000.0, 1.0e-3};
+    VOFFluid f2_{1.225, 1.8e-5};
+    double sigma_ = 0.0; // [N/m] surface tension
     std::vector<solver::BoundarySpec> bcs_;
     std::unique_ptr<solver::ScalarTransport> alphaEq_;
 };
 
-}  // namespace simall::multiphase
+} // namespace simall::multiphase

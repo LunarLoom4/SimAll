@@ -13,9 +13,11 @@
 
 #include <vector>
 
-namespace simall::solver::bc {
+namespace simall::solver::bc
+{
 
-class OversetBc : public IBoundaryCondition {
+class OversetBc : public IBoundaryCondition
+{
 public:
     OversetBc() = default;
 
@@ -25,19 +27,23 @@ public:
     /// Setter: provide the per-receptor-cell donor value for the named
     /// variable. The solver / OversetCouplingDriver populates this map
     /// each outer iteration.
-    void setDonorValues(std::vector<std::pair<meshing::CellId,double>> v) {
+    void setDonorValues(std::vector<std::pair<meshing::CellId, double>> v)
+    {
         donor_ = std::move(v);
     }
 
     std::size_t apply(BcContext& ctx) override;
 
-    std::unique_ptr<IBoundaryCondition> clone() const override {
+    std::unique_ptr<IBoundaryCondition> clone() const override
+    {
         auto c = std::make_unique<OversetBc>();
-        c->setZone(zone()); c->donor_ = donor_; return c;
+        c->setZone(zone());
+        c->donor_ = donor_;
+        return c;
     }
 
 private:
     std::vector<std::pair<meshing::CellId, double>> donor_;
 };
 
-}  // namespace simall::solver::bc
+} // namespace simall::solver::bc

@@ -66,13 +66,15 @@
 
 #include <string>
 
-namespace simall::io {
+namespace simall::io
+{
 
-struct VtuReadResult {
-    bool          ok        = false;
-    std::string   error;
-    ImportedMesh  mesh;
-    std::uint8_t  dimension = 3;
+struct VtuReadResult
+{
+    bool ok = false;
+    std::string error;
+    ImportedMesh mesh;
+    std::uint8_t dimension = 3;
 };
 
 /// Read a `.vtu` file from disk.
@@ -80,12 +82,11 @@ struct VtuReadResult {
 
 /// Test hook: parse from an in-memory buffer.
 [[nodiscard]] VtuReadResult parse_vtu_string(const std::string& text,
-                                              std::string        sourceHint
-                                              = "<string>");
+                                             std::string sourceHint = "<string>");
 
 /// Translate a VTK cell-type code to the SimAll element-type enum.
 /// Returns ElementType::Unknown for unsupported codes (including
 /// VTK_VERTEX=1, which callers should silently skip).
 [[nodiscard]] ElementType vtu_element_type(int vtkCellType) noexcept;
 
-}  // namespace simall::io
+} // namespace simall::io

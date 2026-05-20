@@ -22,19 +22,22 @@
 #include "meshing/MeshStorage.hpp"
 #include "solver/FieldRegistry.hpp"
 
-namespace simall::multiphase {
+namespace simall::multiphase
+{
 
-struct KunzProps {
-    double rhoLiquid    = 998.2;       // kg/m³
-    double rhoVapor     = 0.02308;     // kg/m³
-    double pSaturation  = 2339.0;      // Pa
-    double Uref         = 1.0;         // m/s reference velocity
-    double Lref         = 1.0;         // m   reference length
-    double C_dest       = 100.0;       // empirical (Kunz 2000)
-    double C_prod       = 100.0;       // empirical (Kunz 2000)
+struct KunzProps
+{
+    double rhoLiquid = 998.2;    // kg/m³
+    double rhoVapor = 0.02308;   // kg/m³
+    double pSaturation = 2339.0; // Pa
+    double Uref = 1.0;           // m/s reference velocity
+    double Lref = 1.0;           // m   reference length
+    double C_dest = 100.0;       // empirical (Kunz 2000)
+    double C_prod = 100.0;       // empirical (Kunz 2000)
 };
 
-class CavitationKunz {
+class CavitationKunz
+{
 public:
     void initialize(const meshing::Mesh& mesh, KunzProps props);
     double apply(solver::FieldRegistry& fields);
@@ -42,7 +45,7 @@ public:
 
 private:
     const meshing::Mesh* mesh_ = nullptr;
-    KunzProps            p_{};
+    KunzProps p_{};
 };
 
-}  // namespace simall::multiphase
+} // namespace simall::multiphase

@@ -24,10 +24,11 @@
 // =============================================================================
 #pragma once
 
-namespace simall::turbulence::wallfn {
+namespace simall::turbulence::wallfn
+{
 
 inline constexpr double kKappa = 0.41;
-inline constexpr double kB     = 5.5;
+inline constexpr double kB = 5.5;
 
 /// Solve Spalding's law for y⁺ given u⁺ (closed form).
 double spalding_yplus(double uplus);
@@ -48,7 +49,7 @@ double kader_tplus(double yplus, double Pr);
 
 /// Friction velocity u_τ from the parallel velocity u_p at wall distance y_p
 /// (Newton-Raphson on Spalding law). Returns 0 when u_p == 0.
-double friction_velocity(double u_p, double y_p, double rho, double mu,
-                         double tol = 1e-9, int maxIter = 32);
+double friction_velocity(
+    double u_p, double y_p, double rho, double mu, double tol = 1e-9, int maxIter = 32);
 
-}  // namespace simall::turbulence::wallfn
+} // namespace simall::turbulence::wallfn

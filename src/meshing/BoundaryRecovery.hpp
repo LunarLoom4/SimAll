@@ -25,25 +25,35 @@
 #include <utility>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct RequiredEdge { NodeId a, b; };
-struct RequiredFace { NodeId a, b, c; };
+struct RequiredEdge
+{
+    NodeId a, b;
+};
+struct RequiredFace
+{
+    NodeId a, b, c;
+};
 
-struct BoundaryRecoveryProps {
+struct BoundaryRecoveryProps
+{
     std::size_t maxSteinerInsertions = 1024;
-    double      coordTol = 1e-9;
+    double coordTol = 1e-9;
 };
 
-struct RecoveryReport {
-    std::size_t edgesMissing   = 0;
+struct RecoveryReport
+{
+    std::size_t edgesMissing = 0;
     std::size_t edgesRecovered = 0;
-    std::size_t facesMissing   = 0;
+    std::size_t facesMissing = 0;
     std::size_t facesRecovered = 0;
-    std::size_t steinerAdded   = 0;
+    std::size_t steinerAdded = 0;
 };
 
-class BoundaryRecovery {
+class BoundaryRecovery
+{
 public:
     void initialize(BoundaryRecoveryProps props);
 
@@ -59,9 +69,9 @@ private:
     bool face_present(const Mesh& mesh, const RequiredFace& f) const;
     NodeId insert_steiner(Mesh& mesh, const RequiredEdge& e);
 
-    BoundaryRecoveryProps     p_{};
+    BoundaryRecoveryProps p_{};
     std::vector<RequiredEdge> edges_;
     std::vector<RequiredFace> faces_;
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

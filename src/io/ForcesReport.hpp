@@ -24,30 +24,34 @@
 #include <string>
 #include <vector>
 
-namespace simall::io {
+namespace simall::io
+{
 
-struct ForceReference {
-    double      rhoRef     = 1.225;       // [kg/m³]
-    double      velRef     = 1.0;         // [m/s]
-    double      areaRef    = 1.0;         // [m²]
-    double      lengthRef  = 1.0;         // [m] (for moment coefficient)
+struct ForceReference
+{
+    double rhoRef = 1.225;  // [kg/m³]
+    double velRef = 1.0;    // [m/s]
+    double areaRef = 1.0;   // [m²]
+    double lengthRef = 1.0; // [m] (for moment coefficient)
     util::Vec3d momentCenter{0, 0, 0};
-    util::Vec3d liftAxis  {0, 1, 0};
-    util::Vec3d dragAxis  {1, 0, 0};
-    util::Vec3d sideAxis  {0, 0, 1};
+    util::Vec3d liftAxis{0, 1, 0};
+    util::Vec3d dragAxis{1, 0, 0};
+    util::Vec3d sideAxis{0, 0, 1};
 };
 
-struct ForceResult {
-    util::Vec3d Fpressure  {0, 0, 0};
-    util::Vec3d Fviscous   {0, 0, 0};
-    util::Vec3d Mpressure  {0, 0, 0};
-    util::Vec3d Mviscous   {0, 0, 0};
-    double      CL = 0, CD = 0, CS = 0;
-    double      CMl = 0, CMd = 0, CMs = 0;
-    double      area = 0;
+struct ForceResult
+{
+    util::Vec3d Fpressure{0, 0, 0};
+    util::Vec3d Fviscous{0, 0, 0};
+    util::Vec3d Mpressure{0, 0, 0};
+    util::Vec3d Mviscous{0, 0, 0};
+    double CL = 0, CD = 0, CS = 0;
+    double CMl = 0, CMd = 0, CMs = 0;
+    double area = 0;
 };
 
-class ForcesReport {
+class ForcesReport
+{
 public:
     /// Compute total forces & moments over the union of `zones`.
     /// `muEffField` is the FieldRegistry scalar name for the effective
@@ -59,4 +63,4 @@ public:
                                const std::string& muEffField = "mu_eff");
 };
 
-}  // namespace simall::io
+} // namespace simall::io

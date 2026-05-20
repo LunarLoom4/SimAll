@@ -4,10 +4,13 @@
 // =============================================================================
 #include "solver/bc/OutletBc.hpp"
 
-namespace simall::solver::bc {
+namespace simall::solver::bc
+{
 
-std::size_t OutletBc::apply(BcContext& ctx) {
-    if (!ctx.mesh || !ctx.matrix || !ctx.rhs) return 0;
+std::size_t OutletBc::apply(BcContext& ctx)
+{
+    if (!ctx.mesh || !ctx.matrix || !ctx.rhs)
+        return 0;
     const auto& F = ctx.mesh->faces();
     auto& A = *ctx.matrix;
     auto& b = *ctx.rhs;
@@ -20,11 +23,15 @@ std::size_t OutletBc::apply(BcContext& ctx) {
     }
     // Outflow: zero-gradient for everything; matrix unchanged.
     // The solver's velocity coupling enforces ∂U/∂n = 0 explicitly.
-    if (v.size() >= 3 && v[0] == 'U' && v[1] == '.') return 0;
-    if (v == "T")     return 0;
-    if (v == "k")     return 0;
-    if (v == "omega") return 0;
+    if (v.size() >= 3 && v[0] == 'U' && v[1] == '.')
+        return 0;
+    if (v == "T")
+        return 0;
+    if (v == "k")
+        return 0;
+    if (v == "omega")
+        return 0;
     return 0;
 }
 
-}  // namespace simall::solver::bc
+} // namespace simall::solver::bc

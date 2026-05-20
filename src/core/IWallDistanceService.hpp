@@ -36,9 +36,11 @@
 
 #include <cstddef>
 
-namespace simall::core {
+namespace simall::core
+{
 
-class IWallDistanceService {
+class IWallDistanceService
+{
 public:
     virtual ~IWallDistanceService() = default;
 
@@ -63,4 +65,4 @@ public:
     virtual const char* implementation_name() const noexcept = 0;
 };
 
-}  // namespace simall::core
+} // namespace simall::core

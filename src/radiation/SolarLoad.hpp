@@ -30,26 +30,30 @@
 
 #include <vector>
 
-namespace simall::radiation {
+namespace simall::radiation
+{
 
-struct SolarFaceSpec {
+struct SolarFaceSpec
+{
     meshing::ZoneId zone;
     double absorptivity = 0.6;
 };
 
-struct SolarProps {
-    util::Vec3d sunDir   {-0.5, -0.5, -0.7071}; // FROM sun toward surface
-    double      I_direct = 900.0;       // W/m² beam normal
-    double      I_diffuse= 100.0;       // W/m² isotropic diffuse
-    double      I_total_max = 1367.0;   // solar constant cap
-    double      groundReflectance = 0.2;
-    bool        useAshrae = false;      // if true, override sunDir from time
-    double      latitude_deg = 0.0;
-    double      longitude_deg = 0.0;
-    double      timezone_hours = 0.0;
+struct SolarProps
+{
+    util::Vec3d sunDir{-0.5, -0.5, -0.7071}; // FROM sun toward surface
+    double I_direct = 900.0;                 // W/m² beam normal
+    double I_diffuse = 100.0;                // W/m² isotropic diffuse
+    double I_total_max = 1367.0;             // solar constant cap
+    double groundReflectance = 0.2;
+    bool useAshrae = false; // if true, override sunDir from time
+    double latitude_deg = 0.0;
+    double longitude_deg = 0.0;
+    double timezone_hours = 0.0;
 };
 
-class SolarLoad {
+class SolarLoad
+{
 public:
     bool initialize(const meshing::Mesh& mesh,
                     solver::FieldRegistry& fields,
@@ -71,11 +75,11 @@ private:
     const SolarFaceSpec* spec_for_zone(meshing::ZoneId z) const;
     util::Vec3d ashrae_sun_dir(double t) const;
 
-    const meshing::Mesh*    mesh_ = nullptr;
-    solver::FieldRegistry*  F_    = nullptr;
-    SolarProps              p_{};
+    const meshing::Mesh* mesh_ = nullptr;
+    solver::FieldRegistry* F_ = nullptr;
+    SolarProps p_{};
     std::vector<SolarFaceSpec> zones_;
-    std::vector<double>     q_face_;
+    std::vector<double> q_face_;
 };
 
-}  // namespace simall::radiation
+} // namespace simall::radiation

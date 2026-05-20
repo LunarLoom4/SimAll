@@ -3,25 +3,33 @@
 // File   : src/combustion/LaminarFiniteRate.cpp
 // =============================================================================
 #include "combustion/LaminarFiniteRate.hpp"
+
 #include "core/Logger.hpp"
 
 #include <algorithm>
 #include <cmath>
 
-namespace simall::combustion {
+namespace simall::combustion
+{
 
-namespace {
-constexpr double Rgas = 8.31446261815324;   // [J/(mol·K)]
+namespace
+{
+constexpr double Rgas = 8.31446261815324; // [J/(mol·K)]
 }
 
-LaminarFiniteRate::LaminarFiniteRate(meshing::Mesh& m, solver::FieldRegistry& f,
+LaminarFiniteRate::LaminarFiniteRate(meshing::Mesh& m,
+                                     solver::FieldRegistry& f,
                                      solver::ILinearSolver& l)
-    : mesh_(m), F_(f), lin_(l) {}
+    : mesh_(m), F_(f), lin_(l)
+{
+}
 
-void LaminarFiniteRate::initialize() {
+void LaminarFiniteRate::initialize()
+{
     const std::size_t nC = mesh_.cells().size();
     F_.scalar("S_combustion", nC);
-    Yeqs_.clear(); srcY_.clear();
+    Yeqs_.clear();
+    srcY_.clear();
     Yeqs_.reserve(species_.size());
     srcY_.reserve(species_.size());
 
@@ -38,24 +46,28 @@ void LaminarFiniteRate::initialize() {
         eq->set_urf(0.8);
         for (const auto& b : bcs_) {
             switch (b.type) {
-                case solver::BCType::VelocityInlet:
-                case solver::BCType::PressureInlet:
-                case solver::BCType::MassFlowInlet:
-                    eq->add_bc({b.zone, solver::ScalarBC::Kind::Dirichlet,
-                                b.scalarValue, 0.0});
-                    break;
-                default:
-                    eq->add_bc({b.zone, solver::ScalarBC::Kind::Neumann, 0.0, 0.0});
+            case solver::BCType::VelocityInlet:
+            case solver::BCType::PressureInlet:
+            case solver::BCType::MassFlowInlet:
+                eq->add_bc({b.zone, solver::ScalarBC::Kind::Dirichlet, b.scalarValue, 0.0});
+                break;
+            default:
+                eq->add_bc({b.zone, solver::ScalarBC::Kind::Neumann, 0.0, 0.0});
             }
         }
         Yeqs_.push_back(std::move(eq));
         srcY_.emplace_back(nC, 0.0);
     }
-    SIMALL_LOG_INFO("Combustion", "Initialized ", species_.size(),
-        " species, ", reactions_.size(), " reactions");
+    SIMALL_LOG_INFO("Combustion",
+                    "Initialized ",
+                    species_.size(),
+                    " species, ",
+                    reactions_.size(),
+                    " reactions");
 }
 
-void LaminarFiniteRate::step() {
+void LaminarFiniteRate::step()
+{
     const std::size_t nC = mesh_.cells().size();
     const std::size_t nS = species_.size();
     const auto* T = F_.find_scalar("T");
@@ -63,7 +75,8 @@ void LaminarFiniteRate::step() {
     // Reset per-species sources and combined enthalpy release.
     auto& Scomb = *F_.find_scalar("S_combustion");
     std::fill(Scomb.begin(), Scomb.end(), 0.0);
-    for (auto& v : srcY_) std::fill(v.begin(), v.end(), 0.0);
+    for (auto& v : srcY_)
+        std::fill(v.begin(), v.end(), 0.0);
 
     // Fetch Y arrays.
     std::vector<util::aligned_vector<double>*> Y(nS, nullptr);
@@ -84,15 +97,17 @@ void LaminarFiniteRate::step() {
             double q = r.A * std::pow(Tc, r.beta) * std::exp(-r.Ea * invRT);
             for (std::size_t k = 0; k < nS; ++k) {
                 const double ord = (k < r.order.size()) ? r.order[k] : r.nuR[k];
-                if (ord > 0.0) q *= std::pow(conc[k], ord);
+                if (ord > 0.0)
+                    q *= std::pow(conc[k], ord);
             }
             for (std::size_t k = 0; k < nS; ++k) {
-                const double nuNet = (k < r.nuP.size() ? r.nuP[k] : 0.0)
-                                   - (k < r.nuR.size() ? r.nuR[k] : 0.0);
-                if (nuNet == 0.0) continue;
-                const double wdot_k = nuNet * q * species_[k].molarMass;  // [kg/m³/s]
+                const double nuNet =
+                    (k < r.nuP.size() ? r.nuP[k] : 0.0) - (k < r.nuR.size() ? r.nuR[k] : 0.0);
+                if (nuNet == 0.0)
+                    continue;
+                const double wdot_k = nuNet * q * species_[k].molarMass; // [kg/m³/s]
                 srcY_[k][c] += wdot_k;
-                Scomb[c]    -= species_[k].formationEnthalpy * wdot_k;
+                Scomb[c] -= species_[k].formationEnthalpy * wdot_k;
             }
         }
     }
@@ -105,7 +120,8 @@ void LaminarFiniteRate::step() {
     }
 
     // Solve each species transport equation (one outer pass).
-    for (auto& eq : Yeqs_) eq->solve_iteration();
+    for (auto& eq : Yeqs_)
+        eq->solve_iteration();
 
     // Clamp & renormalise Y_k so Σ Y_k ≤ 1 (preserves chemistry-physics
     // consistency in early iterations).
@@ -117,9 +133,10 @@ void LaminarFiniteRate::step() {
         }
         if (sum > 1.0) {
             const double s = 1.0 / sum;
-            for (std::size_t k = 0; k < nS; ++k) (*Y[k])[c] *= s;
+            for (std::size_t k = 0; k < nS; ++k)
+                (*Y[k])[c] *= s;
         }
     }
 }
 
-}  // namespace simall::combustion
+} // namespace simall::combustion

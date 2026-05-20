@@ -28,28 +28,33 @@
 #include <memory>
 #include <vector>
 
-namespace simall::solver { class ILinearSolver; }
+namespace simall::solver
+{
+class ILinearSolver;
+}
 
-namespace simall::radiation {
+namespace simall::radiation
+{
 
-struct P1WallBC {
+struct P1WallBC
+{
     meshing::ZoneId zone;
-    double          emissivity  = 1.0;
-    double          temperature = 300.0;
+    double emissivity = 1.0;
+    double temperature = 300.0;
 };
 
-struct P1Props {
-    double absorption   = 0.5;      // a   [1/m]
-    double scattering   = 0.0;      // σ_s [1/m]
-    double asymmetry    = 0.0;      // A ∈ [-1,1], linear-aniso scattering
-    double refractiveN  = 1.0;      // (kept for future spectral extensions)
+struct P1Props
+{
+    double absorption = 0.5;  // a   [1/m]
+    double scattering = 0.0;  // σ_s [1/m]
+    double asymmetry = 0.0;   // A ∈ [-1,1], linear-aniso scattering
+    double refractiveN = 1.0; // (kept for future spectral extensions)
 };
 
-class P1Radiation {
+class P1Radiation
+{
 public:
-    bool initialize(const meshing::Mesh& mesh,
-                    solver::FieldRegistry& fields,
-                    const P1Props& props);
+    bool initialize(const meshing::Mesh& mesh, solver::FieldRegistry& fields, const P1Props& props);
 
     void add_wall(P1WallBC w) { walls_.push_back(w); }
 
@@ -58,11 +63,11 @@ public:
     double solve();
 
 private:
-    const meshing::Mesh*   mesh_  = nullptr;
-    solver::FieldRegistry* F_     = nullptr;
-    P1Props                p_{};
-    std::vector<P1WallBC>  walls_;
+    const meshing::Mesh* mesh_ = nullptr;
+    solver::FieldRegistry* F_ = nullptr;
+    P1Props p_{};
+    std::vector<P1WallBC> walls_;
     std::unique_ptr<solver::ILinearSolver> lin_;
 };
 
-}  // namespace simall::radiation
+} // namespace simall::radiation

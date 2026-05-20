@@ -27,20 +27,23 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::emag {
+namespace simall::emag
+{
 
-struct Tet4 {
-    std::array<std::uint32_t, 4>           nodes;
-    std::array<std::array<double, 3>, 4>   coords;
-    double                                   mu  = 1.25663706e-6;   // permeability
-    double                                   sigma = 1.0;              // conductivity
+struct Tet4
+{
+    std::array<std::uint32_t, 4> nodes;
+    std::array<std::array<double, 3>, 4> coords;
+    double mu = 1.25663706e-6; // permeability
+    double sigma = 1.0;        // conductivity
 };
 
-struct ElementMatrices {
-    std::array<std::array<double, 4>, 4>   K_V;        // ∫ σ ∇N·∇N dV
-    std::array<std::array<double, 4>, 4>   M_A;        // ∫ σ N N dV (for ∂A/∂t)
-    std::array<std::array<double, 4>, 4>   K_A;        // ∫ (1/μ) ∇N·∇N dV
-    double                                  volume = 0.0;
+struct ElementMatrices
+{
+    std::array<std::array<double, 4>, 4> K_V; // ∫ σ ∇N·∇N dV
+    std::array<std::array<double, 4>, 4> M_A; // ∫ σ N N dV (for ∂A/∂t)
+    std::array<std::array<double, 4>, 4> K_A; // ∫ (1/μ) ∇N·∇N dV
+    double volume = 0.0;
 };
 
 [[nodiscard]] ElementMatrices assemble_tet4(const Tet4& e);
@@ -48,13 +51,13 @@ struct ElementMatrices {
 /// Convenience: build the V-only Laplace matrix (DC current conduction)
 /// for an entire tetrahedral mesh.  Returns CSR (rowPtr, colIdx, values)
 /// and the per-row diagonal index for quick Jacobi preconditioning.
-struct CsrFromTets {
-    std::size_t              n = 0;
+struct CsrFromTets
+{
+    std::size_t n = 0;
     std::vector<std::size_t> rowPtr;
     std::vector<std::size_t> colIdx;
-    std::vector<double>      values;
+    std::vector<double> values;
 };
-[[nodiscard]] CsrFromTets build_av_scalar_system(const std::vector<Tet4>& mesh,
-                                                  std::size_t               nNodes);
+[[nodiscard]] CsrFromTets build_av_scalar_system(const std::vector<Tet4>& mesh, std::size_t nNodes);
 
-}  // namespace simall::emag
+} // namespace simall::emag

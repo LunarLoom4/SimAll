@@ -27,29 +27,31 @@
 #include <cstdint>
 #include <random>
 
-namespace simall::particles {
+namespace simall::particles
+{
 
-struct BlobInjectorProps {
-    double      nozzle_diameter = 2.0e-4;   // [m]
-    double      Cd              = 0.8;      // discharge coefficient
-    double      p_inj           = 1.0e8;    // injection pressure [Pa]
-    double      p_amb           = 4.0e6;    // ambient (chamber) pressure [Pa]
-    double      rho_l           = 830.0;    // diesel-like density
-    double      duration        = 1.5e-3;   // injection duration window [s]
-    util::Vec3d origin{0,0,0};
-    util::Vec3d axis  {1,0,0};
-    std::uint64_t rngSeed       = 0xBEEFCAFE;
+struct BlobInjectorProps
+{
+    double nozzle_diameter = 2.0e-4; // [m]
+    double Cd = 0.8;                 // discharge coefficient
+    double p_inj = 1.0e8;            // injection pressure [Pa]
+    double p_amb = 4.0e6;            // ambient (chamber) pressure [Pa]
+    double rho_l = 830.0;            // diesel-like density
+    double duration = 1.5e-3;        // injection duration window [s]
+    util::Vec3d origin{0, 0, 0};
+    util::Vec3d axis{1, 0, 0};
+    std::uint64_t rngSeed = 0xBEEFCAFE;
 };
 
-class BlobInjector {
+class BlobInjector
+{
 public:
     void initialize(BlobInjectorProps props);
 
     /// Inject `Nparcels` blob parcels — but only while elapsed time
     /// `elapsed` ∈ [0, duration].
     /// Returns the number of parcels actually injected (0 if window closed).
-    std::size_t inject(double dt, std::size_t Nparcels,
-                       double elapsed, LagrangianTracker& tracker);
+    std::size_t inject(double dt, std::size_t Nparcels, double elapsed, LagrangianTracker& tracker);
 
     double injection_velocity() const noexcept;
 
@@ -57,7 +59,7 @@ public:
 
 private:
     BlobInjectorProps p_{};
-    std::mt19937_64   rng_;
+    std::mt19937_64 rng_;
 };
 
-}  // namespace simall::particles
+} // namespace simall::particles

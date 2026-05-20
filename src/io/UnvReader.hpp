@@ -65,13 +65,15 @@
 
 #include <string>
 
-namespace simall::io {
+namespace simall::io
+{
 
-struct UnvReadResult {
-    bool          ok        = false;
-    std::string   error;
-    ImportedMesh  mesh;
-    std::uint8_t  dimension = 0;
+struct UnvReadResult
+{
+    bool ok = false;
+    std::string error;
+    ImportedMesh mesh;
+    std::uint8_t dimension = 0;
 };
 
 /// Read an Ideas Universal `.unv` ASCII file from disk.
@@ -79,8 +81,7 @@ struct UnvReadResult {
 
 /// Test hook: parse from an in-memory buffer.
 [[nodiscard]] UnvReadResult parse_unv_string(const std::string& text,
-                                              std::string       sourceHint
-                                              = "<string>");
+                                             std::string sourceHint = "<string>");
 
 /// Translate a UNV finite-element descriptor code to the SimAll element
 /// type enum. Returns ElementType::Unknown for unsupported codes.
@@ -90,4 +91,4 @@ struct UnvReadResult {
 /// E-format token the C++ float parser accepts. Exposed for tests.
 [[nodiscard]] std::string unv_normalize_float_token(std::string s);
 
-}  // namespace simall::io
+} // namespace simall::io

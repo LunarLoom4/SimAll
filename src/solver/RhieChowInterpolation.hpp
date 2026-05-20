@@ -24,20 +24,25 @@
 // =============================================================================
 #pragma once
 
-#include "meshing/MeshStorage.hpp"
 #include "FieldRegistry.hpp"
+
+#include "meshing/MeshStorage.hpp"
 #include "solver/Solver.hpp"
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-class RhieChowInterpolation {
+class RhieChowInterpolation
+{
 public:
     /// rho is constant density (incompressible). For compressible/variable-
     /// density flows pass a face-averaged value through compute_face_mass_flux_var.
     RhieChowInterpolation(const meshing::Mesh& mesh,
                           const std::vector<BoundarySpec>& bcs,
                           double rho)
-        : mesh_(mesh), bcs_(bcs), rho_(rho) {}
+        : mesh_(mesh), bcs_(bcs), rho_(rho)
+    {
+    }
 
     /// Compute Rhie-Chow stabilised mass flux at every face:
     ///   φ_f = ρ · (A · U_f^RC)
@@ -65,9 +70,9 @@ public:
                                     const VectorField* gradP = nullptr) const;
 
 private:
-    const meshing::Mesh&              mesh_;
-    const std::vector<BoundarySpec>&  bcs_;
-    double                            rho_;
+    const meshing::Mesh& mesh_;
+    const std::vector<BoundarySpec>& bcs_;
+    double rho_;
 };
 
-}  // namespace simall::solver
+} // namespace simall::solver

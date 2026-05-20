@@ -16,44 +16,49 @@
 //     ≤ `minHoleRadius` is filled.
 // =============================================================================
 #include "cad/Defeaturing.hpp"
+
 #include "cad/ShapeHandleInternal.hpp"
 #include "core/Logger.hpp"
 
-#include <BRepAlgoAPI_Defeaturing.hxx>
 #include <BRep_Tool.hxx>
-#include <BRepAdaptor_Surface.hxx>
 #include <BRepAdaptor_Curve.hxx>
+#include <BRepAdaptor_Surface.hxx>
+#include <BRepAlgoAPI_Defeaturing.hxx>
 #include <BRepGProp.hxx>
-#include <GProp_GProps.hxx>
+#include <Geom_Circle.hxx>
 #include <Geom_CylindricalSurface.hxx>
 #include <Geom_ToroidalSurface.hxx>
-#include <Geom_Circle.hxx>
+#include <GProp_GProps.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-#include <TopoDS_Face.hxx>
 #include <TopoDS_Edge.hxx>
+#include <TopoDS_Face.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 
-namespace simall::cad {
+namespace simall::cad
+{
 
-namespace {
+namespace
+{
 
-bool isLikelyFillet(const TopoDS_Face& face, double maxR) {
+bool isLikelyFillet(const TopoDS_Face& face, double maxR)
+{
     BRepAdaptor_Surface surf(face);
     switch (surf.GetType()) {
-        case GeomAbs_Cylinder:
-            return surf.Cylinder().Radius() <= maxR;
-        case GeomAbs_Torus:
-            return surf.Torus().MinorRadius() <= maxR;
-        default:
-            break;
+    case GeomAbs_Cylinder:
+        return surf.Cylinder().Radius() <= maxR;
+    case GeomAbs_Torus:
+        return surf.Torus().MinorRadius() <= maxR;
+    default:
+        break;
     }
     return false;
 }
 
-bool isCircularHole(const TopoDS_Face& face, double maxR) {
+bool isCircularHole(const TopoDS_Face& face, double maxR)
+{
     // Count edges and check whether the dominant edge is a circle of small radius.
     TopExp_Explorer exp(face, TopAbs_EDGE);
     int circles = 0;
@@ -64,17 +69,20 @@ bool isCircularHole(const TopoDS_Face& face, double maxR) {
         if (crv.GetType() == GeomAbs_Circle) {
             ++circles;
             double r = crv.Circle().Radius();
-            if (r < rMin) rMin = r;
+            if (r < rMin)
+                rMin = r;
         }
     }
     return circles >= 1 && rMin <= maxR;
 }
 
-}  // namespace
+} // namespace
 
-void Defeaturing::apply(ShapeHandle& shape, const DefeatureOptions& opts) {
+void Defeaturing::apply(ShapeHandle& shape, const DefeatureOptions& opts)
+{
     report_ = {};
-    if (!shape.valid()) return;
+    if (!shape.valid())
+        return;
 
     TopoDS_Shape work = ShapeHandleAccess::shape(shape);
 
@@ -87,8 +95,7 @@ void Defeaturing::apply(ShapeHandle& shape, const DefeatureOptions& opts) {
     // Explicit IDs.
     if (!opts.faceIds.empty()) {
         for (auto id : opts.faceIds) {
-            if (auto* node = shape.topology().find(id);
-                node && node->occHandle) {
+            if (auto* node = shape.topology().find(id); node && node->occHandle) {
                 const TopoDS_Shape* s = static_cast<const TopoDS_Shape*>(node->occHandle);
                 if (s->ShapeType() == TopAbs_FACE) {
                     victims.Append(*s);
@@ -116,7 +123,8 @@ void Defeaturing::apply(ShapeHandle& shape, const DefeatureOptions& opts) {
             }
         }
     }
-    if (victims.IsEmpty()) return;
+    if (victims.IsEmpty())
+        return;
 
     BRepAlgoAPI_Defeaturing op;
     op.SetShape(work);
@@ -129,16 +137,20 @@ void Defeaturing::apply(ShapeHandle& shape, const DefeatureOptions& opts) {
     }
 
     TopoDS_Shape result = op.Shape();
-    if (result.IsNull()) return;
+    if (result.IsNull())
+        return;
 
     ShapeHandleAccess::shape(shape) = result;
     rebuildTopologyGraph(result, ShapeHandleAccess::impl(shape).graph);
     report_.anyChange = true;
 
     SIMALL_LOG_INFO("CAD/Defeature",
-                    "fillets=", report_.filletsRemoved,
-                    " holes=", report_.holesFilled,
-                    " explicit=", report_.facesRemoved);
+                    "fillets=",
+                    report_.filletsRemoved,
+                    " holes=",
+                    report_.holesFilled,
+                    " explicit=",
+                    report_.facesRemoved);
 }
 
-}  // namespace simall::cad
+} // namespace simall::cad

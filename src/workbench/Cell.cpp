@@ -5,40 +5,47 @@
 // =============================================================================
 #include "workbench/Cell.hpp"
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
 Cell::Cell(CellId id, CellKind kind, std::string label)
-    : id_(id), kind_(kind), label_(std::move(label)) {}
+    : id_(id), kind_(kind), label_(std::move(label))
+{
+}
 
-PortId Cell::add_input(std::string name, std::string data_type, bool required) {
+PortId Cell::add_input(std::string name, std::string data_type, bool required)
+{
     const PortId pid = next_port_id_++;
     ports_.push_back(CellPort{
-        .id        = pid,
+        .id = pid,
         .direction = PortDirection::Input,
-        .name      = std::move(name),
+        .name = std::move(name),
         .data_type = std::move(data_type),
-        .required  = required,
+        .required = required,
     });
     return pid;
 }
 
-PortId Cell::add_output(std::string name, std::string data_type) {
+PortId Cell::add_output(std::string name, std::string data_type)
+{
     const PortId pid = next_port_id_++;
     ports_.push_back(CellPort{
-        .id        = pid,
+        .id = pid,
         .direction = PortDirection::Output,
-        .name      = std::move(name),
+        .name = std::move(name),
         .data_type = std::move(data_type),
-        .required  = false,
+        .required = false,
     });
     return pid;
 }
 
-const CellPort* Cell::find_port(PortId pid) const noexcept {
+const CellPort* Cell::find_port(PortId pid) const noexcept
+{
     for (const auto& p : ports_) {
-        if (p.id == pid) return &p;
+        if (p.id == pid)
+            return &p;
     }
     return nullptr;
 }
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

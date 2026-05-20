@@ -53,7 +53,8 @@
 #include <memory>
 #include <string>
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
 // ---------------------------------------------------------------------------
 // Log severity for ExecutionContext::log().  Matches the levels used by
@@ -62,10 +63,11 @@ namespace simall::workbench {
 //   2 = info      3 = warning
 // Kept as plain ints to avoid pulling core::Logger into this header.
 // ---------------------------------------------------------------------------
-enum class AdapterLogLevel : int {
-    Trace   = 0,
-    Error   = 1,
-    Info    = 2,
+enum class AdapterLogLevel : int
+{
+    Trace = 0,
+    Error = 1,
+    Info = 2,
     Warning = 3,
 };
 
@@ -83,42 +85,48 @@ enum class AdapterLogLevel : int {
 // worker thread without races (the QtConcurrent task captures the
 // shared_ptr by value).
 // ---------------------------------------------------------------------------
-class ExecutionContext {
+class ExecutionContext
+{
 public:
     using ProgressSink = std::function<void(double)>;
-    using LogSink      = std::function<void(AdapterLogLevel, std::string_view)>;
+    using LogSink = std::function<void(AdapterLogLevel, std::string_view)>;
 
     ExecutionContext() = default;
 
     // -- sinks -----------------------------------------------------------
     void set_progress_sink(ProgressSink fn) { progress_sink_ = std::move(fn); }
-    void set_log_sink     (LogSink      fn) { log_sink_      = std::move(fn); }
+    void set_log_sink(LogSink fn) { log_sink_ = std::move(fn); }
 
-    void report_progress(double frac) const {
-        if (progress_sink_) progress_sink_(frac);
+    void report_progress(double frac) const
+    {
+        if (progress_sink_)
+            progress_sink_(frac);
     }
-    void log(AdapterLogLevel lvl, std::string_view msg) const {
-        if (log_sink_) log_sink_(lvl, msg);
+    void log(AdapterLogLevel lvl, std::string_view msg) const
+    {
+        if (log_sink_)
+            log_sink_(lvl, msg);
     }
-    void info (std::string_view m) const { log(AdapterLogLevel::Info,    m); }
-    void warn (std::string_view m) const { log(AdapterLogLevel::Warning, m); }
-    void error(std::string_view m) const { log(AdapterLogLevel::Error,   m); }
+    void info(std::string_view m) const { log(AdapterLogLevel::Info, m); }
+    void warn(std::string_view m) const { log(AdapterLogLevel::Warning, m); }
+    void error(std::string_view m) const { log(AdapterLogLevel::Error, m); }
 
     // -- cancellation ----------------------------------------------------
-    void set_cancel_flag(std::shared_ptr<std::atomic_bool> flag) {
-        cancel_flag_ = std::move(flag);
-    }
-    [[nodiscard]] bool is_cancelled() const noexcept {
+    void set_cancel_flag(std::shared_ptr<std::atomic_bool> flag) { cancel_flag_ = std::move(flag); }
+    [[nodiscard]] bool is_cancelled() const noexcept
+    {
         return cancel_flag_ && cancel_flag_->load(std::memory_order_acquire);
     }
-    void request_cancel() {
-        if (cancel_flag_) cancel_flag_->store(true, std::memory_order_release);
+    void request_cancel()
+    {
+        if (cancel_flag_)
+            cancel_flag_->store(true, std::memory_order_release);
     }
 
 private:
-    ProgressSink                       progress_sink_;
-    LogSink                            log_sink_;
-    std::shared_ptr<std::atomic_bool>  cancel_flag_;
+    ProgressSink progress_sink_;
+    LogSink log_sink_;
+    std::shared_ptr<std::atomic_bool> cancel_flag_;
 };
 
 // ---------------------------------------------------------------------------
@@ -135,7 +143,8 @@ private:
 // Adapters MUST NOT mutate the Schematic / StateMachine themselves --
 // state propagation is owned by WorkflowEngine.
 // ---------------------------------------------------------------------------
-class ICellAdapter {
+class ICellAdapter
+{
 public:
     virtual ~ICellAdapter() = default;
 
@@ -167,18 +176,22 @@ public:
 // `solver::Solver` instances without needing to hand-roll a new C++
 // class per adapter.
 // ---------------------------------------------------------------------------
-class FunctionalCellAdapter final : public ICellAdapter {
+class FunctionalCellAdapter final : public ICellAdapter
+{
 public:
     using Body = std::function<bool(Cell&, ExecutionContext&, std::string& out_error)>;
 
     FunctionalCellAdapter(CellKind kind, std::string id, Body body)
-        : kind_(kind), id_(std::move(id)), body_(std::move(body)) {}
+        : kind_(kind), id_(std::move(id)), body_(std::move(body))
+    {
+    }
 
-    [[nodiscard]] CellKind         kind()       const noexcept override { return kind_; }
-    [[nodiscard]] std::string_view adapter_id() const noexcept override { return id_;  }
+    [[nodiscard]] CellKind kind() const noexcept override { return kind_; }
+    [[nodiscard]] std::string_view adapter_id() const noexcept override { return id_; }
     [[nodiscard]] std::string_view last_error() const noexcept override { return last_error_; }
 
-    [[nodiscard]] bool execute(Cell& cell, ExecutionContext& ctx) override {
+    [[nodiscard]] bool execute(Cell& cell, ExecutionContext& ctx) override
+    {
         last_error_.clear();
         if (!body_) {
             last_error_ = "FunctionalCellAdapter has no body";
@@ -196,10 +209,10 @@ public:
     }
 
 private:
-    CellKind    kind_;
+    CellKind kind_;
     std::string id_;
-    Body        body_;
+    Body body_;
     std::string last_error_;
 };
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

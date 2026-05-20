@@ -23,19 +23,21 @@
 #include <string>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct StlSurface {
-    std::vector<util::Vec3d>                  vertices;
+struct StlSurface
+{
+    std::vector<util::Vec3d> vertices;
     std::vector<std::array<std::uint32_t, 3>> triangles;
-    std::vector<util::Vec3d>                  normals;       // per triangle
+    std::vector<util::Vec3d> normals; // per triangle
 };
 
-class StlImporter {
+class StlImporter
+{
 public:
     /// Returns true on success. Both ASCII and binary STL are auto-detected.
-    static bool load(const std::string& path, StlSurface& out,
-                     double weldTolerance = 1.0e-9);
+    static bool load(const std::string& path, StlSurface& out, double weldTolerance = 1.0e-9);
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

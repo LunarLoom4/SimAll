@@ -22,34 +22,39 @@
 
 #include <vector>
 
-namespace simall::zones {
+namespace simall::zones
+{
 
-struct FanCurve {
+struct FanCurve
+{
     // Δp [Pa] = c0 + c1 Q + c2 Q²,  Q [m³/s]
     double c0 = 200.0;
     double c1 = 0.0;
     double c2 = -50.0;
 };
 
-struct FanZoneSpec {
-    meshing::ZoneId cellZone   = 0;
-    meshing::ZoneId throughFaceZone = 0;
-    util::Vec3d     axis{0, 0, 1};   // unit vector of flow direction
-    FanCurve        curve{};
-};
-
-struct HexZoneSpec {
+struct FanZoneSpec
+{
     meshing::ZoneId cellZone = 0;
-    double          T_ambient = 300.0;
-    double          h_a = 100.0;     // W/(m³·K) — coefficient
-    double          h_b = 800.0;
-    double          h_c = 0.7;
-    // Optional Darcy-Forchheimer (set to 0 to disable).
-    double          darcy      = 0.0;   // 1/K_perm  [1/m²]
-    double          forchheimer= 0.0;   // C_2       [1/m]
+    meshing::ZoneId throughFaceZone = 0;
+    util::Vec3d axis{0, 0, 1}; // unit vector of flow direction
+    FanCurve curve{};
 };
 
-class FanZone {
+struct HexZoneSpec
+{
+    meshing::ZoneId cellZone = 0;
+    double T_ambient = 300.0;
+    double h_a = 100.0; // W/(m³·K) — coefficient
+    double h_b = 800.0;
+    double h_c = 0.7;
+    // Optional Darcy-Forchheimer (set to 0 to disable).
+    double darcy = 0.0;       // 1/K_perm  [1/m²]
+    double forchheimer = 0.0; // C_2       [1/m]
+};
+
+class FanZone
+{
 public:
     void initialize(const meshing::Mesh& mesh, std::vector<FanZoneSpec> specs);
     /// Updates "S_FanMom" vector source per cell from current "U".
@@ -65,7 +70,8 @@ private:
     std::vector<std::vector<meshing::FaceId>> throughFaces_;
 };
 
-class HexZone {
+class HexZone
+{
 public:
     void initialize(const meshing::Mesh& mesh, std::vector<HexZoneSpec> specs);
     /// Writes per-cell "S_HexEn" (scalar, W/m³) and "S_HexMom" (vector, N/m³).
@@ -77,4 +83,4 @@ private:
     std::vector<std::int32_t> cellZoneId_;
 };
 
-}  // namespace simall::zones
+} // namespace simall::zones

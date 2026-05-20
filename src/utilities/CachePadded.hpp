@@ -23,28 +23,29 @@
 #include <type_traits>
 #include <utility>
 
-namespace simall::util {
+namespace simall::util
+{
 
-template <typename T>
-class alignas(kCacheLineBytes) CachePadded {
+template <typename T> class alignas(kCacheLineBytes) CachePadded
+{
 public:
-    constexpr CachePadded() noexcept(std::is_nothrow_default_constructible_v<T>)
-        = default;
+    constexpr CachePadded() noexcept(std::is_nothrow_default_constructible_v<T>) = default;
 
-    template <typename... Args,
-              typename = std::enable_if_t<std::is_constructible_v<T, Args&&...>>>
-    constexpr explicit CachePadded(Args&&... args)
-        noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
-        : value_(std::forward<Args>(args)...) {}
+    template <typename... Args, typename = std::enable_if_t<std::is_constructible_v<T, Args&&...>>>
+    constexpr explicit CachePadded(Args&&... args) noexcept(
+        std::is_nothrow_constructible_v<T, Args&&...>)
+        : value_(std::forward<Args>(args)...)
+    {
+    }
 
-    constexpr       T& value()       noexcept { return value_; }
+    constexpr T& value() noexcept { return value_; }
     constexpr const T& value() const noexcept { return value_; }
 
-    constexpr       T* operator->()       noexcept { return &value_; }
+    constexpr T* operator->() noexcept { return &value_; }
     constexpr const T* operator->() const noexcept { return &value_; }
 
-    constexpr       T& operator*()        noexcept { return value_; }
-    constexpr const T& operator*()  const noexcept { return value_; }
+    constexpr T& operator*() noexcept { return value_; }
+    constexpr const T& operator*() const noexcept { return value_; }
 
 private:
     T value_{};
@@ -62,4 +63,4 @@ static_assert(alignof(CachePadded<int>) == kCacheLineBytes,
 static_assert(sizeof(CachePadded<int>) % kCacheLineBytes == 0,
               "CachePadded<int> size must be a cache-line multiple");
 
-}  // namespace simall::util
+} // namespace simall::util

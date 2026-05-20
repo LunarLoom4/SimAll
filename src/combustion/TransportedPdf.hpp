@@ -29,26 +29,34 @@
 #include <random>
 #include <vector>
 
-namespace simall::combustion {
+namespace simall::combustion
+{
 
-enum class PdfMixingModel { IEM, ModifiedCurl };
-
-struct TransportedPdfParams {
-    std::size_t      particlesPerCell = 50;
-    PdfMixingModel   mixing           = PdfMixingModel::IEM;
-    double           C_phi            = 2.0;        // mixing-time constant
-    double           Sc_t             = 0.7;        // turbulent Schmidt
-    double           T_reference      = 1500.0;     // K  (chemistry linearisation)
-    std::uint64_t    rngSeed          = 0xC0DE'BEEFULL;
+enum class PdfMixingModel
+{
+    IEM,
+    ModifiedCurl
 };
 
-struct PdfParticle {
-    std::vector<double> Y;          // mass fractions (size = nSpecies)
-    double              h = 0.0;    // sensible enthalpy (optional channel)
-    double              age = 0.0;  // residence time, diagnostic
+struct TransportedPdfParams
+{
+    std::size_t particlesPerCell = 50;
+    PdfMixingModel mixing = PdfMixingModel::IEM;
+    double C_phi = 2.0;          // mixing-time constant
+    double Sc_t = 0.7;           // turbulent Schmidt
+    double T_reference = 1500.0; // K  (chemistry linearisation)
+    std::uint64_t rngSeed = 0xC0DE'BEEFULL;
 };
 
-class TransportedPdf {
+struct PdfParticle
+{
+    std::vector<double> Y; // mass fractions (size = nSpecies)
+    double h = 0.0;        // sensible enthalpy (optional channel)
+    double age = 0.0;      // residence time, diagnostic
+};
+
+class TransportedPdf
+{
 public:
     void initialize(const meshing::Mesh& mesh,
                     const std::vector<std::string>& speciesNames,
@@ -58,24 +66,25 @@ public:
     ///   convection (deterministic), random walk (Wiener), mixing (IEM/MC),
     ///   chemistry (one-step LFR with provided reactions).
     /// Writes ensemble-averaged Y_<name> + T to the field registry.
-    void step(double dt, solver::FieldRegistry& fields,
+    void step(double dt,
+              solver::FieldRegistry& fields,
               const std::vector<ChemkinReaction>& reactions = {});
 
     std::size_t num_species() const noexcept { return names_.size(); }
     std::size_t num_particles_per_cell() const noexcept { return p_.particlesPerCell; }
 
 private:
-    void apply_iem(double dt, std::vector<PdfParticle>& particles,
-                   const std::vector<double>& Ybar);
+    void apply_iem(double dt, std::vector<PdfParticle>& particles, const std::vector<double>& Ybar);
     void apply_modified_curl(double dt, std::vector<PdfParticle>& particles);
-    void apply_chemistry(double dt, std::vector<PdfParticle>& particles,
+    void apply_chemistry(double dt,
+                         std::vector<PdfParticle>& particles,
                          const std::vector<ChemkinReaction>& reactions);
 
-    const meshing::Mesh*                    mesh_ = nullptr;
-    TransportedPdfParams                    p_{};
-    std::vector<std::string>                names_;
-    std::vector<std::vector<PdfParticle>>   cellParticles_;     // per cell
-    std::mt19937_64                         rng_;
+    const meshing::Mesh* mesh_ = nullptr;
+    TransportedPdfParams p_{};
+    std::vector<std::string> names_;
+    std::vector<std::vector<PdfParticle>> cellParticles_; // per cell
+    std::mt19937_64 rng_;
 };
 
-}  // namespace simall::combustion
+} // namespace simall::combustion

@@ -31,24 +31,28 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct SweepProps {
+struct SweepProps
+{
     std::uint32_t sourceZone = 1;
     std::uint32_t targetZone = 2;
-    std::uint32_t sideZone   = 3;
-    std::size_t   nLayers    = 10;       // path layers (≥2)
-    bool          scaleAlongPath = false;
-    double        startScale = 1.0;
-    double        endScale   = 1.0;
+    std::uint32_t sideZone = 3;
+    std::size_t nLayers = 10; // path layers (≥2)
+    bool scaleAlongPath = false;
+    double startScale = 1.0;
+    double endScale = 1.0;
 };
 
-struct SourceQuadMesh {
-    std::vector<util::Vec3d>            nodes;   // node positions
-    std::vector<std::array<NodeId, 4>>  quads;   // CCW node indices
+struct SourceQuadMesh
+{
+    std::vector<util::Vec3d> nodes;           // node positions
+    std::vector<std::array<NodeId, 4>> quads; // CCW node indices
 };
 
-class HexSweepMesher {
+class HexSweepMesher
+{
 public:
     void initialize(SweepProps props);
 
@@ -64,4 +68,4 @@ private:
     SweepProps p_{};
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

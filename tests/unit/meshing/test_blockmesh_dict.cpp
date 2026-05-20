@@ -10,12 +10,12 @@
 //   - boundary patches assigned 1-based face zones via 4-vertex set match
 //   - assemble() yields a valid Mesh with the right cell count
 // =============================================================================
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/catch_approx.hpp>
-
 #include "meshing/BlockMeshDict.hpp"
-#include "meshing/MultiblockHex.hpp"
 #include "meshing/MeshStorage.hpp"
+#include "meshing/MultiblockHex.hpp"
+
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -26,7 +26,8 @@
 using namespace simall;
 using Catch::Approx;
 
-namespace {
+namespace
+{
 
 constexpr const char* kUnitCubeDict = R"(
 /*--------------------------------*- C++ -*----------------------------------*\
@@ -84,11 +85,11 @@ boundary
 );
 )";
 
-}  // namespace
+} // namespace
 
 // =============================================================================
-TEST_CASE("blockMeshDict parser handles vertices, blocks and patches",
-          "[meshing][blockmesh]") {
+TEST_CASE("blockMeshDict parser handles vertices, blocks and patches", "[meshing][blockmesh]")
+{
     const auto d = meshing::parse_block_mesh_dict(kUnitCubeDict);
     REQUIRE(d.convertToMeters == Approx(1.0));
     REQUIRE(d.vertices.size() == 8);
@@ -109,8 +110,8 @@ TEST_CASE("blockMeshDict parser handles vertices, blocks and patches",
 }
 
 // =============================================================================
-TEST_CASE("blockMeshDict convertToMeters scales vertices",
-          "[meshing][blockmesh]") {
+TEST_CASE("blockMeshDict convertToMeters scales vertices", "[meshing][blockmesh]")
+{
     const std::string dict = R"(
         convertToMeters 0.001;
         vertices ( (0 0 0) (1000 0 0) (1000 1000 0) (0 1000 0)
@@ -130,28 +131,29 @@ TEST_CASE("blockMeshDict convertToMeters scales vertices",
 }
 
 // =============================================================================
-TEST_CASE("blockMeshDict builds a 2x2x2 cell mesh and tags patches",
-          "[meshing][blockmesh]") {
+TEST_CASE("blockMeshDict builds a 2x2x2 cell mesh and tags patches", "[meshing][blockmesh]")
+{
     const auto d = meshing::parse_block_mesh_dict(kUnitCubeDict);
     meshing::MultiblockHex mb;
     mb.initialize(meshing::MultiblockProps{});
     const auto stats = meshing::build_multiblock(d, mb);
-    REQUIRE(stats.blocks      == 1);
-    REQUIRE(stats.patches     == 3);
-    REQUIRE(stats.patchFaces  == 6);
+    REQUIRE(stats.blocks == 1);
+    REQUIRE(stats.patches == 3);
+    REQUIRE(stats.patchFaces == 6);
     REQUIRE(stats.orphanFaces == 0);
 
     meshing::Mesh m;
     const std::size_t nCells = mb.assemble(m);
     m.compute_geometry();
-    REQUIRE(nCells == 8);          // 2*2*2
+    REQUIRE(nCells == 8); // 2*2*2
     REQUIRE(m.cells().size() == 8);
-    for (auto v : m.cells().volume) REQUIRE(v > 0.0);
+    for (auto v : m.cells().volume)
+        REQUIRE(v > 0.0);
 }
 
 // =============================================================================
-TEST_CASE("blockMeshDict parser tolerates // and /* */ comments",
-          "[meshing][blockmesh]") {
+TEST_CASE("blockMeshDict parser tolerates // and /* */ comments", "[meshing][blockmesh]")
+{
     const std::string dict = R"(
         // header
         convertToMeters 1.0;  // unit
@@ -172,7 +174,8 @@ TEST_CASE("blockMeshDict parser tolerates // and /* */ comments",
 
 // =============================================================================
 TEST_CASE("blockMeshDict reports orphan patch faces that match no block face",
-          "[meshing][blockmesh]") {
+          "[meshing][blockmesh]")
+{
     const std::string dict = R"(
         vertices (
             (0 0 0) (1 0 0) (1 1 0) (0 1 0)
@@ -187,13 +190,13 @@ TEST_CASE("blockMeshDict reports orphan patch faces that match no block face",
     meshing::MultiblockHex mb;
     mb.initialize(meshing::MultiblockProps{});
     const auto stats = meshing::build_multiblock(d, mb);
-    REQUIRE(stats.patchFaces  == 0);
+    REQUIRE(stats.patchFaces == 0);
     REQUIRE(stats.orphanFaces == 1);
 }
 
 // =============================================================================
-TEST_CASE("blockMeshDict parser raises on unknown top-level key",
-          "[meshing][blockmesh]") {
+TEST_CASE("blockMeshDict parser raises on unknown top-level key", "[meshing][blockmesh]")
+{
     const std::string dict = "fooBar 1;";
     REQUIRE_THROWS_AS(meshing::parse_block_mesh_dict(dict), std::runtime_error);
 }
@@ -202,7 +205,8 @@ TEST_CASE("blockMeshDict parser raises on unknown top-level key",
 // Pass 15 - simpleGrading is now applied (not just parsed).
 // =============================================================================
 TEST_CASE("blockMeshDict simpleGrading produces geometric cell sizes in x",
-          "[meshing][blockmesh][grading]") {
+          "[meshing][blockmesh][grading]")
+{
     // 4 cells along x with G = 4 (last/first cell ratio).  Expected per-cell
     // ratio r = 4^(1/3) ~= 1.5874.  First-cell length = (r-1)/(r^4 - 1).
     const std::string dict = R"(
@@ -224,8 +228,7 @@ TEST_CASE("blockMeshDict simpleGrading produces geometric cell sizes in x",
     REQUIRE(nCells == 4);
 
     // Locate the 4 cells by x-centroid and confirm geometric progression.
-    std::vector<double> cx(m.cells().centroidX.begin(),
-                           m.cells().centroidX.end());
+    std::vector<double> cx(m.cells().centroidX.begin(), m.cells().centroidX.end());
     std::sort(cx.begin(), cx.end());
     REQUIRE(cx.size() == 4);
 
@@ -241,20 +244,19 @@ TEST_CASE("blockMeshDict simpleGrading produces geometric cell sizes in x",
 
     // The width of cell-i = 2 * (cx[i] - left_face_position[i]); easier check:
     // sum of widths = 1.0 (unit cube).
-    const double sumVol = std::accumulate(m.cells().volume.begin(),
-                                          m.cells().volume.end(), 0.0);
+    const double sumVol = std::accumulate(m.cells().volume.begin(), m.cells().volume.end(), 0.0);
     REQUIRE(sumVol == Approx(1.0).margin(1e-9));
 
     // First-cell volume / last-cell volume = 1/4 (only x varies).
-    std::vector<double> vols(m.cells().volume.begin(),
-                             m.cells().volume.end());
+    std::vector<double> vols(m.cells().volume.begin(), m.cells().volume.end());
     std::sort(vols.begin(), vols.end());
     REQUIRE(vols.back() / vols.front() == Approx(4.0).margin(1e-9));
 }
 
 // =============================================================================
 TEST_CASE("blockMeshDict simpleGrading (1 1 1) matches uniform spacing",
-          "[meshing][blockmesh][grading]") {
+          "[meshing][blockmesh][grading]")
+{
     const std::string dict = R"(
         vertices (
             (0 0 0) (1 0 0) (1 1 0) (0 1 0)
@@ -277,7 +279,8 @@ TEST_CASE("blockMeshDict simpleGrading (1 1 1) matches uniform spacing",
 // Pass 16 - writer round-trip.
 // =============================================================================
 TEST_CASE("blockMeshDict writer round-trips parse -> write -> parse",
-          "[meshing][blockmesh][writer]") {
+          "[meshing][blockmesh][writer]")
+{
     const auto d1 = meshing::parse_block_mesh_dict(kUnitCubeDict);
     const std::string text = meshing::write_block_mesh_dict(d1);
     const auto d2 = meshing::parse_block_mesh_dict(text);
@@ -291,15 +294,15 @@ TEST_CASE("blockMeshDict writer round-trips parse -> write -> parse",
     }
     REQUIRE(d2.blocks.size() == d1.blocks.size());
     for (std::size_t i = 0; i < d1.blocks.size(); ++i) {
-        REQUIRE(d2.blocks[i].vertices  == d1.blocks[i].vertices);
+        REQUIRE(d2.blocks[i].vertices == d1.blocks[i].vertices);
         REQUIRE(d2.blocks[i].divisions == d1.blocks[i].divisions);
         for (int k = 0; k < 3; ++k)
             REQUIRE(d2.blocks[i].grading[k] == Approx(d1.blocks[i].grading[k]));
     }
     REQUIRE(d2.patches.size() == d1.patches.size());
     for (std::size_t i = 0; i < d1.patches.size(); ++i) {
-        REQUIRE(d2.patches[i].name        == d1.patches[i].name);
-        REQUIRE(d2.patches[i].type        == d1.patches[i].type);
+        REQUIRE(d2.patches[i].name == d1.patches[i].name);
+        REQUIRE(d2.patches[i].type == d1.patches[i].type);
         REQUIRE(d2.patches[i].faces.size() == d1.patches[i].faces.size());
         for (std::size_t j = 0; j < d1.patches[i].faces.size(); ++j)
             REQUIRE(d2.patches[i].faces[j] == d1.patches[i].faces[j]);
@@ -308,22 +311,27 @@ TEST_CASE("blockMeshDict writer round-trips parse -> write -> parse",
 
 // =============================================================================
 TEST_CASE("blockMeshDict writer preserves non-trivial grading and convertToMeters",
-          "[meshing][blockmesh][writer]") {
+          "[meshing][blockmesh][writer]")
+{
     meshing::BlockMeshDict d;
     d.convertToMeters = 0.001;
-    d.vertices = {
-        {0,0,0}, {1000,0,0}, {1000,1000,0}, {0,1000,0},
-        {0,0,1000}, {1000,0,1000}, {1000,1000,1000}, {0,1000,1000}
-    };
+    d.vertices = {{0, 0, 0},
+                  {1000, 0, 0},
+                  {1000, 1000, 0},
+                  {0, 1000, 0},
+                  {0, 0, 1000},
+                  {1000, 0, 1000},
+                  {1000, 1000, 1000},
+                  {0, 1000, 1000}};
     meshing::BlockMeshBlock b;
-    b.vertices  = {0,1,2,3,4,5,6,7};
+    b.vertices = {0, 1, 2, 3, 4, 5, 6, 7};
     b.divisions = {5, 3, 2};
-    b.grading   = {2.5, 0.5, 1.0};
+    b.grading = {2.5, 0.5, 1.0};
     d.blocks.push_back(b);
 
     const auto d2 = meshing::parse_block_mesh_dict(meshing::write_block_mesh_dict(d));
-    REQUIRE(d2.convertToMeters     == Approx(0.001));
-    REQUIRE(d2.blocks.size()       == 1);
+    REQUIRE(d2.convertToMeters == Approx(0.001));
+    REQUIRE(d2.blocks.size() == 1);
     REQUIRE(d2.blocks[0].divisions == b.divisions);
     REQUIRE(d2.blocks[0].grading[0] == Approx(2.5));
     REQUIRE(d2.blocks[0].grading[1] == Approx(0.5));
@@ -332,7 +340,8 @@ TEST_CASE("blockMeshDict writer preserves non-trivial grading and convertToMeter
 
 // =============================================================================
 TEST_CASE("blockMeshDict writer round-trip yields identical assembled mesh",
-          "[meshing][blockmesh][writer]") {
+          "[meshing][blockmesh][writer]")
+{
     const auto d1 = meshing::parse_block_mesh_dict(kUnitCubeDict);
     const auto d2 = meshing::parse_block_mesh_dict(meshing::write_block_mesh_dict(d1));
 
@@ -352,7 +361,9 @@ TEST_CASE("blockMeshDict writer round-trip yields identical assembled mesh",
     REQUIRE(m1.nodes().size() == m2.nodes().size());
 
     double v1 = 0, v2 = 0;
-    for (auto v : m1.cells().volume) v1 += v;
-    for (auto v : m2.cells().volume) v2 += v;
+    for (auto v : m1.cells().volume)
+        v1 += v;
+    for (auto v : m2.cells().volume)
+        v2 += v;
     REQUIRE(v1 == Approx(v2).margin(1e-12));
 }

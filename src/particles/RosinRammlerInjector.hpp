@@ -28,31 +28,33 @@
 #include <cstdint>
 #include <random>
 
-namespace simall::particles {
+namespace simall::particles
+{
 
-struct RosinRammlerProps {
-    double X            = 5.0e-5;   // characteristic diameter [m]
-    double n            = 3.5;      // spread (shape) parameter
-    double d_min        = 1.0e-6;
-    double d_max        = 5.0e-4;
-    double rho_l        = 998.2;    // liquid density [kg/m³]
-    double mass_flowrate = 1.0e-3;  // ṁ [kg/s]
-    util::Vec3d origin{0,0,0};
-    util::Vec3d axis  {1,0,0};      // injection direction (unit-normalised)
-    double      nozzleRadius = 1.0e-4;
-    double      speed        = 50.0;
-    std::uint64_t rngSeed    = 0xDEADBEEF;
+struct RosinRammlerProps
+{
+    double X = 5.0e-5; // characteristic diameter [m]
+    double n = 3.5;    // spread (shape) parameter
+    double d_min = 1.0e-6;
+    double d_max = 5.0e-4;
+    double rho_l = 998.2;          // liquid density [kg/m³]
+    double mass_flowrate = 1.0e-3; // ṁ [kg/s]
+    util::Vec3d origin{0, 0, 0};
+    util::Vec3d axis{1, 0, 0}; // injection direction (unit-normalised)
+    double nozzleRadius = 1.0e-4;
+    double speed = 50.0;
+    std::uint64_t rngSeed = 0xDEADBEEF;
 };
 
-class RosinRammlerInjector {
+class RosinRammlerInjector
+{
 public:
     void initialize(RosinRammlerProps props);
 
     /// Inject `parcelsThisStep` parcels into the tracker over an integration
     /// interval dt; sets diameter + mass + position + velocity per parcel.
     /// Returns the actual number injected.
-    std::size_t inject(double dt, std::size_t parcelsThisStep,
-                       LagrangianTracker& tracker);
+    std::size_t inject(double dt, std::size_t parcelsThisStep, LagrangianTracker& tracker);
 
     /// Sample a single diameter via inverse-CDF Rosin-Rammler.
     double sample_diameter();
@@ -61,7 +63,7 @@ public:
 
 private:
     RosinRammlerProps p_{};
-    std::mt19937_64   rng_;
+    std::mt19937_64 rng_;
 };
 
-}  // namespace simall::particles
+} // namespace simall::particles

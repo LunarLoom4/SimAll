@@ -30,27 +30,31 @@
 
 #include <cstddef>
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-enum class MapMethod {
+enum class MapMethod
+{
     Nearest,
     InverseDistance
 };
 
-struct MapFieldsOptions {
-    MapMethod   method     = MapMethod::Nearest;
-    std::size_t kNeighbors = 4;     ///< IDW only.
-    double      idwPower   = 2.0;   ///< 1/d^p exponent.
+struct MapFieldsOptions
+{
+    MapMethod method = MapMethod::Nearest;
+    std::size_t kNeighbors = 4; ///< IDW only.
+    double idwPower = 2.0;      ///< 1/d^p exponent.
 };
 
-struct MapFieldsStats {
+struct MapFieldsStats
+{
     std::size_t scalarFieldsMapped = 0;
     std::size_t vectorFieldsMapped = 0;
-    std::size_t sourceCells        = 0;
-    std::size_t targetCells        = 0;
+    std::size_t sourceCells = 0;
+    std::size_t targetCells = 0;
     /// Number of target queries that fell back to a linear scan because
     /// the spatial-hash ring search did not find enough candidates.
-    std::size_t fallbackQueries    = 0;
+    std::size_t fallbackQueries = 0;
 };
 
 /// Map every field in `srcFields` from `srcMesh` onto `tgtMesh`,
@@ -59,7 +63,7 @@ struct MapFieldsStats {
 MapFieldsStats map_fields(const meshing::Mesh& srcMesh,
                           const FieldRegistry& srcFields,
                           const meshing::Mesh& tgtMesh,
-                          FieldRegistry&       dstFields,
+                          FieldRegistry& dstFields,
                           const MapFieldsOptions& opts = {});
 
-}  // namespace simall::solver
+} // namespace simall::solver

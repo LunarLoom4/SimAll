@@ -8,34 +8,37 @@
 #include <cmath>
 #include <limits>
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-namespace {
-const BoundarySpec* find_bc(const std::vector<BoundarySpec>& bcs,
-                            meshing::ZoneId z) {
-    for (const auto& b : bcs) if (b.zone == z) return &b;
+namespace
+{
+const BoundarySpec* find_bc(const std::vector<BoundarySpec>& bcs, meshing::ZoneId z)
+{
+    for (const auto& b : bcs)
+        if (b.zone == z)
+            return &b;
     return nullptr;
 }
 
 // Boundary face value of phi: Dirichlet from BC, else owner extrapolation.
-inline double boundary_phi(const BoundarySpec* bc,
-                           double phiOwner) {
-    if (!bc) return phiOwner;
-    if (bc->type == BCType::VelocityInlet  ||
-        bc->type == BCType::PressureInlet  ||
-        bc->type == BCType::MassFlowInlet) {
-        return bc->scalarValue;   // BC-supplied scalar value at inlet
+inline double boundary_phi(const BoundarySpec* bc, double phiOwner)
+{
+    if (!bc)
+        return phiOwner;
+    if (bc->type == BCType::VelocityInlet || bc->type == BCType::PressureInlet
+        || bc->type == BCType::MassFlowInlet) {
+        return bc->scalarValue; // BC-supplied scalar value at inlet
     }
-    return phiOwner;  // outflow / wall / symmetry → zero-grad
+    return phiOwner; // outflow / wall / symmetry → zero-grad
 }
-}  // namespace
+} // namespace
 
-void FluxCorrectedTransport::compute_limiter(
-        const util::aligned_vector<double>& phi,
-        const util::aligned_vector<double>& massFlux,
-        double dt,
-        util::aligned_vector<double>& alpha) {
-
+void FluxCorrectedTransport::compute_limiter(const util::aligned_vector<double>& phi,
+                                             const util::aligned_vector<double>& massFlux,
+                                             double dt,
+                                             util::aligned_vector<double>& alpha)
+{
     const auto& F = mesh_.faces();
     const auto& C = mesh_.cells();
     const std::size_t nC = C.size();
@@ -49,13 +52,15 @@ void FluxCorrectedTransport::compute_limiter(
         const meshing::CellId n = F.neighbor[f];
         const double Ff = massFlux[f];
         double phiN;
-        if (n != meshing::kBoundaryCell) phiN = phi[n];
-        else phiN = boundary_phi(find_bc(bcs_, F.boundaryZone[f]), phi[o]);
+        if (n != meshing::kBoundaryCell)
+            phiN = phi[n];
+        else
+            phiN = boundary_phi(find_bc(bcs_, F.boundaryZone[f]), phi[o]);
         // Upwind
         FL[f] = (Ff >= 0.0) ? Ff * phi[o] : Ff * phiN;
         // Central
         FH[f] = Ff * 0.5 * (phi[o] + phiN);
-        A[f]  = FH[f] - FL[f];
+        A[f] = FH[f] - FL[f];
     }
 
     // ---- 2) Low-order advanced field φ^low ----
@@ -82,13 +87,19 @@ void FluxCorrectedTransport::compute_limiter(
         const meshing::CellId o = F.owner[f];
         const meshing::CellId n = F.neighbor[f];
         double phiN;
-        if (n != meshing::kBoundaryCell) phiN = phi[n];
-        else phiN = boundary_phi(find_bc(bcs_, F.boundaryZone[f]), phi[o]);
-        if (phiN > phiMax[o]) phiMax[o] = phiN;
-        if (phiN < phiMin[o]) phiMin[o] = phiN;
+        if (n != meshing::kBoundaryCell)
+            phiN = phi[n];
+        else
+            phiN = boundary_phi(find_bc(bcs_, F.boundaryZone[f]), phi[o]);
+        if (phiN > phiMax[o])
+            phiMax[o] = phiN;
+        if (phiN < phiMin[o])
+            phiMin[o] = phiN;
         if (n != meshing::kBoundaryCell) {
-            if (phi[o] > phiMax[n]) phiMax[n] = phi[o];
-            if (phi[o] < phiMin[n]) phiMin[n] = phi[o];
+            if (phi[o] > phiMax[n])
+                phiMax[n] = phi[o];
+            if (phi[o] < phiMin[n])
+                phiMin[n] = phi[o];
         }
     }
     // Accumulate P+/-: positive A_f *received* by cell increases P+; outgoing increases P-.
@@ -100,10 +111,12 @@ void FluxCorrectedTransport::compute_limiter(
         if (Af >= 0.0) {
             // Owner sees outgoing antidiffusion of magnitude |Af|
             Pminus[o] += Af;
-            if (n != meshing::kBoundaryCell) Pplus[n]  += Af;
+            if (n != meshing::kBoundaryCell)
+                Pplus[n] += Af;
         } else {
-            Pplus[o]   += -Af;
-            if (n != meshing::kBoundaryCell) Pminus[n] += -Af;
+            Pplus[o] += -Af;
+            if (n != meshing::kBoundaryCell)
+                Pminus[n] += -Af;
         }
     }
 
@@ -111,11 +124,11 @@ void FluxCorrectedTransport::compute_limiter(
     util::aligned_vector<double> Rplus(nC, 1.0), Rminus(nC, 1.0);
     for (std::size_t c = 0; c < nC; ++c) {
         const double Vdt = C.volume[c] / std::max(dt, 1.0e-30);
-        const double Qp  = (phiMax[c] - phiLow[c]) * Vdt;
-        const double Qm  = (phiLow[c] - phiMin[c]) * Vdt;
-        Rplus [c] = (Pplus [c] > 1.0e-30) ? std::min(1.0, Qp / Pplus [c]) : 1.0;
+        const double Qp = (phiMax[c] - phiLow[c]) * Vdt;
+        const double Qm = (phiLow[c] - phiMin[c]) * Vdt;
+        Rplus[c] = (Pplus[c] > 1.0e-30) ? std::min(1.0, Qp / Pplus[c]) : 1.0;
         Rminus[c] = (Pminus[c] > 1.0e-30) ? std::min(1.0, Qm / Pminus[c]) : 1.0;
-        Rplus [c] = std::max(0.0, Rplus [c]);
+        Rplus[c] = std::max(0.0, Rplus[c]);
         Rminus[c] = std::max(0.0, Rminus[c]);
     }
 
@@ -139,7 +152,8 @@ void FluxCorrectedTransport::compute_limiter(
 
 void FluxCorrectedTransport::advance(util::aligned_vector<double>& phi,
                                      const util::aligned_vector<double>& massFlux,
-                                     double dt) {
+                                     double dt)
+{
     const auto& F = mesh_.faces();
     const auto& C = mesh_.cells();
     const std::size_t nF = F.size();
@@ -153,8 +167,10 @@ void FluxCorrectedTransport::advance(util::aligned_vector<double>& phi,
         const meshing::CellId n = F.neighbor[f];
         const double Ff = massFlux[f];
         double phiN;
-        if (n != meshing::kBoundaryCell) phiN = phi[n];
-        else phiN = boundary_phi(find_bc(bcs_, F.boundaryZone[f]), phi[o]);
+        if (n != meshing::kBoundaryCell)
+            phiN = phi[n];
+        else
+            phiN = boundary_phi(find_bc(bcs_, F.boundaryZone[f]), phi[o]);
         const double FL = (Ff >= 0.0) ? Ff * phi[o] : Ff * phiN;
         const double FH = Ff * 0.5 * (phi[o] + phiN);
         const double Fcorr = FL + alpha[f] * (FH - FL);
@@ -167,4 +183,4 @@ void FluxCorrectedTransport::advance(util::aligned_vector<double>& phi,
     }
 }
 
-}  // namespace simall::solver
+} // namespace simall::solver

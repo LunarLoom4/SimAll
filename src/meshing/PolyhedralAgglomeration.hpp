@@ -28,22 +28,24 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct AgglomerationProps {
-    std::size_t maxClusterSize    = 8;     // hard cap on tets per polyhedral
-    double      qualityThreshold  = 0.2;
-    bool        seedByNode        = true;  // false ⇒ K-way agglom by metric
+struct AgglomerationProps
+{
+    std::size_t maxClusterSize = 8; // hard cap on tets per polyhedral
+    double qualityThreshold = 0.2;
+    bool seedByNode = true; // false ⇒ K-way agglom by metric
 };
 
-class PolyhedralAgglomeration {
+class PolyhedralAgglomeration
+{
 public:
     void initialize(AgglomerationProps props);
 
     /// Compute a tet→cluster map and write into `clusterId` (size = nCells).
     /// Returns the number of polyhedral clusters generated.
-    std::size_t agglomerate(const Mesh& tetMesh,
-                            std::vector<std::int32_t>& clusterId);
+    std::size_t agglomerate(const Mesh& tetMesh, std::vector<std::int32_t>& clusterId);
 
     /// Builds a coarse mesh from the cluster map: each cluster becomes one
     /// cell, its faces are the boundary faces of the original cluster, and
@@ -58,4 +60,4 @@ private:
     AgglomerationProps p_{};
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

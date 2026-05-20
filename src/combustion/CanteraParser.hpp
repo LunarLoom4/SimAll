@@ -24,23 +24,30 @@
 
 #include <string>
 
-namespace simall::combustion {
+namespace simall::combustion
+{
 
-enum class CanteraFormat { Auto, Yaml, Cti };
-
-struct CanteraReadOptions {
-    CanteraFormat format          = CanteraFormat::Auto;  ///< sniff by extension if Auto
-    bool          stripUnused     = false;                ///< drop species not referenced by any reaction
-    bool          validateThermo  = true;                 ///< sanity-check NASA-7 polynomials
+enum class CanteraFormat
+{
+    Auto,
+    Yaml,
+    Cti
 };
 
-class CanteraParser {
+struct CanteraReadOptions
+{
+    CanteraFormat format = CanteraFormat::Auto; ///< sniff by extension if Auto
+    bool stripUnused = false;                   ///< drop species not referenced by any reaction
+    bool validateThermo = true;                 ///< sanity-check NASA-7 polynomials
+};
+
+class CanteraParser
+{
 public:
     /// Parse a Cantera mechanism file.  Returns the resulting
     /// `ChemkinMechanism` ready to be handed to LaminarFiniteRate /
     /// FgmFlamelet / TransportedPdf, etc.  Throws on IO or parse failure.
-    ChemkinMechanism parse(const std::string& path,
-                           const CanteraReadOptions& opts = {});
+    ChemkinMechanism parse(const std::string& path, const CanteraReadOptions& opts = {});
 
     /// Parse from an in-memory string (useful for unit tests and embedded
     /// mechanism literals).
@@ -49,4 +56,4 @@ public:
                                  const CanteraReadOptions& opts = {});
 };
 
-}  // namespace simall::combustion
+} // namespace simall::combustion

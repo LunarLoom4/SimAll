@@ -5,9 +5,6 @@
 // Exercises every VTK-free Week-14 module against analytic ground truth so
 // the suite can run on headless CI nodes.
 // =============================================================================
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/catch_approx.hpp>
-
 #include "visualization/ActorRegistry.hpp"
 #include "visualization/AnimationRecorder.hpp"
 #include "visualization/Annotation.hpp"
@@ -26,6 +23,9 @@
 #include "visualization/VectorGlyph.hpp"
 #include "visualization/VolumeRaycast.hpp"
 
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
+
 #include <cmath>
 #include <filesystem>
 
@@ -36,11 +36,10 @@ using simall::util::Vec3d;
 // ---------------------------------------------------------------------------
 //  Scene management
 // ---------------------------------------------------------------------------
-TEST_CASE("SceneGraph builds a hierarchy with composed transforms",
-          "[visualization][scene]")
+TEST_CASE("SceneGraph builds a hierarchy with composed transforms", "[visualization][scene]")
 {
     viz::SceneGraph sg;
-    const auto root  = sg.root();
+    const auto root = sg.root();
     REQUIRE(sg.contains(root));
 
     const auto a = sg.create_node("A", root);
@@ -57,27 +56,26 @@ TEST_CASE("SceneGraph builds a hierarchy with composed transforms",
     REQUIRE(p.z == Catch::Approx(3.0));
 
     sg.set_visible(a, false);
-    REQUIRE_FALSE(sg.visible(b));            // parent invisible → child invisible
+    REQUIRE_FALSE(sg.visible(b)); // parent invisible → child invisible
     sg.set_visible(a, true);
     REQUIRE(sg.visible(b));
 
     REQUIRE(sg.reparent(b, root));
-    REQUIRE_FALSE(sg.reparent(a, b));        // would form a cycle
+    REQUIRE_FALSE(sg.reparent(a, b)); // would form a cycle
 
     sg.destroy_node(a);
-    REQUIRE(sg.contains(b));                 // b was reparented earlier
+    REQUIRE(sg.contains(b)); // b was reparented earlier
     REQUIRE_FALSE(sg.contains(a));
 }
 
-TEST_CASE("ActorRegistry enforces payload kind and tracks bbox",
-          "[visualization][actor]")
+TEST_CASE("ActorRegistry enforces payload kind and tracks bbox", "[visualization][actor]")
 {
     viz::ActorRegistry reg;
     auto id = reg.create(viz::ActorKind::Surface, "wall");
     REQUIRE(id != viz::kInvalidActorId);
 
     viz::SurfaceMesh m;
-    m.points = {{0,0,0}, {1,0,0}, {0,1,0}};
+    m.points = {{0, 0, 0}, {1, 0, 0}, {0, 1, 0}};
     m.triIndex = {0, 1, 2};
     REQUIRE(reg.set_payload(id, m));
 
@@ -96,13 +94,12 @@ TEST_CASE("ActorRegistry enforces payload kind and tracks bbox",
     REQUIRE(reg.size() == 0);
 }
 
-TEST_CASE("CameraController fit_to centres on the bbox",
-          "[visualization][camera]")
+TEST_CASE("CameraController fit_to centres on the bbox", "[visualization][camera]")
 {
     viz::CameraController c;
     BoundingBox box;
     box.expand({-1, -1, -1});
-    box.expand({ 1,  1,  1});
+    box.expand({1, 1, 1});
     c.fit_to(box);
     const auto cam = c.camera();
     REQUIRE(cam.focalPoint.x == Catch::Approx(0.0));
@@ -124,7 +121,7 @@ TEST_CASE("ContourFilter extracts a circular isoline on a triangulated square",
 {
     // Two-triangle unit square in z=0 with scalar = x.
     viz::SurfaceMesh s;
-    s.points = {{0,0,0}, {1,0,0}, {1,1,0}, {0,1,0}};
+    s.points = {{0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0}};
     s.triIndex = {0, 1, 2, 0, 2, 3};
     s.pointScalars = {0.0, 1.0, 1.0, 0.0};
     auto lines = viz::ContourFilter::extract(s, {0.5});
@@ -135,11 +132,10 @@ TEST_CASE("ContourFilter extracts a circular isoline on a triangulated square",
     }
 }
 
-TEST_CASE("IsoSurface extracts a triangle from a single tetrahedron",
-          "[visualization][iso]")
+TEST_CASE("IsoSurface extracts a triangle from a single tetrahedron", "[visualization][iso]")
 {
     viz::VolumeMesh v;
-    v.points = {{0,0,0}, {1,0,0}, {0,1,0}, {0,0,1}};
+    v.points = {{0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
     v.tetIndex = {0, 1, 2, 3};
     v.pointScalars = {0.0, 1.0, 1.0, 1.0};
     auto surf = viz::IsoSurface::extract(v, 0.5);
@@ -151,12 +147,12 @@ TEST_CASE("IsoSurface extracts a triangle from a single tetrahedron",
     }
 }
 
-TEST_CASE("StreamlineRk4 traces a circular vector field",
-          "[visualization][streamline]")
+TEST_CASE("StreamlineRk4 traces a circular vector field", "[visualization][streamline]")
 {
     // v(x,y,z) = (-y, x, 0) — pure rotation about z; radius preserved.
     auto sampler = [](const Vec3d& p) -> std::optional<Vec3d> {
-        if (p.x*p.x + p.y*p.y > 4.0) return std::nullopt;
+        if (p.x * p.x + p.y * p.y > 4.0)
+            return std::nullopt;
         return Vec3d{-p.y, p.x, 0.0};
     };
     viz::StreamlineConfig cfg;
@@ -168,20 +164,19 @@ TEST_CASE("StreamlineRk4 traces a circular vector field",
     REQUIRE(ls.points.size() > 100);
     // RK4 with h=0.01 keeps radius to within ~1e-6 over 8 rad of arc.
     for (auto& p : ls.points) {
-        const double r = std::sqrt(p.x*p.x + p.y*p.y);
+        const double r = std::sqrt(p.x * p.x + p.y * p.y);
         REQUIRE(r == Catch::Approx(1.0).margin(1e-3));
     }
 }
 
 TEST_CASE("VectorGlyph samples and culls", "[visualization][glyph]")
 {
-    auto sampler = [](const Vec3d& p) -> std::optional<Vec3d> {
-        return Vec3d{p.x, 0, 0};
-    };
+    auto sampler = [](const Vec3d& p) -> std::optional<Vec3d> { return Vec3d{p.x, 0, 0}; };
     BoundingBox box;
-    box.expand({0, 0, 0}); box.expand({2, 1, 1});
+    box.expand({0, 0, 0});
+    box.expand({2, 1, 1});
     viz::GlyphConfig cfg;
-    cfg.minMagnitude = 0.5;          // x<=0.5 lattice points are filtered
+    cfg.minMagnitude = 0.5; // x<=0.5 lattice points are filtered
     auto g = viz::VectorGlyph::sample_lattice(sampler, box, 5, 1, 1, cfg);
     REQUIRE(!g.anchor.empty());
     for (std::size_t i = 0; i < g.anchor.size(); ++i) {
@@ -196,23 +191,22 @@ TEST_CASE("ClippingPlane keeps the above-plane half", "[visualization][clip]")
 {
     viz::SurfaceMesh s;
     // Triangle straddling the z=0 plane.
-    s.points = {{0,0, 1}, {1,0,-1}, {0,1, 1}};
+    s.points = {{0, 0, 1}, {1, 0, -1}, {0, 1, 1}};
     s.triIndex = {0, 1, 2};
-    viz::Plane plane{{0,0,0}, {0,0,1}};
-    auto out = viz::ClippingPlane::clip(s, plane, /*keepBelow*/false);
+    viz::Plane plane{{0, 0, 0}, {0, 0, 1}};
+    auto out = viz::ClippingPlane::clip(s, plane, /*keepBelow*/ false);
     REQUIRE(out.triangle_count() >= 1);
     for (auto& p : out.points) {
         REQUIRE(p.z >= -1e-9);
     }
 }
 
-TEST_CASE("SectionCut produces a polygon through a unit tet",
-          "[visualization][section]")
+TEST_CASE("SectionCut produces a polygon through a unit tet", "[visualization][section]")
 {
     viz::VolumeMesh v;
-    v.points = {{0,0,0}, {1,0,0}, {0,1,0}, {0,0,1}};
+    v.points = {{0, 0, 0}, {1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
     v.tetIndex = {0, 1, 2, 3};
-    viz::Plane plane{{0,0,0.25}, {0,0,1}};
+    viz::Plane plane{{0, 0, 0.25}, {0, 0, 1}};
     auto out = viz::SectionCut::slice(v, plane);
     REQUIRE(out.triangle_count() >= 1);
     for (auto& p : out.points) {
@@ -220,36 +214,40 @@ TEST_CASE("SectionCut produces a polygon through a unit tet",
     }
 }
 
-TEST_CASE("VolumeRaycast renders a non-empty image for a dense field",
-          "[visualization][volume]")
+TEST_CASE("VolumeRaycast renders a non-empty image for a dense field", "[visualization][volume]")
 {
     viz::RegularGrid3 g;
     g.nx = g.ny = g.nz = 8;
-    g.values.assign(8u*8u*8u, 1.0f);
+    g.values.assign(8u * 8u * 8u, 1.0f);
     g.origin = {-1, -1, -1};
-    g.spacing = {2.0/7, 2.0/7, 2.0/7};
+    g.spacing = {2.0 / 7, 2.0 / 7, 2.0 / 7};
     viz::TransferFunction tf = viz::make_cool_warm(0.0, 1.0);
-    for (auto& s : tf.stops) s.color[3] = 0.4f;     // semi-opaque everywhere
+    for (auto& s : tf.stops)
+        s.color[3] = 0.4f; // semi-opaque everywhere
     viz::Camera cam;
-    cam.viewportWidth = 16; cam.viewportHeight = 16;
-    cam.position = {0, 0, 5}; cam.focalPoint = {0,0,0};
+    cam.viewportWidth = 16;
+    cam.viewportHeight = 16;
+    cam.position = {0, 0, 5};
+    cam.focalPoint = {0, 0, 0};
     auto img = viz::VolumeRaycast::render(g, cam, tf);
     REQUIRE(img.width == 16);
     // At least one pixel must be non-background.
     bool any = false;
     for (std::size_t i = 0; i < img.pixels.size(); i += 4) {
-        if (img.pixels[i] || img.pixels[i+1] || img.pixels[i+2]) { any = true; break; }
+        if (img.pixels[i] || img.pixels[i + 1] || img.pixels[i + 2]) {
+            any = true;
+            break;
+        }
     }
     REQUIRE(any);
 }
 
-TEST_CASE("LicFilter produces a non-trivial intensity image",
-          "[visualization][lic]")
+TEST_CASE("LicFilter produces a non-trivial intensity image", "[visualization][lic]")
 {
     viz::RegularGrid2 g;
     g.nx = g.ny = 16;
-    g.vx.assign(16u*16u, 1.0f);
-    g.vy.assign(16u*16u, 0.0f);
+    g.vx.assign(16u * 16u, 1.0f);
+    g.vy.assign(16u * 16u, 0.0f);
     viz::LicConfig cfg;
     cfg.stepsPerSide = 8;
     auto img = viz::LicFilter::generate(g, cfg);
@@ -258,7 +256,8 @@ TEST_CASE("LicFilter produces a non-trivial intensity image",
     // The convolution along the flow direction averages a row of noise; not
     // every pixel is identical → some variance must remain.
     double mean = 0.0;
-    for (std::size_t i = 0; i < img.pixels.size(); i += 4) mean += img.pixels[i];
+    for (std::size_t i = 0; i < img.pixels.size(); i += 4)
+        mean += img.pixels[i];
     mean /= static_cast<double>(img.width * img.height);
     REQUIRE(mean > 0.0);
     REQUIRE(mean < 255.0);
@@ -267,37 +266,41 @@ TEST_CASE("LicFilter produces a non-trivial intensity image",
 // ---------------------------------------------------------------------------
 //  Overlays
 // ---------------------------------------------------------------------------
-TEST_CASE("ScalarBar emits ticks and a gradient image",
-          "[visualization][scalarbar]")
+TEST_CASE("ScalarBar emits ticks and a gradient image", "[visualization][scalarbar]")
 {
     viz::ScalarBar bar;
-    bar.scalarMin = 0.0; bar.scalarMax = 10.0;
-    bar.tickCount = 6; bar.precision = 1;
+    bar.scalarMin = 0.0;
+    bar.scalarMax = 10.0;
+    bar.tickCount = 6;
+    bar.precision = 1;
     bar.tf = viz::make_cool_warm(0.0, 10.0);
     auto ticks = bar.ticks();
     REQUIRE(ticks.size() == 6);
     REQUIRE(ticks.front().scalar == Catch::Approx(0.0));
-    REQUIRE(ticks.back().scalar  == Catch::Approx(10.0));
+    REQUIRE(ticks.back().scalar == Catch::Approx(10.0));
     auto img = bar.rasterise_gradient();
-    REQUIRE(img.width  == bar.widthPx);
+    REQUIRE(img.width == bar.widthPx);
     REQUIRE(img.height == bar.lengthPx);
 }
 
-TEST_CASE("AnnotationLayer projects a world point onto the viewport",
-          "[visualization][annotation]")
+TEST_CASE("AnnotationLayer projects a world point onto the viewport", "[visualization][annotation]")
 {
     viz::AnnotationLayer L;
     viz::Annotation a;
-    a.text = "probe"; a.anchor = {0, 0, 0}; a.space = viz::AnchorSpace::World;
+    a.text = "probe";
+    a.anchor = {0, 0, 0};
+    a.space = viz::AnchorSpace::World;
     const auto id = L.add(a);
     REQUIRE(L.size() == 1);
 
     viz::Camera cam;
-    cam.viewportWidth = 100; cam.viewportHeight = 100;
-    cam.position = {0, 0, 5}; cam.focalPoint = {0, 0, 0};
+    cam.viewportWidth = 100;
+    cam.viewportHeight = 100;
+    cam.position = {0, 0, 5};
+    cam.focalPoint = {0, 0, 0};
     auto proj = viz::AnnotationLayer::project_world(cam, {0, 0, 0});
     REQUIRE(proj.has_value());
-    REQUIRE(proj->first  == Catch::Approx(50.0).margin(1e-9));
+    REQUIRE(proj->first == Catch::Approx(50.0).margin(1e-9));
     REQUIRE(proj->second == Catch::Approx(50.0).margin(1e-9));
 
     // Behind the camera should fail.
@@ -308,12 +311,15 @@ TEST_CASE("AnnotationLayer projects a world point onto the viewport",
     REQUIRE(L.size() == 0);
 }
 
-TEST_CASE("OrientationGizmo hits center yields a deterministic axis",
-          "[visualization][gizmo]")
+TEST_CASE("OrientationGizmo hits center yields a deterministic axis", "[visualization][gizmo]")
 {
-    viz::Camera cam; cam.viewportWidth = 200; cam.viewportHeight = 200;
+    viz::Camera cam;
+    cam.viewportWidth = 200;
+    cam.viewportHeight = 200;
     viz::GizmoLayout L;
-    L.cornerX = 0.5; L.cornerY = 0.5; L.sizePx = 60;
+    L.cornerX = 0.5;
+    L.cornerY = 0.5;
+    L.sizePx = 60;
     auto hit = viz::OrientationGizmo::hit_test(cam, L, 100.0, 100.0);
     REQUIRE(hit.has_value());
     // Missing the circle entirely:
@@ -322,21 +328,21 @@ TEST_CASE("OrientationGizmo hits center yields a deterministic axis",
 
     viz::CameraController ctrl;
     viz::OrientationGizmo::snap(ctrl, viz::Axis::PosX);
-    REQUIRE(ctrl.camera().position.x < 0.0);   // camera now in -X looking at origin
+    REQUIRE(ctrl.camera().position.x < 0.0); // camera now in -X looking at origin
 }
 
 // ---------------------------------------------------------------------------
 //  Recording
 // ---------------------------------------------------------------------------
-TEST_CASE("ScreenshotRecorder round-trips a PPM image",
-          "[visualization][screenshot]")
+TEST_CASE("ScreenshotRecorder round-trips a PPM image", "[visualization][screenshot]")
 {
-    viz::Image img; img.resize(4, 2);
+    viz::Image img;
+    img.resize(4, 2);
     for (std::size_t i = 0; i < img.pixels.size(); i += 4) {
-        img.pixels[i]   = static_cast<std::uint8_t>(i);
-        img.pixels[i+1] = 64;
-        img.pixels[i+2] = 128;
-        img.pixels[i+3] = 255;
+        img.pixels[i] = static_cast<std::uint8_t>(i);
+        img.pixels[i + 1] = 64;
+        img.pixels[i + 2] = 128;
+        img.pixels[i + 3] = 255;
     }
     auto path = std::filesystem::temp_directory_path() / "simall_test_ppm.ppm";
     REQUIRE(viz::ScreenshotRecorder::save_ppm(img, path));
@@ -344,31 +350,32 @@ TEST_CASE("ScreenshotRecorder round-trips a PPM image",
     REQUIRE(loaded.width == img.width);
     REQUIRE(loaded.height == img.height);
     for (std::size_t i = 0; i < img.pixels.size(); i += 4) {
-        REQUIRE(loaded.pixels[i]   == img.pixels[i]);
-        REQUIRE(loaded.pixels[i+1] == img.pixels[i+1]);
-        REQUIRE(loaded.pixels[i+2] == img.pixels[i+2]);
+        REQUIRE(loaded.pixels[i] == img.pixels[i]);
+        REQUIRE(loaded.pixels[i + 1] == img.pixels[i + 1]);
+        REQUIRE(loaded.pixels[i + 2] == img.pixels[i + 2]);
     }
-    std::error_code ec; std::filesystem::remove(path, ec);
+    std::error_code ec;
+    std::filesystem::remove(path, ec);
 }
 
-TEST_CASE("AnimationRecorder enforces fps schedule",
-          "[visualization][animation]")
+TEST_CASE("AnimationRecorder enforces fps schedule", "[visualization][animation]")
 {
     viz::AnimationConfig cfg;
     cfg.outputDir = std::filesystem::temp_directory_path() / "simall_anim_test";
     std::filesystem::remove_all(cfg.outputDir);
-    cfg.fps = 10;                                     // dt = 0.1
+    cfg.fps = 10; // dt = 0.1
     cfg.filenameDigits = 3;
     viz::AnimationRecorder rec(cfg);
 
-    viz::Image small; small.resize(2, 2);
-    REQUIRE( rec.submit(0.00, small));               // first frame
-    REQUIRE_FALSE(rec.submit(0.05, small));          // < 0.10s after — dropped
-    REQUIRE( rec.submit(0.15, small));               // accepted
+    viz::Image small;
+    small.resize(2, 2);
+    REQUIRE(rec.submit(0.00, small));       // first frame
+    REQUIRE_FALSE(rec.submit(0.05, small)); // < 0.10s after — dropped
+    REQUIRE(rec.submit(0.15, small));       // accepted
     REQUIRE(rec.flush() == 2);
 
     auto s = rec.stats();
-    REQUIRE(s.framesQueued  == 2);
+    REQUIRE(s.framesQueued == 2);
     REQUIRE(s.framesDropped == 1);
     REQUIRE(s.framesWritten == 2);
     std::filesystem::remove_all(cfg.outputDir);
@@ -377,17 +384,18 @@ TEST_CASE("AnimationRecorder enforces fps schedule",
 // ---------------------------------------------------------------------------
 //  Picking
 // ---------------------------------------------------------------------------
-TEST_CASE("PickingBridge intersects the closest of two surfaces",
-          "[visualization][pick]")
+TEST_CASE("PickingBridge intersects the closest of two surfaces", "[visualization][pick]")
 {
     viz::ActorRegistry reg;
     auto near = reg.create(viz::ActorKind::Surface, "near");
     auto far_ = reg.create(viz::ActorKind::Surface, "far");
 
-    viz::SurfaceMesh n; n.points = {{-1,-1,1}, {1,-1,1}, {0,1,1}};
-    n.triIndex = {0,1,2};
-    viz::SurfaceMesh f; f.points = {{-1,-1,-3}, {1,-1,-3}, {0,1,-3}};
-    f.triIndex = {0,1,2};
+    viz::SurfaceMesh n;
+    n.points = {{-1, -1, 1}, {1, -1, 1}, {0, 1, 1}};
+    n.triIndex = {0, 1, 2};
+    viz::SurfaceMesh f;
+    f.points = {{-1, -1, -3}, {1, -1, -3}, {0, 1, -3}};
+    f.triIndex = {0, 1, 2};
     REQUIRE(reg.set_payload(near, n));
     REQUIRE(reg.set_payload(far_, f));
 
@@ -397,5 +405,5 @@ TEST_CASE("PickingBridge intersects the closest of two surfaces",
     REQUIRE(hit.has_value());
     REQUIRE(hit->actor == near);
     REQUIRE(hit->worldHit.z == Catch::Approx(1.0));
-    REQUIRE(hit->distance   == Catch::Approx(4.0));
+    REQUIRE(hit->distance == Catch::Approx(4.0));
 }

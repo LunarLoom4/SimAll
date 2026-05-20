@@ -21,45 +21,50 @@
 #include <variant>
 #include <vector>
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-enum class ActorKind : std::uint8_t {
+enum class ActorKind : std::uint8_t
+{
     Unknown = 0,
-    Surface,         // SurfaceMesh payload
-    Lines,           // LineSet payload (streamlines, contours, edges)
-    Glyphs,          // GlyphSet payload (vector glyphs)
-    Volume,          // VolumeMesh payload (raycast or interior wireframe)
-    Image2D,         // Image payload (LIC, scalar bar, screenshot preview)
-    Overlay          // 2D HUD primitive owned by the back-end
+    Surface, // SurfaceMesh payload
+    Lines,   // LineSet payload (streamlines, contours, edges)
+    Glyphs,  // GlyphSet payload (vector glyphs)
+    Volume,  // VolumeMesh payload (raycast or interior wireframe)
+    Image2D, // Image payload (LIC, scalar bar, screenshot preview)
+    Overlay  // 2D HUD primitive owned by the back-end
 };
 
 using ActorPayload =
     std::variant<std::monostate, SurfaceMesh, LineSet, GlyphSet, VolumeMesh, Image>;
 
-struct ActorDisplay {
-    bool         visible        = true;
-    bool         picking        = true;
-    bool         showEdges      = false;
-    double       opacity        = 1.0;
-    double       lineWidth      = 1.0;
-    double       pointSize      = 1.0;
-    Color4       solidColor     {0.85f, 0.85f, 0.90f, 1.0f};
-    bool         useScalarColor = false;        // true → consult TF
+struct ActorDisplay
+{
+    bool visible = true;
+    bool picking = true;
+    bool showEdges = false;
+    double opacity = 1.0;
+    double lineWidth = 1.0;
+    double pointSize = 1.0;
+    Color4 solidColor{0.85f, 0.85f, 0.90f, 1.0f};
+    bool useScalarColor = false; // true → consult TF
     TransferFunction tf{};
-    double       scalarMin      = 0.0;
-    double       scalarMax      = 1.0;
+    double scalarMin = 0.0;
+    double scalarMax = 1.0;
 };
 
-struct ActorRecord {
-    ActorId      id          = kInvalidActorId;
-    std::string  name;
-    ActorKind    kind        = ActorKind::Unknown;
+struct ActorRecord
+{
+    ActorId id = kInvalidActorId;
+    std::string name;
+    ActorKind kind = ActorKind::Unknown;
     ActorPayload payload;
     ActorDisplay display;
-    util::BoundingBox bbox;   // updated when payload is replaced
+    util::BoundingBox bbox; // updated when payload is replaced
 };
 
-class ActorRegistry {
+class ActorRegistry
+{
 public:
     ActorRegistry();
 
@@ -81,9 +86,9 @@ public:
 
     /// Read-only access; copies are returned to keep callers thread-safe.
     std::optional<ActorRecord> get(ActorId id) const;
-    std::vector<ActorId>       list() const;
-    std::vector<ActorId>       list(ActorKind kind) const;
-    std::size_t                size() const noexcept;
+    std::vector<ActorId> list() const;
+    std::vector<ActorId> list(ActorKind kind) const;
+    std::size_t size() const noexcept;
 
     /// Bulk visibility / opacity edits used by the layer panel in the GUI.
     void set_visible_all(ActorKind kind, bool visible);
@@ -91,9 +96,9 @@ public:
 private:
     static util::BoundingBox compute_bbox(const ActorPayload& p);
 
-    mutable std::mutex                          mu_;
-    std::unordered_map<ActorId, ActorRecord>    actors_;
-    ActorId                                     nextId_ = 1;
+    mutable std::mutex mu_;
+    std::unordered_map<ActorId, ActorRecord> actors_;
+    ActorId nextId_ = 1;
 };
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

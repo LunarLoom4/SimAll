@@ -22,21 +22,29 @@
 #include "meshing/MeshStorage.hpp"
 #include "solver/FieldRegistry.hpp"
 
-namespace simall::multiphase {
+namespace simall::multiphase
+{
 
-struct DriftFluxProps {
-    double rhoLiquid     = 998.2;
-    double rhoGas        = 1.225;
-    double surfaceTension= 0.0728;          // N/m (water-air)
-    double gravity       = 9.81;
-    double C0            = 1.2;             // distribution parameter (Zuber-Findlay)
+struct DriftFluxProps
+{
+    double rhoLiquid = 998.2;
+    double rhoGas = 1.225;
+    double surfaceTension = 0.0728; // N/m (water-air)
+    double gravity = 9.81;
+    double C0 = 1.2; // distribution parameter (Zuber-Findlay)
     // Drift velocity model:
-    enum class DriftLaw { Harmathy, IshiiChawla, UserConstant };
-    DriftLaw  driftLaw   = DriftLaw::Harmathy;
-    double    Ugj_const  = 0.0;             // used if driftLaw == UserConstant
+    enum class DriftLaw
+    {
+        Harmathy,
+        IshiiChawla,
+        UserConstant
+    };
+    DriftLaw driftLaw = DriftLaw::Harmathy;
+    double Ugj_const = 0.0; // used if driftLaw == UserConstant
 };
 
-class DriftFlux {
+class DriftFlux
+{
 public:
     void initialize(const meshing::Mesh& mesh, DriftFluxProps props);
 
@@ -48,7 +56,7 @@ public:
 
 private:
     const meshing::Mesh* mesh_ = nullptr;
-    DriftFluxProps       p_{};
+    DriftFluxProps p_{};
 };
 
-}  // namespace simall::multiphase
+} // namespace simall::multiphase

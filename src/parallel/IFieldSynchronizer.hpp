@@ -14,9 +14,11 @@
 
 #include <cstddef>
 
-namespace simall::parallel {
+namespace simall::parallel
+{
 
-class IFieldSynchronizer {
+class IFieldSynchronizer
+{
 public:
     virtual ~IFieldSynchronizer() = default;
 
@@ -35,4 +37,4 @@ public:
     virtual std::size_t ghost_count() const = 0;
 };
 
-}  // namespace simall::parallel
+} // namespace simall::parallel

@@ -3,19 +3,24 @@
 // File   : src/gui/RibbonContent.cpp
 // =============================================================================
 #include "gui/RibbonContent.hpp"
+
 #include "gui/RibbonBar.hpp"
 
-namespace simall::gui {
+namespace simall::gui
+{
 
-namespace {
-void addBtn(RibbonActions& acts, RibbonBar* r,
-            const QString& tab, const QString& label) {
+namespace
+{
+void addBtn(RibbonActions& acts, RibbonBar* r, const QString& tab, const QString& label)
+{
     QAction* a = r->add_button(tab, label);
-    if (a) acts.byName.emplace(label, a);
+    if (a)
+        acts.byName.emplace(label, a);
 }
-}  // namespace
+} // namespace
 
-RibbonActions populate_default_ribbon(RibbonBar* r) {
+RibbonActions populate_default_ribbon(RibbonBar* r)
+{
     RibbonActions a;
     // 1. File
     addBtn(a, r, "File", "New Project");
@@ -122,4 +127,4 @@ RibbonActions populate_default_ribbon(RibbonBar* r) {
     return a;
 }
 
-}  // namespace simall::gui
+} // namespace simall::gui

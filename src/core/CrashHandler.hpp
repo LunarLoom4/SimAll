@@ -17,15 +17,18 @@
 #include <functional>
 #include <string>
 
-namespace simall::core {
+namespace simall::core
+{
 
-struct CrashHandlerConfig {
-    std::filesystem::path dumpDirectory;     // empty → cwd
-    std::string           appName = "SimAll";
+struct CrashHandlerConfig
+{
+    std::filesystem::path dumpDirectory; // empty → cwd
+    std::string appName = "SimAll";
     std::function<void(const std::string& reason)> onBeforeDump;
 };
 
-class CrashHandler {
+class CrashHandler
+{
 public:
     /// Install once at program start. Idempotent; subsequent calls update
     /// configuration. Returns false if installation failed (rare).
@@ -39,4 +42,4 @@ public:
     static void uninstall();
 };
 
-}  // namespace simall::core
+} // namespace simall::core

@@ -12,13 +12,16 @@
 // =============================================================================
 #pragma once
 
-#include "meshing/MeshStorage.hpp"
 #include "FieldRegistry.hpp"
+
+#include "meshing/MeshStorage.hpp"
 #include "utilities/MathTypes.hpp"
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-class LeastSquaresGradient {
+class LeastSquaresGradient
+{
 public:
     explicit LeastSquaresGradient(const meshing::Mesh& mesh);
 
@@ -28,10 +31,10 @@ public:
 
 private:
     void precompute();
-    const meshing::Mesh&       mesh_;
+    const meshing::Mesh& mesh_;
     // Symmetric inverse of (A^T W A) stored as 6 doubles per cell:
     // [xx, xy, xz, yy, yz, zz].
     util::aligned_vector<double> mInv_;
 };
 
-}  // namespace simall::solver
+} // namespace simall::solver

@@ -11,7 +11,8 @@
 #include <cstdint>
 #include <string_view>
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
 // ---------------------------------------------------------------------------
 // What does the user mean when they click "Refresh"?
@@ -26,18 +27,20 @@ namespace simall::workbench {
 //   StopOnFailed    : never include cells that have any transitive Failed
 //                     ancestor.  Combine with either of the above.
 // ---------------------------------------------------------------------------
-enum class RefreshPolicy : std::uint8_t {
-    ReadyOnly      = 0,
-    IncludeStale   = 1 << 0,
-    StopOnFailed   = 1 << 1,
-    UpdateProject  = IncludeStale | StopOnFailed,    // convenient combo
+enum class RefreshPolicy : std::uint8_t
+{
+    ReadyOnly = 0,
+    IncludeStale = 1 << 0,
+    StopOnFailed = 1 << 1,
+    UpdateProject = IncludeStale | StopOnFailed, // convenient combo
 };
 
-[[nodiscard]] constexpr bool has_flag(RefreshPolicy p, RefreshPolicy f) noexcept {
+[[nodiscard]] constexpr bool has_flag(RefreshPolicy p, RefreshPolicy f) noexcept
+{
     using U = std::uint8_t;
     return (static_cast<U>(p) & static_cast<U>(f)) == static_cast<U>(f);
 }
 
 [[nodiscard]] std::string_view to_string(RefreshPolicy) noexcept;
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

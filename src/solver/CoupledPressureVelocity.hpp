@@ -32,30 +32,35 @@
 // =============================================================================
 #pragma once
 
-#include "meshing/MeshStorage.hpp"
 #include "FieldRegistry.hpp"
-#include "solver/Solver.hpp"
+
+#include "meshing/MeshStorage.hpp"
 #include "solver/CSRMatrix.hpp"
 #include "solver/LinearSolvers.hpp"
+#include "solver/Solver.hpp"
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-struct CoupledPvOptions {
-    double rho        = 1.0;
-    double mu         = 1.0e-3;
-    double dt         = 0.0;       // 0 → steady
-    TemporalScheme    timeScheme = TemporalScheme::ImplicitEuler;
+struct CoupledPvOptions
+{
+    double rho = 1.0;
+    double mu = 1.0e-3;
+    double dt = 0.0; // 0 → steady
+    TemporalScheme timeScheme = TemporalScheme::ImplicitEuler;
     // Pressure-equation Dirichlet anchor: if no pressure-outlet BC exists,
     // cell 0's continuity row is replaced by p_0 = 0 to remove the null space.
-    bool   anchorPressureIfNoOutlet = true;
+    bool anchorPressureIfNoOutlet = true;
 };
 
-struct CoupledPvResiduals {
-    double mom[3] = {0,0,0};
-    double cont   = 0.0;
+struct CoupledPvResiduals
+{
+    double mom[3] = {0, 0, 0};
+    double cont = 0.0;
 };
 
-class CoupledPressureVelocity {
+class CoupledPressureVelocity
+{
 public:
     CoupledPressureVelocity(meshing::Mesh& mesh,
                             FieldRegistry& fields,
@@ -72,20 +77,19 @@ public:
 
 private:
     void build_sparsity();
-    void assemble();          // fills A_block_ and rhs_
-    void apply_solution(const util::aligned_vector<double>& x,
-                        CoupledPvResiduals& res);
+    void assemble(); // fills A_block_ and rhs_
+    void apply_solution(const util::aligned_vector<double>& x, CoupledPvResiduals& res);
 
-    meshing::Mesh&                   mesh_;
-    FieldRegistry&                   F_;
+    meshing::Mesh& mesh_;
+    FieldRegistry& F_;
     const std::vector<BoundarySpec>& bcs_;
-    ILinearSolver&                   lin_;
-    CoupledPvOptions                 opt_;
+    ILinearSolver& lin_;
+    CoupledPvOptions opt_;
 
-    CSRMatrix                    A_block_;
+    CSRMatrix A_block_;
     util::aligned_vector<double> rhs_;
     util::aligned_vector<double> x_;
-    util::aligned_vector<double> aP_mom_;   // momentum diagonal (for Rhie-Chow weights)
+    util::aligned_vector<double> aP_mom_; // momentum diagonal (for Rhie-Chow weights)
 
     // BDF2 history
     util::aligned_vector<double> Ux_n_, Uy_n_, Uz_n_;
@@ -95,4 +99,4 @@ private:
     bool sparsity_built_ = false;
 };
 
-}  // namespace simall::solver
+} // namespace simall::solver

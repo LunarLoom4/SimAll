@@ -14,21 +14,25 @@
 
 #include "meshing/MeshStorage.hpp"
 #include "solver/FieldRegistry.hpp"
+#include "solver/LinearSolvers.hpp"
 #include "solver/ScalarTransport.hpp"
 #include "solver/WallDistance.hpp"
-#include "solver/LinearSolvers.hpp"
 
 #include <memory>
 #include <vector>
 
-namespace simall::turbulence {
+namespace simall::turbulence
+{
 
-class GammaReThetaTransition {
+class GammaReThetaTransition
+{
 public:
     GammaReThetaTransition();
 
-    void initialize(meshing::Mesh& mesh, solver::FieldRegistry& fields,
-                    double density, double viscosity);
+    void initialize(meshing::Mesh& mesh,
+                    solver::FieldRegistry& fields,
+                    double density,
+                    double viscosity);
     void set_boundaries(const std::vector<solver::BoundarySpec>& bcs) { bcs_ = bcs; }
 
     /// One outer iteration: assemble & solve γ and Reθ_t equations, update γ_eff.
@@ -42,19 +46,19 @@ private:
     /// Empirical correlation Reθ_t = f(Tu, λ_θ) for free-stream condition.
     static double correlation_ReThetaT(double Tu, double lambda);
     /// Onset function used in P_γ.
-    static double F_onset(double rho, double mu, double mut, double S,
-                          double dwall, double ReThetaT);
+    static double F_onset(
+        double rho, double mu, double mut, double S, double dwall, double ReThetaT);
 
     meshing::Mesh* mesh_ = nullptr;
     std::vector<solver::BoundarySpec> bcs_;
-    std::unique_ptr<solver::ILinearSolver>   lin_;
+    std::unique_ptr<solver::ILinearSolver> lin_;
     std::unique_ptr<solver::ScalarTransport> gammaEq_;
     std::unique_ptr<solver::ScalarTransport> ReThetaEq_;
-    std::unique_ptr<solver::IWallDistance>   wd_;
+    std::unique_ptr<solver::IWallDistance> wd_;
 
-    util::aligned_vector<double> S_, W_;      // strain and vorticity magnitudes
+    util::aligned_vector<double> S_, W_; // strain and vorticity magnitudes
     util::aligned_vector<double> Pgamma_, ReThetaT_;
     double rho_ = 1.0, mu_ = 1.8e-5;
 };
 
-}  // namespace simall::turbulence
+} // namespace simall::turbulence

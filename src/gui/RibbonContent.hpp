@@ -15,13 +15,16 @@
 #include <QString>
 #include <unordered_map>
 
-namespace simall::gui {
+namespace simall::gui
+{
 
 class RibbonBar;
 
-struct RibbonActions {
+struct RibbonActions
+{
     std::unordered_map<QString, QAction*> byName;
-    QAction* operator[](const QString& k) const {
+    QAction* operator[](const QString& k) const
+    {
         auto it = byName.find(k);
         return it == byName.end() ? nullptr : it->second;
     }
@@ -30,4 +33,4 @@ struct RibbonActions {
 // Populate every tab with its default action set; returns the lookup map.
 RibbonActions populate_default_ribbon(RibbonBar* ribbon);
 
-}  // namespace simall::gui
+} // namespace simall::gui

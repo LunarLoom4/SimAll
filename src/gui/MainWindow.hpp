@@ -11,26 +11,40 @@
 #pragma once
 
 #include "core/Application.hpp"
-#include <QMainWindow>
+
 #include <memory>
+#include <QMainWindow>
 
 class QTabWidget;
 class QTreeView;
 class QDockWidget;
 class QPlainTextEdit;
 
-namespace simall::visualization { class Viewport; }
-namespace simall::cad           { class CadKernel; class ShapeHandle; struct TriangleMesh; }
-namespace simall::meshing       { class Mesh; }
-namespace simall::workbench {
-    class Schematic;
-    class StateMachine;
-    class WorkflowEngine;
-    class ChangeJournal;
-    class CellAdapterRegistry;
+namespace simall::visualization
+{
+class Viewport;
 }
+namespace simall::cad
+{
+class CadKernel;
+class ShapeHandle;
+struct TriangleMesh;
+} // namespace simall::cad
+namespace simall::meshing
+{
+class Mesh;
+}
+namespace simall::workbench
+{
+class Schematic;
+class StateMachine;
+class WorkflowEngine;
+class ChangeJournal;
+class CellAdapterRegistry;
+} // namespace simall::workbench
 
-namespace simall::gui {
+namespace simall::gui
+{
 
 class WorkflowTree;
 class PropertyEditor;
@@ -43,9 +57,13 @@ class MeshStatsPanel;
 class SolverMonitorPanel;
 class PythonConsolePanel;
 
-namespace workbench { class WorkbenchSchematicView; }
+namespace workbench
+{
+class WorkbenchSchematicView;
+}
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 public:
     explicit MainWindow(core::Application& app, QWidget* parent = nullptr);
@@ -70,32 +88,32 @@ private:
     void wire_ribbon_actions();
     void save_default_perspectives();
 
-    core::Application&                  app_;
-    RibbonBar*                          ribbon_      = nullptr;
-    visualization::Viewport*            viewport_    = nullptr;
-    WorkflowTree*                       workflow_    = nullptr;
-    PropertyEditor*                     properties_  = nullptr;
-    QPlainTextEdit*                     console_     = nullptr;
-    ResidualPlot*                       residuals_   = nullptr;
+    core::Application& app_;
+    RibbonBar* ribbon_ = nullptr;
+    visualization::Viewport* viewport_ = nullptr;
+    WorkflowTree* workflow_ = nullptr;
+    PropertyEditor* properties_ = nullptr;
+    QPlainTextEdit* console_ = nullptr;
+    ResidualPlot* residuals_ = nullptr;
 
-    DockManager*                        docks_       = nullptr;
-    ConsolePanel*                       consolePanel_= nullptr;
-    DiagnosticsPanel*                   diagPanel_   = nullptr;
-    MeshStatsPanel*                     meshPanel_   = nullptr;
-    SolverMonitorPanel*                 solverPanel_ = nullptr;
-    PythonConsolePanel*                 pythonPanel_ = nullptr;
-    std::unique_ptr<cad::CadKernel>     cad_kernel_;
+    DockManager* docks_ = nullptr;
+    ConsolePanel* consolePanel_ = nullptr;
+    DiagnosticsPanel* diagPanel_ = nullptr;
+    MeshStatsPanel* meshPanel_ = nullptr;
+    SolverMonitorPanel* solverPanel_ = nullptr;
+    PythonConsolePanel* pythonPanel_ = nullptr;
+    std::unique_ptr<cad::CadKernel> cad_kernel_;
 
     // Workbench (Phase 22 Pass 22.4).  Lazily constructed in
     // build_workbench_dock(); destroyed in reverse order with the
     // MainWindow.  WorkbenchSchematicView is owned by its QDockWidget,
     // so we keep only a raw pointer.
-    std::unique_ptr<simall::workbench::Schematic>      wbSchematic_;
-    std::unique_ptr<simall::workbench::StateMachine>   wbState_;
+    std::unique_ptr<simall::workbench::Schematic> wbSchematic_;
+    std::unique_ptr<simall::workbench::StateMachine> wbState_;
     std::unique_ptr<simall::workbench::WorkflowEngine> wbEngine_;
-    std::unique_ptr<simall::workbench::ChangeJournal>  wbJournal_;
+    std::unique_ptr<simall::workbench::ChangeJournal> wbJournal_;
     std::unique_ptr<simall::workbench::CellAdapterRegistry> wbAdapters_;
-    workbench::WorkbenchSchematicView*                 wbView_ = nullptr;
+    workbench::WorkbenchSchematicView* wbView_ = nullptr;
 
     // Pass 22.5b -- shared pipeline state threaded between the four
     // built-in CellAdapters (cad.import -> mesh.surface -> solver.run ->
@@ -105,7 +123,7 @@ private:
     // only / forward-declared here, and unique_ptr is the cleanest way
     // to keep the heavy headers out of MainWindow.hpp.
     struct WorkbenchPipeline;
-    std::unique_ptr<WorkbenchPipeline>                 wbPipeline_;
+    std::unique_ptr<WorkbenchPipeline> wbPipeline_;
 };
 
-}  // namespace simall::gui
+} // namespace simall::gui

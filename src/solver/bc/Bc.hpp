@@ -17,47 +17,59 @@
 // =============================================================================
 #pragma once
 
+#include "meshing/MeshStorage.hpp"
 #include "solver/CSRMatrix.hpp"
 #include "solver/FieldRegistry.hpp"
-#include "meshing/MeshStorage.hpp"
 #include "utilities/AlignedAllocator.hpp"
 
 #include <memory>
 #include <string>
 
-namespace simall::solver::bc {
+namespace simall::solver::bc
+{
 
 /// Identifier for the variable whose equation is currently being assembled.
 /// String-based to avoid coupling the BC library to every physics module.
 using VariableName = std::string;
 
 /// Per-assemble context handed to a boundary condition.  All non-owning.
-struct BcContext {
-    const meshing::Mesh*           mesh        = nullptr;
-    FieldRegistry*                 fields      = nullptr;
-    CSRMatrix*                     matrix      = nullptr;     // may be null for explicit BCs
-    util::aligned_vector<double>*  rhs         = nullptr;     // may be null
-    VariableName                   variable;
-    double                         dt          = 0.0;
-    double                         timeNow     = 0.0;
+struct BcContext
+{
+    const meshing::Mesh* mesh = nullptr;
+    FieldRegistry* fields = nullptr;
+    CSRMatrix* matrix = nullptr;                 // may be null for explicit BCs
+    util::aligned_vector<double>* rhs = nullptr; // may be null
+    VariableName variable;
+    double dt = 0.0;
+    double timeNow = 0.0;
 };
 
 /// Canonical BC family — used by BcFactory & UI inspector.
-enum class BcKind {
-    Wall, Inlet, Outlet, Symmetry, Axisymmetric, Periodic,
-    PorousJump, Fan, Overset, Interface
+enum class BcKind
+{
+    Wall,
+    Inlet,
+    Outlet,
+    Symmetry,
+    Axisymmetric,
+    Periodic,
+    PorousJump,
+    Fan,
+    Overset,
+    Interface
 };
 
-class IBoundaryCondition {
+class IBoundaryCondition
+{
 public:
     virtual ~IBoundaryCondition() = default;
 
     /// Mesh zone this BC is bound to.
     meshing::ZoneId zone() const noexcept { return zone_; }
-    void            setZone(meshing::ZoneId z) noexcept { zone_ = z; }
+    void setZone(meshing::ZoneId z) noexcept { zone_ = z; }
 
     /// Canonical kind. UI / serialization use this.
-    virtual BcKind  kind()  const noexcept = 0;
+    virtual BcKind kind() const noexcept = 0;
     virtual const char* name() const noexcept = 0;
 
     /// Apply BC contribution for the current (mesh, variable) context.
@@ -78,8 +90,8 @@ protected:
     /// Walk the FaceStorage and invoke `fn(faceId)` for every face whose
     /// boundaryZone matches this BC's zone.  Convenience helper for
     /// concrete BCs.
-    template <class Fn>
-    std::size_t for_each_face(const meshing::Mesh& m, Fn&& fn) const {
+    template <class Fn> std::size_t for_each_face(const meshing::Mesh& m, Fn&& fn) const
+    {
         const auto& F = m.faces();
         const std::size_t n = F.size();
         std::size_t hits = 0;
@@ -94,32 +106,44 @@ protected:
 
     /// Locate (or skip) the diagonal entry of `row` in CSRMatrix and add δ.
     /// Diagonal is assumed to exist (true after solver assembly).
-    static void addToDiagonal(CSRMatrix& A, std::size_t row, double delta) {
+    static void addToDiagonal(CSRMatrix& A, std::size_t row, double delta)
+    {
         const int r = static_cast<int>(row);
-        for (int k = A.rowPtr[r]; k < A.rowPtr[r+1]; ++k) {
-            if (A.colIdx[k] == r) { A.values[k] += delta; return; }
+        for (int k = A.rowPtr[r]; k < A.rowPtr[r + 1]; ++k) {
+            if (A.colIdx[k] == r) {
+                A.values[k] += delta;
+                return;
+            }
         }
     }
 
     /// Penalty-Dirichlet on owner cell of face f. Safe to call repeatedly.
     static void applyDirichlet(CSRMatrix& A,
                                util::aligned_vector<double>& b,
-                               meshing::CellId cell, double value) {
+                               meshing::CellId cell,
+                               double value)
+    {
         addToDiagonal(A, cell, kPenalty);
         b[cell] += kPenalty * value;
     }
 
     /// Neumann (flux) contribution.
     static void applyNeumann(util::aligned_vector<double>& b,
-                             meshing::CellId cell, double flux, double area) {
+                             meshing::CellId cell,
+                             double flux,
+                             double area)
+    {
         b[cell] += flux * area;
     }
 
     /// Robin contribution: ∂φ/∂n + h(φ - φ∞) = 0.
     static void applyRobin(CSRMatrix& A,
                            util::aligned_vector<double>& b,
-                           meshing::CellId cell, double h,
-                           double area, double phi_inf) {
+                           meshing::CellId cell,
+                           double h,
+                           double area,
+                           double phi_inf)
+    {
         addToDiagonal(A, cell, h * area);
         b[cell] += h * area * phi_inf;
     }
@@ -127,4 +151,4 @@ protected:
     meshing::ZoneId zone_ = 0;
 };
 
-}  // namespace simall::solver::bc
+} // namespace simall::solver::bc

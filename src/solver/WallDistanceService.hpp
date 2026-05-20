@@ -23,17 +23,19 @@
 #pragma once
 
 #include "core/IWallDistanceService.hpp"
+#include "meshing/MeshStorage.hpp"
 #include "solver/Solver.hpp"
 #include "solver/WallDistance.hpp"
-#include "meshing/MeshStorage.hpp"
 
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-class WallDistanceService final : public core::IWallDistanceService {
+class WallDistanceService final : public core::IWallDistanceService
+{
 public:
     /// Takes ownership of `backend` (an ExactNearest or Poisson instance).
     /// Keeps references to `mesh` and `bcs` — caller must outlive the
@@ -43,33 +45,28 @@ public:
                         std::unique_ptr<IWallDistance> backend,
                         std::string implName);
 
-    std::size_t   prepare() override;
+    std::size_t prepare() override;
     const double* data() const noexcept override { return field_.data(); }
-    std::size_t   size() const noexcept override { return field_.size(); }
-    const char*   implementation_name() const noexcept override {
-        return implName_.c_str();
-    }
+    std::size_t size() const noexcept override { return field_.size(); }
+    const char* implementation_name() const noexcept override { return implName_.c_str(); }
 
     /// Direct access for solver-internal consumers that need the typed
     /// ScalarField (e.g. to alias into a FieldRegistry slot).
     const ScalarField& field() const noexcept { return field_; }
 
 private:
-    const meshing::Mesh&                   mesh_;
-    const std::vector<BoundarySpec>&       bcs_;
-    std::unique_ptr<IWallDistance>         backend_;
-    ScalarField                            field_;
-    std::string                            implName_;
+    const meshing::Mesh& mesh_;
+    const std::vector<BoundarySpec>& bcs_;
+    std::unique_ptr<IWallDistance> backend_;
+    ScalarField field_;
+    std::string implName_;
 };
 
 /// Convenience factories.
-std::unique_ptr<WallDistanceService>
-make_wall_distance_service_exact(const meshing::Mesh& mesh,
-                                 const std::vector<BoundarySpec>& bcs);
+std::unique_ptr<WallDistanceService> make_wall_distance_service_exact(
+    const meshing::Mesh& mesh, const std::vector<BoundarySpec>& bcs);
 
-std::unique_ptr<WallDistanceService>
-make_wall_distance_service_poisson(const meshing::Mesh& mesh,
-                                   const std::vector<BoundarySpec>& bcs,
-                                   ILinearSolver& linear);
+std::unique_ptr<WallDistanceService> make_wall_distance_service_poisson(
+    const meshing::Mesh& mesh, const std::vector<BoundarySpec>& bcs, ILinearSolver& linear);
 
-}  // namespace simall::solver
+} // namespace simall::solver

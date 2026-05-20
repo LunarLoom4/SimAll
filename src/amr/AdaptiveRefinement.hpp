@@ -26,22 +26,36 @@
 #include <string>
 #include <vector>
 
-namespace simall::amr {
+namespace simall::amr
+{
 
-enum class Indicator { GradientMagnitude, SecondDerivative, Jump, Vorticity };
-
-enum class RefineFlag : std::int8_t { Coarsen = -1, Keep = 0, Refine = +1 };
-
-struct AmrOptions {
-    Indicator indicator       = Indicator::GradientMagnitude;
-    std::string fieldName     = "p";       // scalar field (Vorticity uses "U")
-    double refineFraction     = 0.10;      // top 10 % flagged refine
-    double coarsenFraction    = 0.30;      // bottom 30 % flagged coarsen
-    int    minLevel           = 0;
-    int    maxLevel           = 5;
+enum class Indicator
+{
+    GradientMagnitude,
+    SecondDerivative,
+    Jump,
+    Vorticity
 };
 
-class AdaptiveRefinement {
+enum class RefineFlag : std::int8_t
+{
+    Coarsen = -1,
+    Keep = 0,
+    Refine = +1
+};
+
+struct AmrOptions
+{
+    Indicator indicator = Indicator::GradientMagnitude;
+    std::string fieldName = "p";   // scalar field (Vorticity uses "U")
+    double refineFraction = 0.10;  // top 10 % flagged refine
+    double coarsenFraction = 0.30; // bottom 30 % flagged coarsen
+    int minLevel = 0;
+    int maxLevel = 5;
+};
+
+class AdaptiveRefinement
+{
 public:
     /// Compute per-cell indicators ε_c for the chosen field on the mesh.
     void compute_indicator(const meshing::Mesh& mesh,
@@ -60,4 +74,4 @@ private:
     std::vector<double> ind_;
 };
 
-}  // namespace simall::amr
+} // namespace simall::amr

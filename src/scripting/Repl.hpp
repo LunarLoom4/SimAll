@@ -20,17 +20,25 @@
 #include <string>
 #include <vector>
 
-namespace simall::scripting {
+namespace simall::scripting
+{
 
-enum class ReplState { Ready, NeedsMore, SyntaxError };
-
-struct ReplFeedResult {
-    ReplState    state;
-    std::string  message;       // empty on Ready / NeedsMore
-    std::string  promptHint;    // ">>> " or "... "
+enum class ReplState
+{
+    Ready,
+    NeedsMore,
+    SyntaxError
 };
 
-class Repl {
+struct ReplFeedResult
+{
+    ReplState state;
+    std::string message;    // empty on Ready / NeedsMore
+    std::string promptHint; // ">>> " or "... "
+};
+
+class Repl
+{
 public:
     Repl() = default;
 
@@ -58,18 +66,19 @@ public:
 private:
     [[nodiscard]] ReplState classify() const;
 
-    std::string              buffer_;        // accumulated lines, '\n' separated
+    std::string buffer_; // accumulated lines, '\n' separated
     std::vector<std::string> history_;
-    int                      historyCursor_ = -1;     // -1 == bottom
+    int historyCursor_ = -1; // -1 == bottom
 };
 
 // -- exposed for unit-testing the analyser ----------------------------------
-struct BracketState {
-    int parens     = 0;   // ()
-    int brackets   = 0;   // []
-    int braces     = 0;   // {}
-    bool inSingle  = false;
-    bool inDouble  = false;
+struct BracketState
+{
+    int parens = 0;   // ()
+    int brackets = 0; // []
+    int braces = 0;   // {}
+    bool inSingle = false;
+    bool inDouble = false;
     bool inTriSingle = false;
     bool inTriDouble = false;
     bool trailingColon = false;
@@ -77,4 +86,4 @@ struct BracketState {
 };
 [[nodiscard]] BracketState analyse_python(std::string_view src);
 
-}  // namespace simall::scripting
+} // namespace simall::scripting

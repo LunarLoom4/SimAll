@@ -6,25 +6,25 @@
 // that the analytic residual vanishes exactly on the exact solution.
 // Tag: [verification].
 // =============================================================================
+#include "MmsSolutions.hpp"
+
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
-
-#include "MmsSolutions.hpp"
 
 using Catch::Matchers::WithinAbs;
 namespace sv = simall::verification;
 
-TEST_CASE("MMS heat-equation residual vanishes on exact solution",
-           "[verification][mms]") {
+TEST_CASE("MMS heat-equation residual vanishes on exact solution", "[verification][mms]")
+{
     for (double x : {0.1, 0.3, 0.7}) {
         for (double y : {0.2, 0.5, 0.9}) {
-            REQUIRE_THAT(sv::heat_residual(x, y, 0.05, 0.01),
-                          WithinAbs(0.0, 1e-12));
+            REQUIRE_THAT(sv::heat_residual(x, y, 0.05, 0.01), WithinAbs(0.0, 1e-12));
         }
     }
 }
 
-TEST_CASE("FD5 Laplacian converges at second order", "[verification][mms]") {
+TEST_CASE("FD5 Laplacian converges at second order", "[verification][mms]")
+{
     const double e1 = sv::fd5_laplacian_error(33);
     const double e2 = sv::fd5_laplacian_error(65);
     const double e3 = sv::fd5_laplacian_error(129);
@@ -39,8 +39,8 @@ TEST_CASE("FD5 Laplacian converges at second order", "[verification][mms]") {
     REQUIRE(order23 < 2.2);
 }
 
-TEST_CASE("MMS exact solution satisfies homogeneous Dirichlet BC",
-           "[verification][mms]") {
+TEST_CASE("MMS exact solution satisfies homogeneous Dirichlet BC", "[verification][mms]")
+{
     for (double t : {0.0, 0.1, 0.5}) {
         REQUIRE_THAT(sv::heat_exact(0.0, 0.5, t, 0.01), WithinAbs(0.0, 1e-12));
         REQUIRE_THAT(sv::heat_exact(1.0, 0.5, t, 0.01), WithinAbs(0.0, 1e-12));

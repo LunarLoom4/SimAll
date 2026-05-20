@@ -30,16 +30,19 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct MetisProps {
-    int    nParts          = 4;
-    double imbalanceTol    = 1.03;
-    int    refineSweeps    = 4;
-    std::uint64_t rngSeed  = 0xCAFEDEED'1357ULL;
+struct MetisProps
+{
+    int nParts = 4;
+    double imbalanceTol = 1.03;
+    int refineSweeps = 4;
+    std::uint64_t rngSeed = 0xCAFEDEED'1357ULL;
 };
 
-class PartitionerMetis {
+class PartitionerMetis
+{
 public:
     void initialize(MetisProps props);
 
@@ -59,4 +62,4 @@ private:
     MetisProps p_{};
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

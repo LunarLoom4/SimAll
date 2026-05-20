@@ -3,33 +3,40 @@
 // File   : src/cad/StlSurfaceReader.cpp
 // =============================================================================
 #include "cad/StlSurfaceReader.hpp"
+
 #include "cad/ShapeHandleInternal.hpp"
 #include "core/Logger.hpp"
-
-#include <RWStl.hxx>
-#include <Poly_Triangulation.hxx>
-#include <StlAPI_Reader.hxx>
-#include <BRep_Builder.hxx>
-#include <TopoDS_Face.hxx>
-#include <TopoDS_Compound.hxx>
 
 #include <cmath>
 #include <filesystem>
 #include <stdexcept>
 #include <unordered_map>
 
-namespace simall::cad {
+#include <BRep_Builder.hxx>
+#include <Poly_Triangulation.hxx>
+#include <RWStl.hxx>
+#include <StlAPI_Reader.hxx>
+#include <TopoDS_Compound.hxx>
+#include <TopoDS_Face.hxx>
 
-namespace {
+namespace simall::cad
+{
 
-struct VertexKey {
+namespace
+{
+
+struct VertexKey
+{
     long long ix, iy, iz;
-    bool operator==(const VertexKey& o) const noexcept {
+    bool operator==(const VertexKey& o) const noexcept
+    {
         return ix == o.ix && iy == o.iy && iz == o.iz;
     }
 };
-struct VertexKeyHash {
-    std::size_t operator()(const VertexKey& k) const noexcept {
+struct VertexKeyHash
+{
+    std::size_t operator()(const VertexKey& k) const noexcept
+    {
         std::size_t h = std::hash<long long>{}(k.ix);
         h ^= std::hash<long long>{}(k.iy) + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
         h ^= std::hash<long long>{}(k.iz) + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
@@ -37,10 +44,10 @@ struct VertexKeyHash {
     }
 };
 
-}  // namespace
+} // namespace
 
-TriangleMesh StlSurfaceReader::readTriangles(const std::string& path,
-                                             const StlReadOptions& opts) {
+TriangleMesh StlSurfaceReader::readTriangles(const std::string& path, const StlReadOptions& opts)
+{
     if (!std::filesystem::exists(path))
         throw std::runtime_error("StlSurfaceReader: file not found: " + path);
 
@@ -50,7 +57,7 @@ TriangleMesh StlSurfaceReader::readTriangles(const std::string& path,
 
     TriangleMesh out;
     const Standard_Integer nNodes = poly->NbNodes();
-    const Standard_Integer nTris  = poly->NbTriangles();
+    const Standard_Integer nTris = poly->NbTriangles();
     out.points.reserve(nNodes);
     out.triangles.reserve(nTris);
     out.triangleFaceId.assign(nTris, util::PersistentId{1});
@@ -90,13 +97,19 @@ TriangleMesh StlSurfaceReader::readTriangles(const std::string& path,
                                  remap[static_cast<std::size_t>(b - 1)],
                                  remap[static_cast<std::size_t>(c - 1)]});
     }
-    SIMALL_LOG_INFO("CAD/STL", "Read ", path, " — ", out.points.size(),
-                    " verts, ", out.triangles.size(), " tris");
+    SIMALL_LOG_INFO("CAD/STL",
+                    "Read ",
+                    path,
+                    " — ",
+                    out.points.size(),
+                    " verts, ",
+                    out.triangles.size(),
+                    " tris");
     return out;
 }
 
-ShapeHandle StlSurfaceReader::read(const std::string& path,
-                                   const StlReadOptions& /*opts*/) {
+ShapeHandle StlSurfaceReader::read(const std::string& path, const StlReadOptions& /*opts*/)
+{
     if (!std::filesystem::exists(path))
         throw std::runtime_error("StlSurfaceReader: file not found: " + path);
 
@@ -108,9 +121,8 @@ ShapeHandle StlSurfaceReader::read(const std::string& path,
         throw std::runtime_error("StlSurfaceReader: empty shape after read");
 
     auto h = makeHandle(std::move(shape));
-    SIMALL_LOG_INFO("CAD/STL", "Imported ", path, " (",
-                    h.topology().size(), " topo nodes)");
+    SIMALL_LOG_INFO("CAD/STL", "Imported ", path, " (", h.topology().size(), " topo nodes)");
     return h;
 }
 
-}  // namespace simall::cad
+} // namespace simall::cad

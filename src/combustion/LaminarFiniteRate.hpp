@@ -24,43 +24,47 @@
 // =============================================================================
 #pragma once
 
-#include "solver/Solver.hpp"
-#include "solver/ScalarTransport.hpp"
-#include "solver/FieldRegistry.hpp"
 #include "meshing/MeshStorage.hpp"
+#include "solver/FieldRegistry.hpp"
+#include "solver/ScalarTransport.hpp"
+#include "solver/Solver.hpp"
 #include "utilities/AlignedAllocator.hpp"
 
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace simall::combustion {
+namespace simall::combustion
+{
 
-struct Species {
+struct Species
+{
     std::string name;
-    double      molarMass;            // [kg/mol]
-    double      formationEnthalpy;    // [J/kg]   h_f0
-    double      diffusivity;          // [m²/s]   D_k
+    double molarMass;         // [kg/mol]
+    double formationEnthalpy; // [J/kg]   h_f0
+    double diffusivity;       // [m²/s]   D_k
 };
 
-struct Reaction {
-    std::vector<double> nuP;          // products  ν'   (size = nSpecies)
-    std::vector<double> nuR;          // reactants ν''  (size = nSpecies)
-    std::vector<double> order;        // forward-rate order per species
-    double A   = 1.0e10;              // [SI cgs-equivalent units, user-supplied]
+struct Reaction
+{
+    std::vector<double> nuP;   // products  ν'   (size = nSpecies)
+    std::vector<double> nuR;   // reactants ν''  (size = nSpecies)
+    std::vector<double> order; // forward-rate order per species
+    double A = 1.0e10;         // [SI cgs-equivalent units, user-supplied]
     double beta = 0.0;
-    double Ea  = 0.0;                 // [J/mol]
+    double Ea = 0.0; // [J/mol]
 };
 
-class LaminarFiniteRate {
+class LaminarFiniteRate
+{
 public:
     LaminarFiniteRate(meshing::Mesh& mesh,
                       solver::FieldRegistry& fields,
                       solver::ILinearSolver& linear);
 
-    void add_species(Species s)                 { species_.push_back(std::move(s)); }
-    void add_reaction(Reaction r)               { reactions_.push_back(std::move(r)); }
-    void set_density(double rho)                { rho_ = rho; }
+    void add_species(Species s) { species_.push_back(std::move(s)); }
+    void add_reaction(Reaction r) { reactions_.push_back(std::move(r)); }
+    void set_density(double rho) { rho_ = rho; }
     void set_boundaries(const std::vector<solver::BoundarySpec>& bcs) { bcs_ = bcs; }
 
     /// Build per-species transport equations (call after add_species).
@@ -71,15 +75,15 @@ public:
     void step();
 
 private:
-    meshing::Mesh&                            mesh_;
-    solver::FieldRegistry&                    F_;
-    solver::ILinearSolver&                    lin_;
-    double                                    rho_ = 1.0;
-    std::vector<Species>                      species_;
-    std::vector<Reaction>                     reactions_;
-    std::vector<solver::BoundarySpec>         bcs_;
+    meshing::Mesh& mesh_;
+    solver::FieldRegistry& F_;
+    solver::ILinearSolver& lin_;
+    double rho_ = 1.0;
+    std::vector<Species> species_;
+    std::vector<Reaction> reactions_;
+    std::vector<solver::BoundarySpec> bcs_;
     std::vector<std::unique_ptr<solver::ScalarTransport>> Yeqs_;
-    std::vector<util::aligned_vector<double>> srcY_;     // ω̇_k storage
+    std::vector<util::aligned_vector<double>> srcY_; // ω̇_k storage
 };
 
-}  // namespace simall::combustion
+} // namespace simall::combustion

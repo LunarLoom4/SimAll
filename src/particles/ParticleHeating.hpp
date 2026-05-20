@@ -23,41 +23,43 @@
 
 #include <vector>
 
-namespace simall::particles {
+namespace simall::particles
+{
 
-struct HeatingProps {
-    double cp_l       = 4186.0;     // [J/(kg·K)] water default
-    double k_g        = 2.6e-2;     // gas thermal conductivity W/(m·K)
-    double cp_g       = 1006.0;
-    double mu_g       = 1.81e-5;
-    double rho_g_ref  = 1.225;
-    double T_p_init   = 300.0;
-    double T_p_min    = 200.0;
-    double T_p_max    = 5000.0;
+struct HeatingProps
+{
+    double cp_l = 4186.0; // [J/(kg·K)] water default
+    double k_g = 2.6e-2;  // gas thermal conductivity W/(m·K)
+    double cp_g = 1006.0;
+    double mu_g = 1.81e-5;
+    double rho_g_ref = 1.225;
+    double T_p_init = 300.0;
+    double T_p_min = 200.0;
+    double T_p_max = 5000.0;
     double emissivity = 0.85;
-    bool   includeRadiation = false;
+    bool includeRadiation = false;
 };
 
-class ParticleHeating {
+class ParticleHeating
+{
 public:
     void initialize(const meshing::Mesh& mesh, HeatingProps props);
 
     /// Reads gas "T" and (optionally) "T_radiation" cell fields; writes
     /// additive cell field "S_particle_energy" (W/m³).  Updates parcel
     /// temperatures stored internally (vector aligned with tracker).
-    double apply(double dt, LagrangianTracker& tracker,
-                 solver::FieldRegistry& fields);
+    double apply(double dt, LagrangianTracker& tracker, solver::FieldRegistry& fields);
 
     double parcel_temperature(std::size_t i) const;
-    void   set_parcel_temperature(std::size_t i, double T);
-    void   resize_to(std::size_t nParticles);
+    void set_parcel_temperature(std::size_t i, double T);
+    void resize_to(std::size_t nParticles);
 
     const HeatingProps& props() const noexcept { return p_; }
 
 private:
     const meshing::Mesh* mesh_ = nullptr;
-    HeatingProps         p_{};
-    std::vector<double>  T_p_;
+    HeatingProps p_{};
+    std::vector<double> T_p_;
 };
 
-}  // namespace simall::particles
+} // namespace simall::particles

@@ -10,29 +10,33 @@
 #include <string>
 #include <vector>
 
-namespace simall::cad {
+namespace simall::cad
+{
 
-struct IgesReadOptions {
-    bool readNames      = true;
-    bool readBSpline    = true;
-    bool readVisible    = true;
-    bool heal           = true;     // IGES files almost always need it
-    bool fixContinuity  = true;
+struct IgesReadOptions
+{
+    bool readNames = true;
+    bool readBSpline = true;
+    bool readVisible = true;
+    bool heal = true; // IGES files almost always need it
+    bool fixContinuity = true;
 };
 
-struct IgesReadReport {
+struct IgesReadReport
+{
     std::size_t entityCount = 0;
     std::size_t transferred = 0;
     std::vector<std::string> warnings;
 };
 
-class IgesReader {
+class IgesReader
+{
 public:
-    ShapeHandle    read(const std::string& path, const IgesReadOptions& opts = {});
+    ShapeHandle read(const std::string& path, const IgesReadOptions& opts = {});
     IgesReadReport lastReport() const noexcept { return report_; }
 
 private:
     IgesReadReport report_;
 };
 
-}  // namespace simall::cad
+} // namespace simall::cad

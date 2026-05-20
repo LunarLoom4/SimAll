@@ -4,10 +4,13 @@
 // =============================================================================
 #include "solver/bc/OversetBc.hpp"
 
-namespace simall::solver::bc {
+namespace simall::solver::bc
+{
 
-std::size_t OversetBc::apply(BcContext& ctx) {
-    if (!ctx.matrix || !ctx.rhs) return 0;
+std::size_t OversetBc::apply(BcContext& ctx)
+{
+    if (!ctx.matrix || !ctx.rhs)
+        return 0;
     auto& A = *ctx.matrix;
     auto& b = *ctx.rhs;
     for (auto const& [cell, val] : donor_)
@@ -15,4 +18,4 @@ std::size_t OversetBc::apply(BcContext& ctx) {
     return donor_.size();
 }
 
-}  // namespace simall::solver::bc
+} // namespace simall::solver::bc

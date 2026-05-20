@@ -12,13 +12,14 @@
 
 using namespace simall::cad;
 
-TEST_CASE("TopologyGraph add/find/by_type", "[cad][topology]") {
+TEST_CASE("TopologyGraph add/find/by_type", "[cad][topology]")
+{
     TopologyGraph g;
     char dummy1, dummy2, dummy3;
 
-    auto f1 = g.add(TopologyType::Face,   &dummy1);
-    auto f2 = g.add(TopologyType::Face,   &dummy2);
-    auto e1 = g.add(TopologyType::Edge,   &dummy3);
+    auto f1 = g.add(TopologyType::Face, &dummy1);
+    auto f2 = g.add(TopologyType::Face, &dummy2);
+    auto e1 = g.add(TopologyType::Edge, &dummy3);
 
     REQUIRE(g.size() == 3);
     REQUIRE(g.find(f1) != nullptr);
@@ -32,19 +33,21 @@ TEST_CASE("TopologyGraph add/find/by_type", "[cad][topology]") {
     REQUIRE(edges.front() == e1);
 }
 
-TEST_CASE("TopologyGraph link establishes parent/child", "[cad][topology]") {
+TEST_CASE("TopologyGraph link establishes parent/child", "[cad][topology]")
+{
     TopologyGraph g;
     int a, b;
     auto solid = g.add(TopologyType::Solid, &a);
-    auto face  = g.add(TopologyType::Face,  &b);
+    auto face = g.add(TopologyType::Face, &b);
 
     g.link(solid, face);
 
     auto* p = g.find(solid);
     auto* c = g.find(face);
-    REQUIRE(p);  REQUIRE(c);
+    REQUIRE(p);
+    REQUIRE(c);
     REQUIRE(p->children.size() == 1);
     REQUIRE(p->children.front() == face);
-    REQUIRE(c->parents.size()  == 1);
+    REQUIRE(c->parents.size() == 1);
     REQUIRE(c->parents.front() == solid);
 }

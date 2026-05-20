@@ -4,20 +4,29 @@
 // Phase  : 9 (HEAT TRANSFER + Conjugate HT)
 // =============================================================================
 #pragma once
-#include "solver/FieldRegistry.hpp"
 #include "meshing/MeshStorage.hpp"
+#include "solver/FieldRegistry.hpp"
 
-namespace simall::heat {
+namespace simall::heat
+{
 
-enum class Mode { Conduction, Convection, Conjugate, PhaseChange };
+enum class Mode
+{
+    Conduction,
+    Convection,
+    Conjugate,
+    PhaseChange
+};
 
-class HeatTransferModule {
+class HeatTransferModule
+{
 public:
     void configure(Mode m) { mode_ = m; }
     Mode mode() const { return mode_; }
     void solve(double dt, meshing::Mesh&, solver::FieldRegistry&);
+
 private:
     Mode mode_ = Mode::Conjugate;
 };
 
-}  // namespace simall::heat
+} // namespace simall::heat

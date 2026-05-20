@@ -25,9 +25,11 @@
 #include <cstddef>
 #include <vector>
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
-class Schematic {
+class Schematic
+{
 public:
     Schematic() = default;
 
@@ -41,8 +43,7 @@ public:
     // `restore_link`.  Note: state propagation (downstream invalidation
     // of formerly-dependent cells) is left to the caller / WorkflowEngine
     // -- Schematic itself stays pure-graph.
-    bool remove_cell(CellId id,
-                     std::vector<CellLink>* removed_links_out = nullptr);
+    bool remove_cell(CellId id, std::vector<CellLink>* removed_links_out = nullptr);
 
     // Re-inserts a cell that was previously held by `remove_cell` (or any
     // externally-constructed Cell carrying a stable id).  Fails when the
@@ -55,10 +56,10 @@ public:
     // same bool as add_link.
     bool restore_link(const CellLink& link) { return add_link(link); }
 
-    [[nodiscard]] Cell*                     cell(CellId)       noexcept;
-    [[nodiscard]] const Cell*               cell(CellId) const noexcept;
-    [[nodiscard]] const std::vector<Cell>&  cells()      const noexcept { return cells_; }
-    [[nodiscard]] std::size_t               size()       const noexcept { return cells_.size(); }
+    [[nodiscard]] Cell* cell(CellId) noexcept;
+    [[nodiscard]] const Cell* cell(CellId) const noexcept;
+    [[nodiscard]] const std::vector<Cell>& cells() const noexcept { return cells_; }
+    [[nodiscard]] std::size_t size() const noexcept { return cells_.size(); }
 
     // ----- links -------------------------------------------------------
     // Rejects (returns false) when any of the following holds:
@@ -79,7 +80,7 @@ public:
     // somehow cyclic (should be unreachable since add_link guards it).
     [[nodiscard]] std::vector<CellId> topological_order() const;
 
-    [[nodiscard]] std::vector<CellId> upstream  (CellId) const;
+    [[nodiscard]] std::vector<CellId> upstream(CellId) const;
     [[nodiscard]] std::vector<CellId> downstream(CellId) const;
 
     [[nodiscard]] bool inputs_satisfied(CellId) const;
@@ -87,9 +88,9 @@ public:
 private:
     [[nodiscard]] bool would_create_cycle(CellId from, CellId to) const;
 
-    std::vector<Cell>     cells_;
+    std::vector<Cell> cells_;
     std::vector<CellLink> links_;
-    CellId                next_cell_id_{1};  // 0 reserved as kInvalidCellId
+    CellId next_cell_id_{1}; // 0 reserved as kInvalidCellId
 };
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

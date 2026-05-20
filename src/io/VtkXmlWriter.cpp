@@ -3,27 +3,31 @@
 // File   : src/io/VtkXmlWriter.cpp
 // =============================================================================
 #include "io/VtkXmlWriter.hpp"
+
 #include "core/Logger.hpp"
 
 #include <fstream>
 #include <set>
 #include <unordered_map>
 
-namespace simall::io {
+namespace simall::io
+{
 
-namespace {
+namespace
+{
 
 // VTK_POLYHEDRON descriptor format per cell:
 //   nFaces, [nFaceNodes, n0,n1,...], [nFaceNodes, n0,n1,...], ...
 // We emit polyhedra to keep arbitrary topologies (hex/tet/prism/pyr/poly)
 // round-trippable.
-struct PolyDesc {
-    std::vector<int> faceCounts;     // nodes per face for this cell
-    std::vector<int> faceNodes;      // flat node IDs
+struct PolyDesc
+{
+    std::vector<int> faceCounts; // nodes per face for this cell
+    std::vector<int> faceNodes;  // flat node IDs
 };
 
-void build_poly_desc(const meshing::Mesh& mesh,
-                     std::size_t c, PolyDesc& d) {
+void build_poly_desc(const meshing::Mesh& mesh, std::size_t c, PolyDesc& d)
+{
     const auto& C = mesh.cells();
     const auto& F = mesh.faces();
     d.faceCounts.clear();
@@ -39,11 +43,15 @@ void build_poly_desc(const meshing::Mesh& mesh,
     }
 }
 
-}  // namespace
+} // namespace
 
-bool VtkXmlWriter::write(const meshing::Mesh& mesh) const {
+bool VtkXmlWriter::write(const meshing::Mesh& mesh) const
+{
     std::ofstream f(path_);
-    if (!f) { SIMALL_LOG_ERROR("VTK", "open failed: ", path_); return false; }
+    if (!f) {
+        SIMALL_LOG_ERROR("VTK", "open failed: ", path_);
+        return false;
+    }
     const auto& N = mesh.nodes();
     const auto& C = mesh.cells();
     const std::size_t nN = N.size();
@@ -75,7 +83,8 @@ bool VtkXmlWriter::write(const meshing::Mesh& mesh) const {
         build_poly_desc(mesh, c, d);
         // Unique node set for this cell.
         std::set<int> unique(d.faceNodes.begin(), d.faceNodes.end());
-        for (int n : unique) connectivity.push_back(n);
+        for (int n : unique)
+            connectivity.push_back(n);
         totalConn += static_cast<int>(unique.size());
         cellOffsets.push_back(totalConn);
 
@@ -95,23 +104,28 @@ bool VtkXmlWriter::write(const meshing::Mesh& mesh) const {
     }
 
     f << "<DataArray type=\"Int32\" Name=\"connectivity\" format=\"ascii\">\n";
-    for (int v : connectivity) f << v << ' ';
+    for (int v : connectivity)
+        f << v << ' ';
     f << "\n</DataArray>\n";
 
     f << "<DataArray type=\"Int32\" Name=\"offsets\" format=\"ascii\">\n";
-    for (int v : cellOffsets) f << v << ' ';
+    for (int v : cellOffsets)
+        f << v << ' ';
     f << "\n</DataArray>\n";
 
     f << "<DataArray type=\"UInt8\" Name=\"types\" format=\"ascii\">\n";
-    for (std::size_t c = 0; c < nC; ++c) f << 42 << ' ';   // VTK_POLYHEDRON
+    for (std::size_t c = 0; c < nC; ++c)
+        f << 42 << ' '; // VTK_POLYHEDRON
     f << "\n</DataArray>\n";
 
     f << "<DataArray type=\"Int32\" Name=\"faces\" format=\"ascii\">\n";
-    for (int v : faces) f << v << ' ';
+    for (int v : faces)
+        f << v << ' ';
     f << "\n</DataArray>\n";
 
     f << "<DataArray type=\"Int32\" Name=\"faceoffsets\" format=\"ascii\">\n";
-    for (int v : faceOffsets) f << v << ' ';
+    for (int v : faceOffsets)
+        f << v << ' ';
     f << "\n</DataArray>\n";
     f << "</Cells>\n";
 
@@ -121,7 +135,8 @@ bool VtkXmlWriter::write(const meshing::Mesh& mesh) const {
         for (const auto& s : scalars_) {
             f << "<DataArray type=\"Float64\" Name=\"" << s.name
               << "\" NumberOfComponents=\"1\" format=\"ascii\">\n";
-            for (std::size_t c = 0; c < nC; ++c) f << s.data[c] << ' ';
+            for (std::size_t c = 0; c < nC; ++c)
+                f << s.data[c] << ' ';
             f << "\n</DataArray>\n";
         }
         for (const auto& v : vectors_) {
@@ -139,4 +154,4 @@ bool VtkXmlWriter::write(const meshing::Mesh& mesh) const {
     return true;
 }
 
-}  // namespace simall::io
+} // namespace simall::io

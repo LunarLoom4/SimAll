@@ -7,36 +7,40 @@
 #include <array>
 #include <cmath>
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-namespace {
+namespace
+{
 
-struct Vertex {
+struct Vertex
+{
     util::Vec3d p;
-    double      s;
-    double      d;
+    double s;
+    double d;
 };
 
-inline Vertex lerp_vertex(const Vertex& a, const Vertex& b) {
+inline Vertex lerp_vertex(const Vertex& a, const Vertex& b)
+{
     const double t = a.d / (a.d - b.d);
     const double tc = std::clamp(t, 0.0, 1.0);
-    return Vertex{
-        util::Vec3d{a.p.x + tc*(b.p.x-a.p.x),
-                    a.p.y + tc*(b.p.y-a.p.y),
-                    a.p.z + tc*(b.p.z-a.p.z)},
-        a.s + tc * (b.s - a.s),
-        0.0};
+    return Vertex{util::Vec3d{a.p.x + tc * (b.p.x - a.p.x),
+                              a.p.y + tc * (b.p.y - a.p.y),
+                              a.p.z + tc * (b.p.z - a.p.z)},
+                  a.s + tc * (b.s - a.s),
+                  0.0};
 }
 
-}  // namespace
+} // namespace
 
 SurfaceMesh SectionCut::slice(const VolumeMesh& vol, const Plane& plane)
 {
     SurfaceMesh out;
-    if (vol.empty()) return out;
+    if (vol.empty())
+        return out;
 
     const util::Vec3d n = plane.normal;
-    const double      D = -n.dot(plane.point);
+    const double D = -n.dot(plane.point);
     const bool hasScalars = vol.pointScalars.size() == vol.points.size();
 
     auto emit_tri = [&](const Vertex& a, const Vertex& b, const Vertex& c) {
@@ -58,7 +62,7 @@ SurfaceMesh SectionCut::slice(const VolumeMesh& vol, const Plane& plane)
     for (std::size_t t = 0; t < nTet; ++t) {
         std::array<Vertex, 4> v;
         for (int k = 0; k < 4; ++k) {
-            const std::int32_t i = vol.tetIndex[4*t + k];
+            const std::int32_t i = vol.tetIndex[4 * t + k];
             v[k].p = vol.points[i];
             v[k].s = hasScalars ? vol.pointScalars[i] : 0.0;
             v[k].d = n.dot(v[k].p) + D;
@@ -67,10 +71,13 @@ SurfaceMesh SectionCut::slice(const VolumeMesh& vol, const Plane& plane)
         std::array<int, 4> above{}, below{};
         int nA = 0, nB = 0;
         for (int k = 0; k < 4; ++k) {
-            if (v[k].d >= 0.0) above[nA++] = k;
-            else                below[nB++] = k;
+            if (v[k].d >= 0.0)
+                above[nA++] = k;
+            else
+                below[nB++] = k;
         }
-        if (nA == 0 || nB == 0) continue;
+        if (nA == 0 || nB == 0)
+            continue;
 
         // 1 above + 3 below  → triangle on 3 edges from the single above vertex.
         if (nA == 1) {
@@ -85,7 +92,7 @@ SurfaceMesh SectionCut::slice(const VolumeMesh& vol, const Plane& plane)
             Vertex i1 = lerp_vertex(B, v[above[1]]);
             Vertex i2 = lerp_vertex(B, v[above[2]]);
             emit_tri(i0, i1, i2);
-        } else {  // nA == 2  → quad
+        } else { // nA == 2  → quad
             const Vertex& A0 = v[above[0]];
             const Vertex& A1 = v[above[1]];
             const Vertex& B0 = v[below[0]];
@@ -102,4 +109,4 @@ SurfaceMesh SectionCut::slice(const VolumeMesh& vol, const Plane& plane)
     return out;
 }
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

@@ -23,31 +23,34 @@
 #include <string>
 #include <vector>
 
-namespace simall::optimization {
+namespace simall::optimization
+{
 
-struct CmaEsOptions {
-    std::size_t        dim         = 0;
-    std::size_t        maxGen      = 200;
-    std::size_t        lambda      = 0;   // 0 → 4 + ⌊3·ln n⌋
-    double             sigma0      = 0.3;
-    double             tolFitness  = 1e-10;
-    double             tolSigma    = 1e-12;
-    std::uint64_t      seed        = 0xC0FFEE;
-    std::vector<double> mean0;            // size = dim (defaults to 0)
-    std::vector<double> xLow;             // size = dim (defaults to -inf)
-    std::vector<double> xUp;              // size = dim (defaults to +inf)
+struct CmaEsOptions
+{
+    std::size_t dim = 0;
+    std::size_t maxGen = 200;
+    std::size_t lambda = 0; // 0 → 4 + ⌊3·ln n⌋
+    double sigma0 = 0.3;
+    double tolFitness = 1e-10;
+    double tolSigma = 1e-12;
+    std::uint64_t seed = 0xC0FFEE;
+    std::vector<double> mean0; // size = dim (defaults to 0)
+    std::vector<double> xLow;  // size = dim (defaults to -inf)
+    std::vector<double> xUp;   // size = dim (defaults to +inf)
     std::function<double(const std::vector<double>&)> evaluate;
 };
 
-struct CmaEsResult {
-    bool                  ok = false;
-    std::string           error;
-    std::size_t           generations = 0;
-    double                bestF = 0.0;
-    std::vector<double>   bestX;
-    std::vector<double>   history;   // best f per generation
+struct CmaEsResult
+{
+    bool ok = false;
+    std::string error;
+    std::size_t generations = 0;
+    double bestF = 0.0;
+    std::vector<double> bestX;
+    std::vector<double> history; // best f per generation
 };
 
 [[nodiscard]] CmaEsResult run_cmaes(CmaEsOptions opt);
 
-}  // namespace simall::optimization
+} // namespace simall::optimization

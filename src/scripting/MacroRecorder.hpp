@@ -15,9 +15,11 @@
 #include <string>
 #include <vector>
 
-namespace simall::scripting {
+namespace simall::scripting
+{
 
-class MacroRecorder {
+class MacroRecorder
+{
 public:
     MacroRecorder();
     ~MacroRecorder();
@@ -28,20 +30,22 @@ public:
 
     void clear();
     [[nodiscard]] size_t size() const noexcept { return commands_.size(); }
-    [[nodiscard]] const std::vector<ScriptableCommand>& commands() const noexcept { return commands_; }
+    [[nodiscard]] const std::vector<ScriptableCommand>& commands() const noexcept
+    {
+        return commands_;
+    }
 
     // Manually append a command (useful for tests / synthetic playback).
     void append(ScriptableCommand cmd);
 
     // -- serialisation --------------------------------------------------------
     [[nodiscard]] std::string to_python_script(std::string_view header = {}) const;
-    bool save_to_file(const std::string& path,
-                      std::string_view header = {}) const;
+    bool save_to_file(const std::string& path, std::string_view header = {}) const;
 
 private:
-    int                                 listenerId_ = 0;
-    bool                                recording_  = false;
-    std::vector<ScriptableCommand>      commands_;
+    int listenerId_ = 0;
+    bool recording_ = false;
+    std::vector<ScriptableCommand> commands_;
 };
 
-}  // namespace simall::scripting
+} // namespace simall::scripting

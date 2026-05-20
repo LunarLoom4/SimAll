@@ -17,26 +17,30 @@
 // =============================================================================
 #pragma once
 
-#include "turbulence/ITurbulenceModel.hpp"
 #include "solver/Solver.hpp"
+#include "turbulence/ITurbulenceModel.hpp"
 #include "utilities/AlignedAllocator.hpp"
 
 #include <vector>
 
-namespace simall::turbulence {
+namespace simall::turbulence
+{
 
-class WALE_LES final : public ITurbulenceModel {
+class WALE_LES final : public ITurbulenceModel
+{
 public:
     std::string name() const override { return "WALE"; }
-    void   initialize(meshing::Mesh&, solver::FieldRegistry&) override;
-    void   solve(double dt, solver::FieldRegistry&) override;
+    void initialize(meshing::Mesh&, solver::FieldRegistry&) override;
+    void solve(double dt, solver::FieldRegistry&) override;
     double turbulent_viscosity(std::size_t c) const override
-        { return c < mut_.size() ? mut_[c] : 0.0; }
+    {
+        return c < mut_.size() ? mut_[c] : 0.0;
+    }
 
     void set_boundaries(const std::vector<solver::BoundarySpec>& bcs) { bcs_ = bcs; }
     void set_density(double rho) { rho_ = rho; }
-    void set_viscosity(double mu){ mu_ = mu; }
-    void set_wale_constant(double cw){ Cw_ = cw; }
+    void set_viscosity(double mu) { mu_ = mu; }
+    void set_wale_constant(double cw) { Cw_ = cw; }
 
 private:
     meshing::Mesh* mesh_ = nullptr;
@@ -46,4 +50,4 @@ private:
     util::aligned_vector<double> delta_;
 };
 
-}  // namespace simall::turbulence
+} // namespace simall::turbulence

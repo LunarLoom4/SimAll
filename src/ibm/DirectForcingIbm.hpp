@@ -23,37 +23,42 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::ibm {
+namespace simall::ibm
+{
 
-using CellIdx   = std::uint32_t;
+using CellIdx = std::uint32_t;
 using MarkerIdx = std::uint32_t;
 
-struct MarkerPoint {
+struct MarkerPoint
+{
     std::array<double, 3> position;
     std::array<double, 3> bodyVelocity;
-    double                 area = 1.0;
+    double area = 1.0;
 };
 
-struct EulerianCell {
+struct EulerianCell
+{
     std::array<double, 3> centroid;
-    double                 volume = 1.0;
+    double volume = 1.0;
 };
 
-struct DirectForcingOptions {
-    double spacing       = 1.0;          // characteristic h
-    double kernelWidth   = 3.0;          // in units of h
-    double dt            = 1.0;
+struct DirectForcingOptions
+{
+    double spacing = 1.0;     // characteristic h
+    double kernelWidth = 3.0; // in units of h
+    double dt = 1.0;
 };
 
-struct DirectForcingResult {
-    std::vector<std::array<double, 3>> markerForce;       // per-marker f
-    std::vector<std::array<double, 3>> eulerianForce;     // per-cell, scattered
+struct DirectForcingResult
+{
+    std::vector<std::array<double, 3>> markerForce;   // per-marker f
+    std::vector<std::array<double, 3>> eulerianForce; // per-cell, scattered
 };
 
 [[nodiscard]] DirectForcingResult compute_direct_forcing(
-        const std::vector<MarkerPoint>&        markers,
-        const std::vector<EulerianCell>&       cells,
-        const std::vector<std::array<double,3>>& predictedVelocity,
-        DirectForcingOptions                   opt);
+    const std::vector<MarkerPoint>& markers,
+    const std::vector<EulerianCell>& cells,
+    const std::vector<std::array<double, 3>>& predictedVelocity,
+    DirectForcingOptions opt);
 
-}  // namespace simall::ibm
+} // namespace simall::ibm

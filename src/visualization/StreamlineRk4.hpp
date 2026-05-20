@@ -15,18 +15,21 @@
 
 #include <vector>
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-struct StreamlineConfig {
-    double      stepSize     = 0.05;    // world-space units
-    std::size_t maxSteps     = 4000;    // per direction
-    double      maxLength    = 1e6;     // world-space cumulative
-    double      stagnationEps = 1e-12;
-    bool        bidirectional = true;   // integrate forward AND backward
-    bool        colorByMagnitude = true;
+struct StreamlineConfig
+{
+    double stepSize = 0.05;      // world-space units
+    std::size_t maxSteps = 4000; // per direction
+    double maxLength = 1e6;      // world-space cumulative
+    double stagnationEps = 1e-12;
+    bool bidirectional = true; // integrate forward AND backward
+    bool colorByMagnitude = true;
 };
 
-class StreamlineRk4 {
+class StreamlineRk4
+{
 public:
     /// Trace a single streamline from `seed`.  Returns a LineSet with one
     /// polyline.  Empty when the seed is out of the sampler's domain.
@@ -40,4 +43,4 @@ public:
                               const StreamlineConfig& cfg = {});
 };
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

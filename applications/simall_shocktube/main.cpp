@@ -9,7 +9,8 @@
 
 #include <cstdio>
 
-int main() {
+int main()
+{
     const auto r = simall::regression::shocktube::sod_reference();
     std::printf("SimAll Beta - simall_shocktube verification driver\n");
     std::printf("===================================================\n");

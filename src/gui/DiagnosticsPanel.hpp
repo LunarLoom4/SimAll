@@ -9,16 +9,18 @@
 // =============================================================================
 #pragma once
 
-#include <QWidget>
 #include <deque>
+#include <QWidget>
 
 class QTimer;
 class QLabel;
 class QFormLayout;
 
-namespace simall::gui {
+namespace simall::gui
+{
 
-class DiagnosticsPanel : public QWidget {
+class DiagnosticsPanel : public QWidget
+{
     Q_OBJECT
 public:
     explicit DiagnosticsPanel(QWidget* parent = nullptr);
@@ -32,18 +34,18 @@ private slots:
     void poll();
 
 private:
-    QFormLayout*        form_         = nullptr;
-    QLabel*             cpuLabel_     = nullptr;
-    QLabel*             rssLabel_     = nullptr;
-    QLabel*             threadsLabel_ = nullptr;
-    QLabel*             handlesLabel_ = nullptr;
-    QLabel*             gpuLabel_     = nullptr;
-    QLabel*             mpiLabel_     = nullptr;
-    QTimer*             timer_        = nullptr;
+    QFormLayout* form_ = nullptr;
+    QLabel* cpuLabel_ = nullptr;
+    QLabel* rssLabel_ = nullptr;
+    QLabel* threadsLabel_ = nullptr;
+    QLabel* handlesLabel_ = nullptr;
+    QLabel* gpuLabel_ = nullptr;
+    QLabel* mpiLabel_ = nullptr;
+    QTimer* timer_ = nullptr;
 
-    std::deque<double>  cpuHistory_;
-    std::deque<double>  rssHistory_;
-    static constexpr int kHistory = 120;     // ~2 min at 1 Hz
+    std::deque<double> cpuHistory_;
+    std::deque<double> rssHistory_;
+    static constexpr int kHistory = 120; // ~2 min at 1 Hz
 };
 
-}  // namespace simall::gui
+} // namespace simall::gui

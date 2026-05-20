@@ -25,24 +25,31 @@
 #include <functional>
 #include <random>
 
-namespace simall::particles {
+namespace simall::particles
+{
 
-enum class ConeKind { Solid, Hollow };
-
-struct ConeInjectorProps {
-    ConeKind     kind         = ConeKind::Solid;
-    double       theta_outer  = 0.35;     // [rad] half-angle of outer cone
-    double       theta_inner  = 0.0;      // hollow-cone inner half-angle
-    double       swirl_angle  = 0.0;      // [rad] tangential bias
-    double       speed        = 50.0;     // [m/s]
-    util::Vec3d  origin{0,0,0};
-    util::Vec3d  axis  {1,0,0};
-    double       diameter_const = 5.0e-5; // fallback when no sampler supplied
-    double       rho_l        = 998.2;
-    std::uint64_t rngSeed     = 0xABBA'FACE;
+enum class ConeKind
+{
+    Solid,
+    Hollow
 };
 
-class ConeInjector {
+struct ConeInjectorProps
+{
+    ConeKind kind = ConeKind::Solid;
+    double theta_outer = 0.35; // [rad] half-angle of outer cone
+    double theta_inner = 0.0;  // hollow-cone inner half-angle
+    double swirl_angle = 0.0;  // [rad] tangential bias
+    double speed = 50.0;       // [m/s]
+    util::Vec3d origin{0, 0, 0};
+    util::Vec3d axis{1, 0, 0};
+    double diameter_const = 5.0e-5; // fallback when no sampler supplied
+    double rho_l = 998.2;
+    std::uint64_t rngSeed = 0xABBA'FACE;
+};
+
+class ConeInjector
+{
 public:
     /// Diameter sampler (optional). If null, p_.diameter_const is used.
     using DiameterSampler = std::function<double()>;
@@ -54,9 +61,9 @@ public:
     const ConeInjectorProps& props() const noexcept { return p_; }
 
 private:
-    ConeInjectorProps  p_{};
-    DiameterSampler    diaSampler_;
-    std::mt19937_64    rng_;
+    ConeInjectorProps p_{};
+    DiameterSampler diaSampler_;
+    std::mt19937_64 rng_;
 };
 
-}  // namespace simall::particles
+} // namespace simall::particles

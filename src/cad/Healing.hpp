@@ -18,27 +18,30 @@
 
 #include "cad/CadKernel.hpp"
 
-#include <vector>
 #include <string>
+#include <vector>
 
-namespace simall::cad {
+namespace simall::cad
+{
 
-struct HealingReport {
-    int    smallEdgesRemoved   = 0;
-    int    sliverFacesRemoved  = 0;
-    int    gapsStitched        = 0;
-    int    orientationFixed    = 0;
-    bool   anyChange           = false;
+struct HealingReport
+{
+    int smallEdgesRemoved = 0;
+    int sliverFacesRemoved = 0;
+    int gapsStitched = 0;
+    int orientationFixed = 0;
+    bool anyChange = false;
     std::vector<std::string> messages;
 };
 
-class Healing {
+class Healing
+{
 public:
-    void              repair(ShapeHandle& shape, const HealingOptions& opts = {});
-    HealingReport     lastReport() const noexcept { return report_; }
+    void repair(ShapeHandle& shape, const HealingOptions& opts = {});
+    HealingReport lastReport() const noexcept { return report_; }
 
 private:
     HealingReport report_;
 };
 
-}  // namespace simall::cad
+} // namespace simall::cad

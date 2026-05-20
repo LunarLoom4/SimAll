@@ -31,20 +31,23 @@
 #include <functional>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct AfsProps {
-    double  baseSize        = 0.05;   // default characteristic edge h
-    double  searchRadiusMul = 1.6;    // R = mul · h
-    double  minQuality      = 0.2;    // min normalised triangle quality
-    double  planeNormalX    = 0.0;    // surface normal for 2-D plane case
-    double  planeNormalY    = 0.0;
-    double  planeNormalZ    = 1.0;
-    std::uint32_t outputZone= 1;
-    std::size_t maxIters    = 200000;
+struct AfsProps
+{
+    double baseSize = 0.05;       // default characteristic edge h
+    double searchRadiusMul = 1.6; // R = mul · h
+    double minQuality = 0.2;      // min normalised triangle quality
+    double planeNormalX = 0.0;    // surface normal for 2-D plane case
+    double planeNormalY = 0.0;
+    double planeNormalZ = 1.0;
+    std::uint32_t outputZone = 1;
+    std::size_t maxIters = 200000;
 };
 
-class AdvancingFrontSurface {
+class AdvancingFrontSurface
+{
 public:
     using SizingFn = std::function<double(double x, double y, double z)>;
 
@@ -62,18 +65,26 @@ public:
     const AfsProps& props() const noexcept { return p_; }
 
 private:
-    struct Edge { NodeId a, b; };
-    struct Tri  { NodeId a, b, c; };
+    struct Edge
+    {
+        NodeId a, b;
+    };
+    struct Tri
+    {
+        NodeId a, b, c;
+    };
 
-    bool triangle_valid(const util::Vec3d& A, const util::Vec3d& B,
-                        const util::Vec3d& P, double h_ref) const;
+    bool triangle_valid(const util::Vec3d& A,
+                        const util::Vec3d& B,
+                        const util::Vec3d& P,
+                        double h_ref) const;
     NodeId find_or_create_node(const util::Vec3d& p, double tol);
 
-    AfsProps             p_{};
-    SizingFn             sizing_;
+    AfsProps p_{};
+    SizingFn sizing_;
     std::vector<util::Vec3d> nodes_;
-    std::vector<Edge>    front_;
-    std::vector<Tri>     tris_;
+    std::vector<Edge> front_;
+    std::vector<Tri> tris_;
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

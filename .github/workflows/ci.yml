@@ -36,8 +36,15 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install clang-format + PowerShell
         run: |
+          # Pin clang-format to a specific version via pip so the same binary
+          # is used locally (pwsh scripts/format.ps1) and in CI -- avoids
+          # cross-version reformatting drift between Ubuntu apt clang-format
+          # (~v14) and newer releases.
           sudo apt-get update
-          sudo apt-get install -y clang-format wget apt-transport-https software-properties-common
+          sudo apt-get install -y wget apt-transport-https software-properties-common python3-pip
+          python3 -m pip install --upgrade "clang-format==22.1.5"
+          # Make pip-installed clang-format visible on PATH for pwsh.
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
           # PowerShell is needed because scripts/format.ps1 is a .ps1 file.
           wget -q "https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb"
           sudo dpkg -i packages-microsoft-prod.deb

@@ -4,31 +4,34 @@
 // Phase  : 18.6 — GPU BiCGSTAB solver (W13).
 // =============================================================================
 #include "gpu/BicgstabGpu.hpp"
-#include "gpu/CudaContext.hpp"
+
 #include "core/Logger.hpp"
+#include "gpu/CudaContext.hpp"
 
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstring>
 
-namespace simall::gpu {
+namespace simall::gpu
+{
 
 // -----------------------------------------------------------------------------
 BicgstabGpu::BicgstabGpu(GpuSolverConfig cfg) : cfg_(cfg) {}
 BicgstabGpu::~BicgstabGpu() = default;
 
 // -----------------------------------------------------------------------------
-void BicgstabGpu::set_matrix(const HostCsrView& A) {
-    n_   = A.n;
+void BicgstabGpu::set_matrix(const HostCsrView& A)
+{
+    n_ = A.n;
     nnz_ = A.nnz;
 
     dRowPtr_.resize(n_ + 1);
     dColIdx_.resize(nnz_);
     dValues_.resize(nnz_);
     std::memcpy(dRowPtr_.host_ptr(), A.rowPtr, (n_ + 1) * sizeof(int));
-    std::memcpy(dColIdx_.host_ptr(), A.colIdx, nnz_     * sizeof(int));
-    std::memcpy(dValues_.host_ptr(), A.values, nnz_     * sizeof(double));
+    std::memcpy(dColIdx_.host_ptr(), A.colIdx, nnz_ * sizeof(int));
+    std::memcpy(dValues_.host_ptr(), A.values, nnz_ * sizeof(double));
     dRowPtr_.to_device();
     dColIdx_.to_device();
     dValues_.to_device();
@@ -38,7 +41,10 @@ void BicgstabGpu::set_matrix(const HostCsrView& A) {
         for (std::size_t i = 0; i < n_; ++i) {
             double d = 1.0;
             for (int k = A.rowPtr[i]; k < A.rowPtr[i + 1]; ++k)
-                if (A.colIdx[k] == static_cast<int>(i)) { d = A.values[k]; break; }
+                if (A.colIdx[k] == static_cast<int>(i)) {
+                    d = A.values[k];
+                    break;
+                }
             dDiag_.host_ptr()[i] = d;
         }
         dDiag_.to_device();
@@ -53,7 +59,10 @@ void BicgstabGpu::set_matrix(const HostCsrView& A) {
             for (std::size_t i = 0; i < n_; ++i) {
                 double d = 1.0;
                 for (int k = A.rowPtr[i]; k < A.rowPtr[i + 1]; ++k)
-                    if (A.colIdx[k] == static_cast<int>(i)) { d = A.values[k]; break; }
+                    if (A.colIdx[k] == static_cast<int>(i)) {
+                        d = A.values[k];
+                        break;
+                    }
                 dDiag_.host_ptr()[i] = d;
             }
             dDiag_.to_device();
@@ -62,27 +71,26 @@ void BicgstabGpu::set_matrix(const HostCsrView& A) {
         }
     }
 
-    dB_   .resize(n_);
-    dX_   .resize(n_);
-    dR_   .resize(n_);
+    dB_.resize(n_);
+    dX_.resize(n_);
+    dR_.resize(n_);
     dRhat_.resize(n_);
-    dP_   .resize(n_);
+    dP_.resize(n_);
     dPhat_.resize(n_);
-    dV_   .resize(n_);
-    dS_   .resize(n_);
+    dV_.resize(n_);
+    dS_.resize(n_);
     dShat_.resize(n_);
-    dT_   .resize(n_);
+    dT_.resize(n_);
 }
 
 // -----------------------------------------------------------------------------
-GpuSolverStats BicgstabGpu::solve(const std::vector<double>& b,
-                                  std::vector<double>&       x)
+GpuSolverStats BicgstabGpu::solve(const std::vector<double>& b, std::vector<double>& x)
 {
     GpuSolverStats st{};
     const auto t0 = std::chrono::steady_clock::now();
     if (n_ == 0 || b.size() != n_ || x.size() != n_) {
-        SIMALL_LOG_INFO("Gpu", "BicgstabGpu size mismatch: n=", n_,
-            " b=", b.size(), " x=", x.size());
+        SIMALL_LOG_INFO(
+            "Gpu", "BicgstabGpu size mismatch: n=", n_, " b=", b.size(), " x=", x.size());
         return st;
     }
     std::memcpy(dB_.host_ptr(), b.data(), n_ * sizeof(double));
@@ -92,26 +100,30 @@ GpuSolverStats BicgstabGpu::solve(const std::vector<double>& b,
 
     auto apply_M = [&](void* in, void* out) {
         switch (cfg_.preconditioner) {
-            case GpuPreconditioner::None:
-                copy(in, out, n_);
-                break;
-            case GpuPreconditioner::Jacobi:
-                jacobi_apply(dDiag_.device_ptr(), in, out, n_);
-                break;
-            case GpuPreconditioner::ILU0:
-                ilu0_apply(n_,
-                    static_cast<const int*>   (dRowPtr_.device_ptr()),
-                    static_cast<const int*>   (dColIdx_.device_ptr()),
-                    static_cast<const double*>(dLU_    .device_ptr()),
-                    static_cast<const double*>(in),
-                    static_cast<      double*>(out));
-                break;
+        case GpuPreconditioner::None:
+            copy(in, out, n_);
+            break;
+        case GpuPreconditioner::Jacobi:
+            jacobi_apply(dDiag_.device_ptr(), in, out, n_);
+            break;
+        case GpuPreconditioner::ILU0:
+            ilu0_apply(n_,
+                       static_cast<const int*>(dRowPtr_.device_ptr()),
+                       static_cast<const int*>(dColIdx_.device_ptr()),
+                       static_cast<const double*>(dLU_.device_ptr()),
+                       static_cast<const double*>(in),
+                       static_cast<double*>(out));
+            break;
         }
     };
 
     // r = b - A x
-    spmv_csr(n_, dRowPtr_.device_ptr(), dColIdx_.device_ptr(),
-             dValues_.device_ptr(), dX_.device_ptr(), dR_.device_ptr());
+    spmv_csr(n_,
+             dRowPtr_.device_ptr(),
+             dColIdx_.device_ptr(),
+             dValues_.device_ptr(),
+             dX_.device_ptr(),
+             dR_.device_ptr());
     scal(-1.0, dR_.device_ptr(), n_);
     axpy(1.0, dB_.device_ptr(), dR_.device_ptr(), n_);
 
@@ -119,7 +131,7 @@ GpuSolverStats BicgstabGpu::solve(const std::vector<double>& b,
     copy(dR_.device_ptr(), dRhat_.device_ptr(), n_);
 
     const double bNorm = nrm2(dB_.device_ptr(), n_);
-    const double bRef  = (bNorm > 0.0) ? bNorm : 1.0;
+    const double bRef = (bNorm > 0.0) ? bNorm : 1.0;
     double rNorm = nrm2(dR_.device_ptr(), n_);
     st.initialResidual = rNorm;
     if (rNorm / bRef <= cfg_.tolerance) {
@@ -137,9 +149,8 @@ GpuSolverStats BicgstabGpu::solve(const std::vector<double>& b,
 
     double rho_old = 1.0, alpha = 1.0, omega = 1.0;
 
-    const double dropTol = (cfg_.relativeOrders > 0.0)
-        ? rNorm * std::pow(10.0, -cfg_.relativeOrders)
-        : 0.0;
+    const double dropTol =
+        (cfg_.relativeOrders > 0.0) ? rNorm * std::pow(10.0, -cfg_.relativeOrders) : 0.0;
 
     for (int it = 1; it <= cfg_.maxIterations; ++it) {
         const double rho_new = dot(dRhat_.device_ptr(), dR_.device_ptr(), n_);
@@ -158,8 +169,12 @@ GpuSolverStats BicgstabGpu::solve(const std::vector<double>& b,
         apply_M(dP_.device_ptr(), dPhat_.device_ptr());
 
         // v = A p̂
-        spmv_csr(n_, dRowPtr_.device_ptr(), dColIdx_.device_ptr(),
-                 dValues_.device_ptr(), dPhat_.device_ptr(), dV_.device_ptr());
+        spmv_csr(n_,
+                 dRowPtr_.device_ptr(),
+                 dColIdx_.device_ptr(),
+                 dValues_.device_ptr(),
+                 dPhat_.device_ptr(),
+                 dV_.device_ptr());
 
         const double rhatv = dot(dRhat_.device_ptr(), dV_.device_ptr(), n_);
         if (std::abs(rhatv) < 1e-300) {
@@ -173,12 +188,11 @@ GpuSolverStats BicgstabGpu::solve(const std::vector<double>& b,
         axpy(-alpha, dV_.device_ptr(), dS_.device_ptr(), n_);
 
         const double sNorm = nrm2(dS_.device_ptr(), n_);
-        if (sNorm / bRef <= cfg_.tolerance ||
-            (dropTol > 0.0 && sNorm <= dropTol)) {
+        if (sNorm / bRef <= cfg_.tolerance || (dropTol > 0.0 && sNorm <= dropTol)) {
             // x ← x + α p̂
             axpy(alpha, dPhat_.device_ptr(), dX_.device_ptr(), n_);
-            st.converged     = true;
-            st.iterations    = it;
+            st.converged = true;
+            st.iterations = it;
             st.finalResidual = sNorm;
             break;
         }
@@ -187,8 +201,12 @@ GpuSolverStats BicgstabGpu::solve(const std::vector<double>& b,
         apply_M(dS_.device_ptr(), dShat_.device_ptr());
 
         // t = A ŝ
-        spmv_csr(n_, dRowPtr_.device_ptr(), dColIdx_.device_ptr(),
-                 dValues_.device_ptr(), dShat_.device_ptr(), dT_.device_ptr());
+        spmv_csr(n_,
+                 dRowPtr_.device_ptr(),
+                 dColIdx_.device_ptr(),
+                 dValues_.device_ptr(),
+                 dShat_.device_ptr(),
+                 dT_.device_ptr());
 
         const double tt = dot(dT_.device_ptr(), dT_.device_ptr(), n_);
         if (tt < 1e-300) {
@@ -209,19 +227,18 @@ GpuSolverStats BicgstabGpu::solve(const std::vector<double>& b,
         axpy(-omega, dT_.device_ptr(), dR_.device_ptr(), n_);
 
         rNorm = nrm2(dR_.device_ptr(), n_);
-        if (rNorm / bRef <= cfg_.tolerance ||
-            (dropTol > 0.0 && rNorm <= dropTol)) {
-            st.converged     = true;
-            st.iterations    = it;
+        if (rNorm / bRef <= cfg_.tolerance || (dropTol > 0.0 && rNorm <= dropTol)) {
+            st.converged = true;
+            st.iterations = it;
             st.finalResidual = rNorm;
             break;
         }
         rho_old = rho_new;
 
         if (it == cfg_.maxIterations) {
-            st.iterations    = it;
+            st.iterations = it;
             st.finalResidual = rNorm;
-            st.converged     = false;
+            st.converged = false;
         }
     }
 
@@ -231,10 +248,17 @@ GpuSolverStats BicgstabGpu::solve(const std::vector<double>& b,
 
     const auto t1 = std::chrono::steady_clock::now();
     st.timeSeconds = std::chrono::duration<double>(t1 - t0).count();
-    SIMALL_LOG_INFO("Gpu", "BicgstabGpu: it=", st.iterations,
-        " ||r||=", st.finalResidual,
-        " converged=", st.converged, " time=", st.timeSeconds, "s");
+    SIMALL_LOG_INFO("Gpu",
+                    "BicgstabGpu: it=",
+                    st.iterations,
+                    " ||r||=",
+                    st.finalResidual,
+                    " converged=",
+                    st.converged,
+                    " time=",
+                    st.timeSeconds,
+                    "s");
     return st;
 }
 
-}  // namespace simall::gpu
+} // namespace simall::gpu

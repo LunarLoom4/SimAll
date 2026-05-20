@@ -29,17 +29,19 @@
 #include <cstddef>
 #include <vector>
 
-namespace simall::rom {
+namespace simall::rom
+{
 
-struct EcswResult {
+struct EcswResult
+{
     std::vector<std::size_t> indices;
-    std::vector<double>      weights;
-    double                   relativeError = 0.0;
+    std::vector<double> weights;
+    double relativeError = 0.0;
 };
 
 [[nodiscard]] EcswResult ecsw_hyper_reduction(
-        const std::vector<std::vector<std::vector<double>>>& elementResiduals,
-        double                                                  tau = 1e-3,
-        std::size_t                                              maxIter = 0);
+    const std::vector<std::vector<std::vector<double>>>& elementResiduals,
+    double tau = 1e-3,
+    std::size_t maxIter = 0);
 
-}  // namespace simall::rom
+} // namespace simall::rom

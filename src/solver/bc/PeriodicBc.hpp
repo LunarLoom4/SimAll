@@ -14,9 +14,11 @@
 
 #include <vector>
 
-namespace simall::solver::bc {
+namespace simall::solver::bc
+{
 
-class PeriodicBc : public IBoundaryCondition {
+class PeriodicBc : public IBoundaryCondition
+{
 public:
     explicit PeriodicBc(PeriodicTransform t = {}) : xform_(t) {}
 
@@ -26,16 +28,19 @@ public:
     void initialize(const meshing::Mesh& mesh) override;
     std::size_t apply(BcContext& ctx) override;
 
-    std::unique_ptr<IBoundaryCondition> clone() const override {
+    std::unique_ptr<IBoundaryCondition> clone() const override
+    {
         auto c = std::make_unique<PeriodicBc>(xform_);
-        c->setZone(zone()); c->pairs_ = pairs_; return c;
+        c->setZone(zone());
+        c->pairs_ = pairs_;
+        return c;
     }
 
     const PeriodicTransform& transform() const noexcept { return xform_; }
 
 private:
     PeriodicTransform xform_;
-    std::vector<int>  pairs_;   // face -> twin face (or -1)
+    std::vector<int> pairs_; // face -> twin face (or -1)
 };
 
-}  // namespace simall::solver::bc
+} // namespace simall::solver::bc

@@ -22,27 +22,42 @@
 #include <string>
 #include <vector>
 
-namespace simall::io {
+namespace simall::io
+{
 
-class VtkXmlWriter {
+class VtkXmlWriter
+{
 public:
     explicit VtkXmlWriter(std::string path) : path_(std::move(path)) {}
 
-    void add_cell_scalar(const std::string& name, const double* data) {
-        scalars_.push_back({name, data}); }
-    void add_cell_vector(const std::string& name,
-                         const double* x, const double* y, const double* z) {
-        vectors_.push_back({name, x, y, z}); }
+    void add_cell_scalar(const std::string& name, const double* data)
+    {
+        scalars_.push_back({name, data});
+    }
+    void add_cell_vector(const std::string& name, const double* x, const double* y, const double* z)
+    {
+        vectors_.push_back({name, x, y, z});
+    }
 
     /// Serialize mesh and registered cell-data to disk. Returns true on success.
     bool write(const meshing::Mesh& mesh) const;
 
 private:
-    struct ScalarRef { std::string name; const double* data; };
-    struct VectorRef { std::string name; const double* x; const double* y; const double* z; };
+    struct ScalarRef
+    {
+        std::string name;
+        const double* data;
+    };
+    struct VectorRef
+    {
+        std::string name;
+        const double* x;
+        const double* y;
+        const double* z;
+    };
     std::string path_;
     std::vector<ScalarRef> scalars_;
     std::vector<VectorRef> vectors_;
 };
 
-}  // namespace simall::io
+} // namespace simall::io

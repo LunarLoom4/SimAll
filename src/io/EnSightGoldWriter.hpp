@@ -26,9 +26,11 @@
 #include <string>
 #include <vector>
 
-namespace simall::io {
+namespace simall::io
+{
 
-class EnSightGoldWriter {
+class EnSightGoldWriter
+{
 public:
     /// Initialise the case directory. `caseDir` is created if it does not
     /// exist. `caseName` becomes the .case file base name.
@@ -47,12 +49,8 @@ public:
 
 private:
     bool write_geometry(const meshing::Mesh& mesh);
-    bool write_variable_scalar(const std::string& name,
-                               const solver::ScalarField& f,
-                               int step);
-    bool write_variable_vector(const std::string& name,
-                               const solver::VectorField& f,
-                               int step);
+    bool write_variable_scalar(const std::string& name, const solver::ScalarField& f, int step);
+    bool write_variable_vector(const std::string& name, const solver::VectorField& f, int step);
     bool flush_case_file();
 
     std::string caseDir_;
@@ -60,8 +58,8 @@ private:
     std::vector<double> times_;
     std::vector<std::string> scalarVars_;
     std::vector<std::string> vectorVars_;
-    bool   geometryWritten_ = false;
-    bool   isOpen_ = false;
+    bool geometryWritten_ = false;
+    bool isOpen_ = false;
 };
 
-}  // namespace simall::io
+} // namespace simall::io

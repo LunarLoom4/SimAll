@@ -19,25 +19,29 @@
 #include <string>
 #include <vector>
 
-namespace simall::core {
+namespace simall::core
+{
 
-struct GpuMemorySample {
-    std::string  name;
+struct GpuMemorySample
+{
+    std::string name;
     std::uint64_t totalBytes = 0;
-    std::uint64_t freeBytes  = 0;
-    std::uint64_t usedBytes  = 0;
+    std::uint64_t freeBytes = 0;
+    std::uint64_t usedBytes = 0;
 };
 
-struct ResourceSample {
-    std::uint64_t rssBytes        = 0;
-    std::uint64_t virtualBytes    = 0;
-    double        userCpuSeconds  = 0.0;
-    double        kernelCpuSeconds= 0.0;
+struct ResourceSample
+{
+    std::uint64_t rssBytes = 0;
+    std::uint64_t virtualBytes = 0;
+    double userCpuSeconds = 0.0;
+    double kernelCpuSeconds = 0.0;
     std::vector<GpuMemorySample> gpus;
     std::chrono::system_clock::time_point capturedAt;
 };
 
-class ResourceMonitor {
+class ResourceMonitor
+{
 public:
     /// Collect a sample of the current process.
     static ResourceSample sample();
@@ -46,4 +50,4 @@ public:
     static bool nvmlAvailable();
 };
 
-}  // namespace simall::core
+} // namespace simall::core

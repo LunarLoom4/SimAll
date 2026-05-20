@@ -19,9 +19,11 @@
 #include <deque>
 #include <vector>
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-class AndersonAcceleration {
+class AndersonAcceleration
+{
 public:
     /// `depth` is the Anderson history length m (use 3–10 in practice).
     /// `beta`  is the relaxation factor.
@@ -32,19 +34,24 @@ public:
     void update(std::vector<double>& x, const std::vector<double>& g);
 
     /// Clear the history (call when restarting the solver).
-    void reset() { dx_hist_.clear(); df_hist_.clear(); have_prev_ = false; }
+    void reset()
+    {
+        dx_hist_.clear();
+        df_hist_.clear();
+        have_prev_ = false;
+    }
 
-    std::size_t depth()  const noexcept { return depth_; }
+    std::size_t depth() const noexcept { return depth_; }
     std::size_t window() const noexcept { return dx_hist_.size(); }
 
 private:
     std::size_t depth_;
-    double      beta_;
-    bool        have_prev_ = false;
-    std::vector<double>            x_prev_;
-    std::vector<double>            f_prev_;
+    double beta_;
+    bool have_prev_ = false;
+    std::vector<double> x_prev_;
+    std::vector<double> f_prev_;
     std::deque<std::vector<double>> dx_hist_;
     std::deque<std::vector<double>> df_hist_;
 };
 
-}  // namespace simall::solver
+} // namespace simall::solver

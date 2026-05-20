@@ -27,15 +27,18 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::parallel {
+namespace simall::parallel
+{
 
-struct NeighbourComm {
+struct NeighbourComm
+{
     int rank;                            // remote rank index
     std::vector<std::int32_t> sendCells; // local owned cell ids to send
     std::vector<std::int32_t> recvCells; // local ghost cell ids to receive into
 };
 
-class GhostExchange final : public IFieldSynchronizer {
+class GhostExchange final : public IFieldSynchronizer
+{
 public:
     explicit GhostExchange(MpiContext& ctx);
 
@@ -55,10 +58,10 @@ public:
     std::size_t ghost_count() const override { return nGhost_; }
 
 private:
-    MpiContext&                  ctx_;
-    std::size_t                  nOwned_ = 0;
-    std::size_t                  nGhost_ = 0;
-    std::vector<NeighbourComm>   nbrs_;
+    MpiContext& ctx_;
+    std::size_t nOwned_ = 0;
+    std::size_t nGhost_ = 0;
+    std::vector<NeighbourComm> nbrs_;
 };
 
-}  // namespace simall::parallel
+} // namespace simall::parallel

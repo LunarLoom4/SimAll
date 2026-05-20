@@ -29,23 +29,27 @@
 #include <string>
 #include <vector>
 
-namespace simall::combustion {
+namespace simall::combustion
+{
 
-struct NasaTempRange {
-    double Tlow  = 0.0;
+struct NasaTempRange
+{
+    double Tlow = 0.0;
     double Thigh = 0.0;
-    double a[9]{};   // NASA-7 uses [0..6], NASA-9 uses [0..6]+b1=a[7]+b2=a[8]
+    double a[9]{}; // NASA-7 uses [0..6], NASA-9 uses [0..6]+b1=a[7]+b2=a[8]
 };
 
-struct NasaSpeciesThermo {
-    std::string                 name;
-    std::map<std::string, int>  composition;     // element symbol → atom count
-    double                      molarMass = 0.0; // g/mol (computed)
-    bool                        isNasa9 = false;
-    std::vector<NasaTempRange>  ranges;          // 2 for NASA-7, ≥2 for NASA-9
+struct NasaSpeciesThermo
+{
+    std::string name;
+    std::map<std::string, int> composition; // element symbol → atom count
+    double molarMass = 0.0;                 // g/mol (computed)
+    bool isNasa9 = false;
+    std::vector<NasaTempRange> ranges; // 2 for NASA-7, ≥2 for NASA-9
 };
 
-class ThermoNasaParser {
+class ThermoNasaParser
+{
 public:
     /// Parse a Chemkin-style THERMO block or a NASA-9 burcat-style file.
     /// Auto-detects format by record-line structure.
@@ -60,7 +64,7 @@ public:
     static double s(const NasaSpeciesThermo& sp, double T);
 
     /// Universal gas constant (SI).
-    static constexpr double Ru = 8.314462618;     // J/(mol·K)
+    static constexpr double Ru = 8.314462618; // J/(mol·K)
 };
 
-}  // namespace simall::combustion
+} // namespace simall::combustion

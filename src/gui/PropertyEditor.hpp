@@ -10,36 +10,46 @@
 // =============================================================================
 #pragma once
 
-#include <QWidget>
 #include <functional>
+#include <QWidget>
 #include <string>
 #include <variant>
 #include <vector>
 
 class QFormLayout;
 
-namespace simall::gui {
+namespace simall::gui
+{
 
-enum class PropertyType { Double, Int, Bool, Enum, String, Vec3 };
+enum class PropertyType
+{
+    Double,
+    Int,
+    Bool,
+    Enum,
+    String,
+    Vec3
+};
 
-using Variant = std::variant<double, int, bool, std::string,
-                             std::array<double,3>>;
+using Variant = std::variant<double, int, bool, std::string, std::array<double, 3>>;
 
-struct PropertyDescriptor {
-    std::string  propertyName;
-    PropertyType type             = PropertyType::Double;
-    Variant      defaultValue     = double{0};
-    double       minimum          = -1e300;
-    double       maximum          =  1e300;
+struct PropertyDescriptor
+{
+    std::string propertyName;
+    PropertyType type = PropertyType::Double;
+    Variant defaultValue = double{0};
+    double minimum = -1e300;
+    double maximum = 1e300;
     std::vector<std::string> enumOptions;
-    std::string  tooltip;
-    std::string  units;
-    bool         requiresRestart  = false;
+    std::string tooltip;
+    std::string units;
+    bool requiresRestart = false;
     std::function<bool()> visibilityCondition;
     std::function<void(const Variant&)> onChanged;
 };
 
-class PropertyEditor : public QWidget {
+class PropertyEditor : public QWidget
+{
     Q_OBJECT
 public:
     explicit PropertyEditor(QWidget* parent = nullptr);
@@ -48,8 +58,8 @@ public:
 
 private:
     void rebuild();
-    QFormLayout*                         form_ = nullptr;
-    std::vector<PropertyDescriptor>      props_;
+    QFormLayout* form_ = nullptr;
+    std::vector<PropertyDescriptor> props_;
 };
 
-}  // namespace simall::gui
+} // namespace simall::gui

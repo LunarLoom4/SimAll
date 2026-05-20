@@ -3,19 +3,22 @@
 // File   : src/cad/BrepIo.cpp
 // =============================================================================
 #include "cad/BrepIo.hpp"
+
 #include "cad/ShapeHandleInternal.hpp"
 #include "core/Logger.hpp"
-
-#include <BRepTools.hxx>
-#include <BRep_Builder.hxx>
-#include <TopoDS_Shape.hxx>
 
 #include <filesystem>
 #include <stdexcept>
 
-namespace simall::cad {
+#include <BRep_Builder.hxx>
+#include <BRepTools.hxx>
+#include <TopoDS_Shape.hxx>
 
-ShapeHandle BrepIo::read(const std::string& path) {
+namespace simall::cad
+{
+
+ShapeHandle BrepIo::read(const std::string& path)
+{
     if (!std::filesystem::exists(path))
         throw std::runtime_error("BrepIo: file not found: " + path);
 
@@ -27,13 +30,14 @@ ShapeHandle BrepIo::read(const std::string& path) {
         throw std::runtime_error("BrepIo: read produced a null shape");
 
     auto h = makeHandle(std::move(shape));
-    SIMALL_LOG_INFO("CAD/BREP", "Loaded ", path, " (",
-                    h.topology().size(), " topo nodes)");
+    SIMALL_LOG_INFO("CAD/BREP", "Loaded ", path, " (", h.topology().size(), " topo nodes)");
     return h;
 }
 
-bool BrepIo::write(const ShapeHandle& shape, const std::string& path) const {
-    if (!shape.valid()) return false;
+bool BrepIo::write(const ShapeHandle& shape, const std::string& path) const
+{
+    if (!shape.valid())
+        return false;
     try {
         return BRepTools::Write(ShapeHandleAccess::shape(shape), path.c_str()) != Standard_False;
     } catch (...) {
@@ -41,4 +45,4 @@ bool BrepIo::write(const ShapeHandle& shape, const std::string& path) const {
     }
 }
 
-}  // namespace simall::cad
+} // namespace simall::cad

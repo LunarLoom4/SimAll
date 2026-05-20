@@ -66,13 +66,15 @@
 
 #include <string>
 
-namespace simall::io {
+namespace simall::io
+{
 
-struct GambitReadResult {
-    bool          ok        = false;
-    std::string   error;
-    ImportedMesh  mesh;
-    std::uint8_t  dimension = 0;   ///< 2 or 3, copied from CONTROL INFO NDFCD
+struct GambitReadResult
+{
+    bool ok = false;
+    std::string error;
+    ImportedMesh mesh;
+    std::uint8_t dimension = 0; ///< 2 or 3, copied from CONTROL INFO NDFCD
 };
 
 /// Read a GAMBIT neutral file from disk.
@@ -80,11 +82,10 @@ struct GambitReadResult {
 
 /// Test hook: parse from an in-memory buffer.
 [[nodiscard]] GambitReadResult parse_gambit_neu_string(const std::string& text,
-                                                       std::string        sourceHint
-                                                       = "<string>");
+                                                       std::string sourceHint = "<string>");
 
 /// Translate a GAMBIT element-type code + ndp pair to the SimAll
 /// element-type enum.  Returns ElementType::Unknown for unsupported pairs.
 [[nodiscard]] ElementType gambit_element_type(int gambitCode, int ndp) noexcept;
 
-}  // namespace simall::io
+} // namespace simall::io

@@ -14,15 +14,23 @@
 
 #include "solver/bc/Bc.hpp"
 
-namespace simall::solver::bc {
+namespace simall::solver::bc
+{
 
-enum class AxisAlignment { X, Y, Z };
+enum class AxisAlignment
+{
+    X,
+    Y,
+    Z
+};
 
-struct AxisymmetricParams {
+struct AxisymmetricParams
+{
     AxisAlignment axis = AxisAlignment::X;
 };
 
-class AxisymmetricBc : public IBoundaryCondition {
+class AxisymmetricBc : public IBoundaryCondition
+{
 public:
     explicit AxisymmetricBc(AxisymmetricParams p = {}) : p_(p) {}
 
@@ -30,15 +38,18 @@ public:
     const char* name() const noexcept override { return "Axisymmetric"; }
 
     std::size_t apply(BcContext& ctx) override;
-    std::unique_ptr<IBoundaryCondition> clone() const override {
-        auto c = std::make_unique<AxisymmetricBc>(p_); c->setZone(zone()); return c;
+    std::unique_ptr<IBoundaryCondition> clone() const override
+    {
+        auto c = std::make_unique<AxisymmetricBc>(p_);
+        c->setZone(zone());
+        return c;
     }
 
-    AxisymmetricParams&       params()       noexcept { return p_; }
+    AxisymmetricParams& params() noexcept { return p_; }
     const AxisymmetricParams& params() const noexcept { return p_; }
 
 private:
     AxisymmetricParams p_;
 };
 
-}  // namespace simall::solver::bc
+} // namespace simall::solver::bc

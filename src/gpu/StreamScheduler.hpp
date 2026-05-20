@@ -33,9 +33,11 @@
 #include <cstddef>
 #include <memory>
 
-namespace simall::gpu {
+namespace simall::gpu
+{
 
-class StreamScheduler {
+class StreamScheduler
+{
 public:
     /// ``n`` streams created up-front.  Common values: 2–4 for SIMPLE/PISO,
     /// 8+ for SpMV-heavy GMRES.
@@ -73,7 +75,7 @@ public:
     /// Number of streams in the pool.
     int stream_count() const noexcept;
 
-    StreamScheduler(const StreamScheduler&)            = delete;
+    StreamScheduler(const StreamScheduler&) = delete;
     StreamScheduler& operator=(const StreamScheduler&) = delete;
 
 private:
@@ -81,4 +83,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-}  // namespace simall::gpu
+} // namespace simall::gpu

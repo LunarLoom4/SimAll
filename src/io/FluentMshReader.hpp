@@ -20,15 +20,18 @@
 #pragma once
 
 #include "io/MeshFormats.hpp"
+
 #include <string>
 
-namespace simall::io {
+namespace simall::io
+{
 
-struct FluentReadResult {
-    bool          ok        = false;
-    std::string   error;
-    ImportedMesh  mesh;
-    std::uint8_t  dimension = 0;
+struct FluentReadResult
+{
+    bool ok = false;
+    std::string error;
+    ImportedMesh mesh;
+    std::uint8_t dimension = 0;
 };
 
 [[nodiscard]] FluentReadResult read_fluent_msh(const std::string& path);
@@ -37,4 +40,4 @@ struct FluentReadResult {
 [[nodiscard]] FluentReadResult parse_fluent_msh_string(const std::string& text,
                                                        std::string sourceHint = "<string>");
 
-}  // namespace simall::io
+} // namespace simall::io

@@ -21,22 +21,26 @@
 #include <cstdint>
 #include <string>
 
-namespace simall::io {
+namespace simall::io
+{
 
-struct CheckpointHeader {
-    char        magic[8] = {'S','I','M','A','L','L','C','P'};
+struct CheckpointHeader
+{
+    char magic[8] = {'S', 'I', 'M', 'A', 'L', 'L', 'C', 'P'};
     std::uint32_t version = 1;
-    std::uint32_t flags   = 0;
+    std::uint32_t flags = 0;
     std::uint64_t timestamp = 0;
 };
 
-struct CheckpointMeta {
-    int     iteration = 0;
-    double  time      = 0.0;
+struct CheckpointMeta
+{
+    int iteration = 0;
+    double time = 0.0;
     std::uint64_t settingsHash = 0;
 };
 
-class Checkpoint {
+class Checkpoint
+{
 public:
     /// Atomic write: first to `.tmp`, then rename over `path`.
     static bool write(const std::string& path,
@@ -52,4 +56,4 @@ public:
                      CheckpointMeta& meta);
 };
 
-}  // namespace simall::io
+} // namespace simall::io

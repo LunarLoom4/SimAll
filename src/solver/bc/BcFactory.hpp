@@ -17,9 +17,11 @@
 #include <string>
 #include <unordered_map>
 
-namespace simall::solver::bc {
+namespace simall::solver::bc
+{
 
-class BcFactory {
+class BcFactory
+{
 public:
     using Builder = std::function<std::unique_ptr<IBoundaryCondition>()>;
 
@@ -44,4 +46,4 @@ private:
     std::unordered_map<int, Builder> builders_;
 };
 
-}  // namespace simall::solver::bc
+} // namespace simall::solver::bc

@@ -14,31 +14,35 @@
 #include <string>
 #include <vector>
 
-namespace simall::cad {
+namespace simall::cad
+{
 
-struct StepReadOptions {
-    double lengthUnitToMeters = 0.0;  // 0 → honour STEP file's declared units
-    bool   readNames           = true;
-    bool   readColors          = true;
-    bool   readLayers          = false;
-    bool   heal                = false;
-    int    precisionMode       = 0;    // 0 = average, 1 = least, 2 = greatest
+struct StepReadOptions
+{
+    double lengthUnitToMeters = 0.0; // 0 → honour STEP file's declared units
+    bool readNames = true;
+    bool readColors = true;
+    bool readLayers = false;
+    bool heal = false;
+    int precisionMode = 0; // 0 = average, 1 = least, 2 = greatest
 };
 
-struct StepReadReport {
-    std::size_t rootCount     = 0;
-    std::size_t transferred   = 0;
-    std::size_t failedRoots   = 0;
+struct StepReadReport
+{
+    std::size_t rootCount = 0;
+    std::size_t transferred = 0;
+    std::size_t failedRoots = 0;
     std::vector<std::string> warnings;
 };
 
-class StepReader {
+class StepReader
+{
 public:
-    ShapeHandle    read(const std::string& path, const StepReadOptions& opts = {});
+    ShapeHandle read(const std::string& path, const StepReadOptions& opts = {});
     StepReadReport lastReport() const noexcept { return report_; }
 
 private:
     StepReadReport report_;
 };
 
-}  // namespace simall::cad
+} // namespace simall::cad

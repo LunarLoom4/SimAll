@@ -20,35 +20,45 @@
 #pragma once
 
 #include "utilities/MathTypes.hpp"
+
 #include <array>
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-struct PrimState {
+struct PrimState
+{
     double rho = 1.0;
-    double u   = 0.0;
-    double v   = 0.0;
-    double w   = 0.0;
-    double p   = 1.0e5;
+    double u = 0.0;
+    double v = 0.0;
+    double w = 0.0;
+    double p = 1.0e5;
 };
 
 /// Conservative state U = (ρ, ρu, ρv, ρw, ρE).
 using ConsFlux = std::array<double, 5>;
 
-class CompressibleFlux {
+class CompressibleFlux
+{
 public:
     explicit CompressibleFlux(double gamma = 1.4) : gamma_(gamma) {}
 
     /// HLLC numerical flux through a face with outward unit normal n and
     /// area magnitude A. The returned flux is already multiplied by A.
-    ConsFlux hllc(const PrimState& L, const PrimState& R,
-                  const util::Vec3d& n, double A) const;
+    ConsFlux hllc(const PrimState& L, const PrimState& R, const util::Vec3d& n, double A) const;
 
     /// Rotate primitive velocity (u,v,w) into face-aligned frame so the
     /// shock-normal axis is x. Used by 1-D Riemann inside hllc().
-    static void rotate_to_face(const util::Vec3d& n, double& u, double& v, double& w,
-                               double& tx_x, double& tx_y, double& tx_z,
-                               double& ty_x, double& ty_y, double& ty_z);
+    static void rotate_to_face(const util::Vec3d& n,
+                               double& u,
+                               double& v,
+                               double& w,
+                               double& tx_x,
+                               double& tx_y,
+                               double& tx_z,
+                               double& ty_x,
+                               double& ty_y,
+                               double& ty_z);
 
     double gamma() const noexcept { return gamma_; }
 
@@ -56,4 +66,4 @@ private:
     double gamma_ = 1.4;
 };
 
-}  // namespace simall::solver
+} // namespace simall::solver

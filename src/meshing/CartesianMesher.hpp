@@ -14,22 +14,27 @@
 #pragma once
 
 #include "MeshStorage.hpp"
+
 #include "utilities/MathTypes.hpp"
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct CartesianGridSpec {
+struct CartesianGridSpec
+{
     util::Vec3d origin{0, 0, 0};
     util::Vec3d extent{1, 1, 1};
     int Nx = 10, Ny = 10, Nz = 10;
 };
 
-class CartesianMesher {
+class CartesianMesher
+{
 public:
     explicit CartesianMesher(CartesianGridSpec s) : spec_(s) {}
     void generate(Mesh& out);
+
 private:
     CartesianGridSpec spec_;
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

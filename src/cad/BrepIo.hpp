@@ -13,9 +13,11 @@
 
 #include <string>
 
-namespace simall::cad {
+namespace simall::cad
+{
 
-class BrepIo {
+class BrepIo
+{
 public:
     /// Read a .brep file. Throws on IO error.
     ShapeHandle read(const std::string& path);
@@ -25,4 +27,4 @@ public:
     bool write(const ShapeHandle& shape, const std::string& path) const;
 };
 
-}  // namespace simall::cad
+} // namespace simall::cad

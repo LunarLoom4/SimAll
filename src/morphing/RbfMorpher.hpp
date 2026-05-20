@@ -27,15 +27,18 @@
 
 #include <vector>
 
-namespace simall::morphing {
+namespace simall::morphing
+{
 
-struct RbfOptions {
-    double supportRadius   = 0.0;   // 0 ⇒ auto-set to bbox diag
-    double regularization  = 1e-12; // ridge to keep system SPD
-    bool   addPolynomial   = true;  // append linear poly for affine recovery
+struct RbfOptions
+{
+    double supportRadius = 0.0;    // 0 ⇒ auto-set to bbox diag
+    double regularization = 1e-12; // ridge to keep system SPD
+    bool addPolynomial = true;     // append linear poly for affine recovery
 };
 
-class RbfMorpher {
+class RbfMorpher
+{
 public:
     /// Set control points + their prescribed displacements (3-vector each).
     /// Sizes must match.
@@ -60,10 +63,10 @@ private:
     // Coefficient vectors per Cartesian component (αx, αy, αz).
     std::vector<double> ax_, ay_, az_;
     // Polynomial coefficients [c0, cx, cy, cz] per component.
-    double bx_[4]{0,0,0,0}, by_[4]{0,0,0,0}, bz_[4]{0,0,0,0};
+    double bx_[4]{0, 0, 0, 0}, by_[4]{0, 0, 0, 0}, bz_[4]{0, 0, 0, 0};
     double R_ = 1.0;
-    bool   havePoly_ = true;
-    bool   trained_  = false;
+    bool havePoly_ = true;
+    bool trained_ = false;
 };
 
-}  // namespace simall::morphing
+} // namespace simall::morphing

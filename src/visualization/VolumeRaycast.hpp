@@ -14,19 +14,23 @@
 
 #include <vector>
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-struct RegularGrid3 {
-    std::uint32_t      nx = 0, ny = 0, nz = 0;
-    util::Vec3d        origin {0, 0, 0};
-    util::Vec3d        spacing{1, 1, 1};
-    std::vector<float> values;   // length nx*ny*nz, k-major (z slowest)
+struct RegularGrid3
+{
+    std::uint32_t nx = 0, ny = 0, nz = 0;
+    util::Vec3d origin{0, 0, 0};
+    util::Vec3d spacing{1, 1, 1};
+    std::vector<float> values; // length nx*ny*nz, k-major (z slowest)
 
-    bool valid() const noexcept {
-        return nx > 0 && ny > 0 && nz > 0 &&
-               static_cast<std::size_t>(nx) * ny * nz == values.size();
+    bool valid() const noexcept
+    {
+        return nx > 0 && ny > 0 && nz > 0
+               && static_cast<std::size_t>(nx) * ny * nz == values.size();
     }
-    util::BoundingBox bbox() const noexcept {
+    util::BoundingBox bbox() const noexcept
+    {
         return {origin,
                 {origin.x + spacing.x * (nx - 1),
                  origin.y + spacing.y * (ny - 1),
@@ -34,15 +38,17 @@ struct RegularGrid3 {
     }
 };
 
-struct RaycastConfig {
-    double sampleStep = 0.0;     // <=0 → automatic (0.5 * min spacing)
-    double opacityScale = 1.0;   // multiplies TF alpha (1 = stops are absolute)
+struct RaycastConfig
+{
+    double sampleStep = 0.0;   // <=0 → automatic (0.5 * min spacing)
+    double opacityScale = 1.0; // multiplies TF alpha (1 = stops are absolute)
     Color4 background = {0.0f, 0.0f, 0.0f, 0.0f};
-    bool   useEarlyTermination = true;
+    bool useEarlyTermination = true;
     double earlyOpacity = 0.98;
 };
 
-class VolumeRaycast {
+class VolumeRaycast
+{
 public:
     /// Render `volume` from `camera` using `tf`.  Resolution comes from
     /// camera.viewportWidth/height.  Returns an RGBA8 image suitable for
@@ -53,4 +59,4 @@ public:
                         const RaycastConfig& cfg = {});
 };
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

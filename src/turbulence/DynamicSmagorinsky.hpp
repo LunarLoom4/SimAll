@@ -16,38 +16,42 @@
 // =============================================================================
 #pragma once
 
-#include "turbulence/ITurbulenceModel.hpp"
 #include "solver/Solver.hpp"
 #include "solver/WallDistance.hpp"
+#include "turbulence/ITurbulenceModel.hpp"
 #include "utilities/AlignedAllocator.hpp"
 
 #include <memory>
 #include <vector>
 
-namespace simall::turbulence {
+namespace simall::turbulence
+{
 
-class DynamicSmagorinsky_LES final : public ITurbulenceModel {
+class DynamicSmagorinsky_LES final : public ITurbulenceModel
+{
 public:
     std::string name() const override { return "dynamicSmagorinsky"; }
-    void   initialize(meshing::Mesh& m, solver::FieldRegistry& f) override;
-    void   solve(double dt, solver::FieldRegistry& f) override;
+    void initialize(meshing::Mesh& m, solver::FieldRegistry& f) override;
+    void solve(double dt, solver::FieldRegistry& f) override;
     double turbulent_viscosity(std::size_t c) const override
-        { return c < mut_.size() ? mut_[c] : 0.0; }
+    {
+        return c < mut_.size() ? mut_[c] : 0.0;
+    }
 
     void set_boundaries(const std::vector<solver::BoundarySpec>& bcs) { bcs_ = bcs; }
-    void set_density(double rho)             { rho_ = rho; }
-    void set_viscosity(double mu)            { mu_  = mu;  }
-    void set_cs_max(double v)                { csMax_ = v; }
+    void set_density(double rho) { rho_ = rho; }
+    void set_viscosity(double mu) { mu_ = mu; }
+    void set_cs_max(double v) { csMax_ = v; }
 
 private:
     meshing::Mesh* mesh_ = nullptr;
     std::vector<solver::BoundarySpec> bcs_;
     double rho_ = 1.0, mu_ = 1.0e-3;
-    double csMax_ = 0.23;                         // physical upper bound
+    double csMax_ = 0.23; // physical upper bound
 
     util::aligned_vector<double> mut_;
     util::aligned_vector<double> Cs2_;
-    util::aligned_vector<double> delta_;          // grid filter width
+    util::aligned_vector<double> delta_; // grid filter width
 };
 
-}  // namespace simall::turbulence
+} // namespace simall::turbulence

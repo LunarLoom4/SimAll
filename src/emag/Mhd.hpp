@@ -30,21 +30,28 @@
 #include <functional>
 #include <string>
 
-namespace simall::emag {
+namespace simall::emag
+{
 
-struct MhdProps {
-    double sigma     = 1.0e6;             // electrical conductivity [S/m]
+struct MhdProps
+{
+    double sigma = 1.0e6; // electrical conductivity [S/m]
     // Externally specified B(x) as a callable, evaluated per cell centroid.
     std::function<util::Vec3d(const util::Vec3d&)> Bfield;
     // Voltage boundary conditions on insulator/electrode zones.
-    struct PhiBC { meshing::ZoneId zone; double value; bool isDirichlet; };
+    struct PhiBC
+    {
+        meshing::ZoneId zone;
+        double value;
+        bool isDirichlet;
+    };
     std::vector<PhiBC> bcs;
 };
 
-class Mhd {
+class Mhd
+{
 public:
-    Mhd(meshing::Mesh& mesh, solver::FieldRegistry& fields,
-        solver::ILinearSolver& linear);
+    Mhd(meshing::Mesh& mesh, solver::FieldRegistry& fields, solver::ILinearSolver& linear);
 
     void initialize(MhdProps props);
 
@@ -56,13 +63,13 @@ public:
 private:
     void build_sparsity();
 
-    meshing::Mesh&         mesh_;
+    meshing::Mesh& mesh_;
     solver::FieldRegistry& F_;
     solver::ILinearSolver& lin_;
-    MhdProps               props_{};
-    solver::CSRMatrix      A_;
+    MhdProps props_{};
+    solver::CSRMatrix A_;
     util::aligned_vector<double> rhs_;
-    bool                   sparsity_built_ = false;
+    bool sparsity_built_ = false;
 };
 
-}  // namespace simall::emag
+} // namespace simall::emag

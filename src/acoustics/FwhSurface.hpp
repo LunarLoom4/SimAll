@@ -40,19 +40,23 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::acoustics {
+namespace simall::acoustics
+{
 
-struct FwhObserver {
+struct FwhObserver
+{
     util::Vec3d position{0, 0, 0};
 };
 
-struct FwhSurfaceProps {
-    double rho0 = 1.225;             // far-field density [kg/m³]
-    double a0   = 340.0;             // far-field sound speed [m/s]
-    bool   permeable = true;         // false ⇒ skip thickness term entirely
+struct FwhSurfaceProps
+{
+    double rho0 = 1.225;   // far-field density [kg/m³]
+    double a0 = 340.0;     // far-field sound speed [m/s]
+    bool permeable = true; // false ⇒ skip thickness term entirely
 };
 
-class FwhSurface {
+class FwhSurface
+{
 public:
     /// Define the integration surface from a set of boundary face zones.
     void initialize(const meshing::Mesh& mesh,
@@ -62,37 +66,42 @@ public:
     /// Record one time-history sample from the running solver. Samples must
     /// be supplied at uniform Δt; the integrator interpolates linearly in
     /// retarded time between adjacent samples.
-    void record_sample(double t, const solver::FieldRegistry& fields,
+    void record_sample(double t,
+                       const solver::FieldRegistry& fields,
                        const util::Vec3d& surfaceVelocity = {0, 0, 0});
 
     /// Compute the acoustic pressure p'(t_obs) for each observer at the
     /// requested observer-time stamps (uniform sampling [tStart, tEnd] in
     /// step dt). Returns a flat array indexed [obsIdx * Nt + it].
     std::vector<double> emit(const std::vector<FwhObserver>& observers,
-                             double tStart, double tEnd, double dt) const;
+                             double tStart,
+                             double tEnd,
+                             double dt) const;
 
     std::size_t panel_count() const noexcept { return panels_.size(); }
     std::size_t sample_count() const noexcept { return times_.size(); }
 
 private:
-    struct Panel {
+    struct Panel
+    {
         util::Vec3d centroid;
-        util::Vec3d normal;       // unit outward normal
-        double      area = 0;
+        util::Vec3d normal; // unit outward normal
+        double area = 0;
     };
-    struct Snapshot {
+    struct Snapshot
+    {
         // Per-panel cached scalars at one time sample.
-        std::vector<util::Vec3d> u;          // fluid velocity at panel
-        std::vector<double>      p;          // gauge pressure
-        std::vector<double>      rho;        // local density (or ρ_0)
-        util::Vec3d              surfaceVel; // rigid-body velocity of S
+        std::vector<util::Vec3d> u; // fluid velocity at panel
+        std::vector<double> p;      // gauge pressure
+        std::vector<double> rho;    // local density (or ρ_0)
+        util::Vec3d surfaceVel;     // rigid-body velocity of S
     };
 
-    const meshing::Mesh*  mesh_ = nullptr;
-    FwhSurfaceProps       props_{};
-    std::vector<Panel>    panels_;
-    std::vector<double>   times_;
+    const meshing::Mesh* mesh_ = nullptr;
+    FwhSurfaceProps props_{};
+    std::vector<Panel> panels_;
+    std::vector<double> times_;
     std::vector<Snapshot> snaps_;
 };
 
-}  // namespace simall::acoustics
+} // namespace simall::acoustics

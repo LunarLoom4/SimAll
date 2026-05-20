@@ -16,20 +16,22 @@
 
 #include <cstddef>
 
-namespace simall::parallel {
+namespace simall::parallel
+{
 
-class FieldReducer {
+class FieldReducer
+{
 public:
     explicit FieldReducer(MpiContext& ctx) : ctx_(ctx) {}
 
     /// Sum of owned values across ranks.
-    double sum (const util::aligned_vector<double>& v, std::size_t nOwned) const;
+    double sum(const util::aligned_vector<double>& v, std::size_t nOwned) const;
     /// L2 norm (sqrt(Σ v²)) over the owned cells of all ranks.
-    double l2  (const util::aligned_vector<double>& v, std::size_t nOwned) const;
+    double l2(const util::aligned_vector<double>& v, std::size_t nOwned) const;
     /// Minimum value across all owned cells of all ranks.
-    double min (const util::aligned_vector<double>& v, std::size_t nOwned) const;
+    double min(const util::aligned_vector<double>& v, std::size_t nOwned) const;
     /// Maximum value across all owned cells of all ranks.
-    double max (const util::aligned_vector<double>& v, std::size_t nOwned) const;
+    double max(const util::aligned_vector<double>& v, std::size_t nOwned) const;
     /// Arithmetic mean (sum/Ntotal).
     double mean(const util::aligned_vector<double>& v, std::size_t nOwned) const;
 
@@ -47,4 +49,4 @@ private:
     MpiContext& ctx_;
 };
 
-}  // namespace simall::parallel
+} // namespace simall::parallel

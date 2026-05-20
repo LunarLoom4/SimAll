@@ -22,14 +22,17 @@
 
 #include "FieldRegistry.hpp"
 #include "Solver.hpp"
+
 #include "meshing/MeshStorage.hpp"
 
 #include <memory>
 #include <vector>
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-class IWallDistance {
+class IWallDistance
+{
 public:
     virtual ~IWallDistance() = default;
     virtual void compute(const meshing::Mesh& mesh,
@@ -40,4 +43,4 @@ public:
 std::unique_ptr<IWallDistance> make_wall_distance_exact();
 std::unique_ptr<IWallDistance> make_wall_distance_poisson(ILinearSolver& solver);
 
-}  // namespace simall::solver
+} // namespace simall::solver

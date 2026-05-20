@@ -29,19 +29,24 @@
 // =============================================================================
 #pragma once
 
-#include "meshing/MeshStorage.hpp"
 #include "FieldRegistry.hpp"
+
+#include "meshing/MeshStorage.hpp"
 #include "solver/Solver.hpp"
+
 #include <vector>
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-class FluxCorrectedTransport {
+class FluxCorrectedTransport
+{
 public:
     /// Construct against a mesh + BC table. Field & mass-flux passed per call.
-    FluxCorrectedTransport(const meshing::Mesh& mesh,
-                           const std::vector<BoundarySpec>& bcs)
-        : mesh_(mesh), bcs_(bcs) {}
+    FluxCorrectedTransport(const meshing::Mesh& mesh, const std::vector<BoundarySpec>& bcs)
+        : mesh_(mesh), bcs_(bcs)
+    {
+    }
 
     /// Single-step explicit FCT advance of a passive scalar:
     ///     ∂φ/∂t + ∇·(U φ) = 0
@@ -64,8 +69,8 @@ public:
                          util::aligned_vector<double>& alpha);
 
 private:
-    const meshing::Mesh&             mesh_;
+    const meshing::Mesh& mesh_;
     const std::vector<BoundarySpec>& bcs_;
 };
 
-}  // namespace simall::solver
+} // namespace simall::solver

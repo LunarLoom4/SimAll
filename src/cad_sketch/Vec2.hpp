@@ -14,9 +14,11 @@
 
 #include <cmath>
 
-namespace simall::cad::sketch {
+namespace simall::cad::sketch
+{
 
-struct Vec2 {
+struct Vec2
+{
     double x{0.0};
     double y{0.0};
 
@@ -25,24 +27,26 @@ struct Vec2 {
 
     constexpr Vec2 operator+(const Vec2& o) const noexcept { return {x + o.x, y + o.y}; }
     constexpr Vec2 operator-(const Vec2& o) const noexcept { return {x - o.x, y - o.y}; }
-    constexpr Vec2 operator*(double s)      const noexcept { return {x * s, y * s}; }
-    constexpr Vec2 operator/(double s)      const noexcept { return {x / s, y / s}; }
-    constexpr Vec2 operator-()              const noexcept { return {-x, -y}; }
+    constexpr Vec2 operator*(double s) const noexcept { return {x * s, y * s}; }
+    constexpr Vec2 operator/(double s) const noexcept { return {x / s, y / s}; }
+    constexpr Vec2 operator-() const noexcept { return {-x, -y}; }
 
-    constexpr double dot  (const Vec2& o) const noexcept { return x * o.x + y * o.y; }
+    constexpr double dot(const Vec2& o) const noexcept { return x * o.x + y * o.y; }
     constexpr double cross(const Vec2& o) const noexcept { return x * o.y - y * o.x; }
 
-    [[nodiscard]] double norm()  const noexcept { return std::sqrt(x * x + y * y); }
+    [[nodiscard]] double norm() const noexcept { return std::sqrt(x * x + y * y); }
     [[nodiscard]] double norm2() const noexcept { return x * x + y * y; }
 
-    [[nodiscard]] Vec2 normalized() const noexcept {
+    [[nodiscard]] Vec2 normalized() const noexcept
+    {
         const double n = norm();
         return n > 0.0 ? Vec2{x / n, y / n} : Vec2{};
     }
 };
 
-[[nodiscard]] inline double distance(const Vec2& a, const Vec2& b) noexcept {
+[[nodiscard]] inline double distance(const Vec2& a, const Vec2& b) noexcept
+{
     return (a - b).norm();
 }
 
-}  // namespace simall::cad::sketch
+} // namespace simall::cad::sketch

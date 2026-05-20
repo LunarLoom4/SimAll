@@ -3,15 +3,18 @@
 // File   : src/turbulence/Smagorinsky.cpp
 // =============================================================================
 #include "turbulence/Smagorinsky.hpp"
-#include "solver/Gradient.hpp"
+
 #include "core/Logger.hpp"
+#include "solver/Gradient.hpp"
 
 #include <algorithm>
 #include <cmath>
 
-namespace simall::turbulence {
+namespace simall::turbulence
+{
 
-void Smagorinsky_LES::initialize(meshing::Mesh& m, solver::FieldRegistry& f) {
+void Smagorinsky_LES::initialize(meshing::Mesh& m, solver::FieldRegistry& f)
+{
     mesh_ = &m;
     const std::size_t nC = m.cells().size();
     f.scalar("mut", nC);
@@ -24,15 +27,23 @@ void Smagorinsky_LES::initialize(meshing::Mesh& m, solver::FieldRegistry& f) {
     delta_.assign(nC, 0.0);
     for (std::size_t c = 0; c < nC; ++c)
         delta_[c] = std::cbrt(std::max(m.cells().volume[c], 1e-30));
-    SIMALL_LOG_INFO("Turbulence", "Smagorinsky LES initialized (Cs=", Cs_,
-        ", van-Driest=", vanDriest_, ", cells=", nC, ")");
+    SIMALL_LOG_INFO("Turbulence",
+                    "Smagorinsky LES initialized (Cs=",
+                    Cs_,
+                    ", van-Driest=",
+                    vanDriest_,
+                    ", cells=",
+                    nC,
+                    ")");
 }
 
-void Smagorinsky_LES::solve(double /*dt*/, solver::FieldRegistry& f) {
-    if (!mesh_) return;
+void Smagorinsky_LES::solve(double /*dt*/, solver::FieldRegistry& f)
+{
+    if (!mesh_)
+        return;
     const std::size_t nC = mesh_->cells().size();
     const auto& U = *f.find_vector("U");
-    auto& mut    = *f.find_scalar("mut");
+    auto& mut = *f.find_scalar("mut");
 
     solver::LeastSquaresGradient G(*mesh_);
     solver::VectorField gUx, gUy, gUz;
@@ -51,8 +62,8 @@ void Smagorinsky_LES::solve(double /*dt*/, solver::FieldRegistry& f) {
         const double S12 = 0.5 * (gUx.y[c] + gUy.x[c]);
         const double S13 = 0.5 * (gUx.z[c] + gUz.x[c]);
         const double S23 = 0.5 * (gUy.z[c] + gUz.y[c]);
-        const double SS  = 2.0 * (S11*S11 + S22*S22 + S33*S33
-                                + 2.0 * (S12*S12 + S13*S13 + S23*S23));
+        const double SS =
+            2.0 * (S11 * S11 + S22 * S22 + S33 * S33 + 2.0 * (S12 * S12 + S13 * S13 + S23 * S23));
         const double Smag = std::sqrt(std::max(SS, 0.0));
 
         double damp = 1.0;
@@ -68,4 +79,4 @@ void Smagorinsky_LES::solve(double /*dt*/, solver::FieldRegistry& f) {
     }
 }
 
-}  // namespace simall::turbulence
+} // namespace simall::turbulence

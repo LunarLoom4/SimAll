@@ -9,27 +9,27 @@
 
 #include <iostream>
 
-namespace {
+namespace
+{
 
-class CurvePostprocPlugin final : public simall::plugins::CategorisedPlugin {
+class CurvePostprocPlugin final : public simall::plugins::CategorisedPlugin
+{
 public:
-    CurvePostprocPlugin()
-        : CategorisedPlugin(simall::plugins::PluginCategory::PostProcessor) {}
+    CurvePostprocPlugin() : CategorisedPlugin(simall::plugins::PluginCategory::PostProcessor) {}
 
-    std::string name()    const override { return "simall_curve_postproc"; }
+    std::string name() const override { return "simall_curve_postproc"; }
     std::string version() const override { return "1.0.0"; }
 
-    void on_load() override {
+    void on_load() override
+    {
         std::clog << "[plugin] " << name() << " " << version() << " loaded\n";
         // In a real host the plugin would call:
         //   simall::visualization::FilterRegistry::instance().register_filter(
         //       "CenterlineExtract", [](){ return new CenterlineExtractFilter; });
     }
-    void on_unload() override {
-        std::clog << "[plugin] " << name() << " unloaded\n";
-    }
+    void on_unload() override { std::clog << "[plugin] " << name() << " unloaded\n"; }
 };
 
-}  // namespace
+} // namespace
 
 SIMALL_DECLARE_PLUGIN(CurvePostprocPlugin)

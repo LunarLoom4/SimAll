@@ -27,29 +27,34 @@
 #include <unordered_map>
 #include <vector>
 
-namespace simall::combustion {
+namespace simall::combustion
+{
 
-struct SlfmAxis {
-    std::vector<double> Z;          // mixture fraction
-    std::vector<double> log10Chi;   // log10 of scalar dissipation rate (1/s)
+struct SlfmAxis
+{
+    std::vector<double> Z;        // mixture fraction
+    std::vector<double> log10Chi; // log10 of scalar dissipation rate (1/s)
 };
 
-struct SlfmTable {
+struct SlfmTable
+{
     SlfmAxis axis;
     std::unordered_map<std::string, std::vector<double>> var;
 };
 
-class SlfmFlamelet {
+class SlfmFlamelet
+{
 public:
     /// Build an analytic SLFM table: Burke-Schumann triangular T(Z)
     /// modulated by exp(-χ/χ_q) extinction factor.
-    void build_analytic(std::size_t NZ      = 41,
+    void build_analytic(std::size_t NZ = 41,
                         std::size_t NlogChi = 11,
-                        double Z_st = 0.055, double T_un = 300.0,
+                        double Z_st = 0.055,
+                        double T_un = 300.0,
                         double T_ad = 2225.0,
                         double chi_q = 100.0,
                         double log10chi_min = -3.0,
-                        double log10chi_max =  3.0);
+                        double log10chi_max = 3.0);
 
     void set_table(SlfmTable t) { table_ = std::move(t); }
     const SlfmTable& table() const noexcept { return table_; }
@@ -63,8 +68,8 @@ public:
     void apply(solver::FieldRegistry& fields);
 
 private:
-    SlfmTable           table_;
+    SlfmTable table_;
     const meshing::Mesh* mesh_ = nullptr;
 };
 
-}  // namespace simall::combustion
+} // namespace simall::combustion

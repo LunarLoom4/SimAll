@@ -35,31 +35,34 @@
 #include <type_traits>
 #include <vector>
 
-namespace simall::core {
+namespace simall::core
+{
 
-struct ThreadPoolConfig {
-    std::size_t numThreads     = 0;        // 0 → hardware_concurrency()
-    bool        pinAffinity    = false;    // pin worker i to logical CPU i
-    int         numaNodeHint   = -1;       // -1 → no preference (informational)
+struct ThreadPoolConfig
+{
+    std::size_t numThreads = 0; // 0 → hardware_concurrency()
+    bool pinAffinity = false;   // pin worker i to logical CPU i
+    int numaNodeHint = -1;      // -1 → no preference (informational)
     std::string threadNamePrefix = "simall-worker";
 };
 
-class ThreadPool {
+class ThreadPool
+{
 public:
     explicit ThreadPool(ThreadPoolConfig cfg = {});
     ~ThreadPool();
 
-    ThreadPool(const ThreadPool&)            = delete;
+    ThreadPool(const ThreadPool&) = delete;
     ThreadPool& operator=(const ThreadPool&) = delete;
 
     /// Submit any callable; returns std::future for its result.
     template <class F, class... Args>
-    auto submit(F&& f, Args&&... args)
-        -> std::future<std::invoke_result_t<F, Args...>>
+    auto submit(F&& f, Args&&... args) -> std::future<std::invoke_result_t<F, Args...>>
     {
         using R = std::invoke_result_t<F, Args...>;
         auto task = std::make_shared<std::packaged_task<R()>>(
-            [fn = std::forward<F>(f), tup = std::make_tuple(std::forward<Args>(args)...)]() mutable {
+            [fn = std::forward<F>(f),
+             tup = std::make_tuple(std::forward<Args>(args)...)]() mutable {
                 return std::apply(std::move(fn), std::move(tup));
             });
         std::future<R> fut = task->get_future();
@@ -87,13 +90,13 @@ private:
     void workerLoop(std::size_t index);
     void setNameAndAffinity(std::size_t index);
 
-    ThreadPoolConfig             cfg_;
-    std::vector<std::thread>     workers_;
+    ThreadPoolConfig cfg_;
+    std::vector<std::thread> workers_;
     std::vector<std::unique_ptr<Worker>> queues_;
-    std::atomic<bool>            stopping_{false};
-    std::atomic<std::size_t>     pending_{0};
-    std::condition_variable      idle_cv_;
-    std::mutex                   idle_mtx_;
+    std::atomic<bool> stopping_{false};
+    std::atomic<std::size_t> pending_{0};
+    std::condition_variable idle_cv_;
+    std::mutex idle_mtx_;
 };
 
-}  // namespace simall::core
+} // namespace simall::core

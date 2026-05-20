@@ -19,55 +19,64 @@
 // =============================================================================
 #pragma once
 
-#include "particles/LagrangianTracker.hpp"
 #include "meshing/MeshStorage.hpp"
+#include "particles/LagrangianTracker.hpp"
 #include "utilities/MathTypes.hpp"
 
 #include <cstdint>
 #include <unordered_map>
 #include <vector>
 
-namespace simall::particles {
+namespace simall::particles
+{
 
-struct DemMaterial {
-    double youngsModulus = 1.0e9;    // Pa
-    double poissonRatio  = 0.30;
-    double restitution   = 0.85;     // coefficient of restitution
-    double friction      = 0.30;     // Coulomb friction coefficient
+struct DemMaterial
+{
+    double youngsModulus = 1.0e9; // Pa
+    double poissonRatio = 0.30;
+    double restitution = 0.85; // coefficient of restitution
+    double friction = 0.30;    // Coulomb friction coefficient
 };
 
-class DemCollision {
+class DemCollision
+{
 public:
     void initialize(const meshing::Mesh& mesh, const DemMaterial& mat);
 
     /// Apply contact forces by mutating particle velocities/angular
     /// velocities in-place over time step `dt`. Pure substep — call after
     /// LagrangianTracker::advance(dt, ...).
-    void apply(double dt, std::vector<ParticleState>& particles,
-               const ParticleSpec& spec);
+    void apply(double dt, std::vector<ParticleState>& particles, const ParticleSpec& spec);
 
     /// Number of contacts processed during the most recent `apply()`.
     std::size_t last_contact_count() const noexcept { return lastContacts_; }
 
 private:
-    struct HashKey {
+    struct HashKey
+    {
         std::int32_t i, j, k;
-        bool operator==(const HashKey& o) const { return i==o.i && j==o.j && k==o.k; }
+        bool operator==(const HashKey& o) const { return i == o.i && j == o.j && k == o.k; }
     };
-    struct HashHasher {
-        std::size_t operator()(const HashKey& k) const noexcept {
-            return (std::size_t)(k.i*73856093u ^ k.j*19349663u ^ k.k*83492791u);
+    struct HashHasher
+    {
+        std::size_t operator()(const HashKey& k) const noexcept
+        {
+            return (std::size_t) (k.i * 73856093u ^ k.j * 19349663u ^ k.k * 83492791u);
         }
     };
 
-    void contact_pair(double dt, ParticleState& a, ParticleState& b,
-                      double dA, double dB, double mA, double mB);
-    void contact_wall(double dt, ParticleState& p, double dP, double mP,
-                      const util::Vec3d& faceNormal, double penetration);
+    void contact_pair(
+        double dt, ParticleState& a, ParticleState& b, double dA, double dB, double mA, double mB);
+    void contact_wall(double dt,
+                      ParticleState& p,
+                      double dP,
+                      double mP,
+                      const util::Vec3d& faceNormal,
+                      double penetration);
 
     const meshing::Mesh* mesh_ = nullptr;
     DemMaterial mat_{};
     std::size_t lastContacts_ = 0;
 };
 
-}  // namespace simall::particles
+} // namespace simall::particles

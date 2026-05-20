@@ -62,20 +62,21 @@
 
 #include <string>
 
-namespace simall::io {
+namespace simall::io
+{
 
-struct FaceBasedMeshReadResult {
-    bool          ok        = false;
-    std::string   error;
-    ImportedMesh  mesh;
-    std::uint8_t  dimension = 0;
+struct FaceBasedMeshReadResult
+{
+    bool ok = false;
+    std::string error;
+    ImportedMesh mesh;
+    std::uint8_t dimension = 0;
 };
 
 /// Read a face-based mesh directory from disk.  `dirPath` must contain
 /// the five ASCII files `points`, `faces`, `owner`, `neighbour`,
 /// `boundary` (the latter two may be empty for a single-cell mesh).
-[[nodiscard]] FaceBasedMeshReadResult
-read_face_based_mesh_dir(const std::string& dirPath);
+[[nodiscard]] FaceBasedMeshReadResult read_face_based_mesh_dir(const std::string& dirPath);
 
 /// Test hook: parse from in-memory buffers.
 [[nodiscard]] FaceBasedMeshReadResult parse_face_based_mesh_strings(
@@ -84,13 +85,12 @@ read_face_based_mesh_dir(const std::string& dirPath);
     const std::string& ownerText,
     const std::string& neighbourText,
     const std::string& boundaryText,
-    std::string        sourceHint = "<string>");
+    std::string sourceHint = "<string>");
 
 /// Translate a per-cell face-size signature (count of tri faces and
 /// count of quad faces) into an ElementType.  Returns
 /// ElementType::Unknown for unsupported signatures.  Exposed for tests.
-[[nodiscard]] ElementType
-classify_face_based_cell(std::uint32_t numTriFaces,
-                         std::uint32_t numQuadFaces) noexcept;
+[[nodiscard]] ElementType classify_face_based_cell(std::uint32_t numTriFaces,
+                                                   std::uint32_t numQuadFaces) noexcept;
 
-}  // namespace simall::io
+} // namespace simall::io

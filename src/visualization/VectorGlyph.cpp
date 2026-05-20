@@ -4,23 +4,28 @@
 // =============================================================================
 #include "visualization/VectorGlyph.hpp"
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
 GlyphSet VectorGlyph::sample(const VectorSampler& sampler,
-                              const std::vector<util::Vec3d>& seeds,
-                              const GlyphConfig& cfg)
+                             const std::vector<util::Vec3d>& seeds,
+                             const GlyphConfig& cfg)
 {
     GlyphSet out;
-    if (!sampler) return out;
+    if (!sampler)
+        return out;
     out.anchor.reserve(seeds.size());
     out.direction.reserve(seeds.size());
     out.magnitude.reserve(seeds.size());
     for (const auto& p : seeds) {
-        if (out.anchor.size() >= cfg.maxAnchors) break;
+        if (out.anchor.size() >= cfg.maxAnchors)
+            break;
         auto v = sampler(p);
-        if (!v) continue;
+        if (!v)
+            continue;
         const double mag = v->norm();
-        if (mag <= cfg.minMagnitude) continue;
+        if (mag <= cfg.minMagnitude)
+            continue;
         util::Vec3d dir = *v;
         if (cfg.normalizeDirection && mag > 0.0) {
             dir = util::Vec3d{dir.x / mag, dir.y / mag, dir.z / mag};
@@ -33,11 +38,11 @@ GlyphSet VectorGlyph::sample(const VectorSampler& sampler,
 }
 
 GlyphSet VectorGlyph::sample_lattice(const VectorSampler& sampler,
-                                      const util::BoundingBox& box,
-                                      std::uint32_t nx,
-                                      std::uint32_t ny,
-                                      std::uint32_t nz,
-                                      const GlyphConfig& cfg)
+                                     const util::BoundingBox& box,
+                                     std::uint32_t nx,
+                                     std::uint32_t ny,
+                                     std::uint32_t nz,
+                                     const GlyphConfig& cfg)
 {
     std::vector<util::Vec3d> seeds;
     if (!box.valid() || nx == 0 || ny == 0 || nz == 0) {
@@ -51,13 +56,11 @@ GlyphSet VectorGlyph::sample_lattice(const VectorSampler& sampler,
     for (std::uint32_t k = 0; k < nz; ++k) {
         for (std::uint32_t j = 0; j < ny; ++j) {
             for (std::uint32_t i = 0; i < nx; ++i) {
-                seeds.push_back({box.min.x + i * dx,
-                                 box.min.y + j * dy,
-                                 box.min.z + k * dz});
+                seeds.push_back({box.min.x + i * dx, box.min.y + j * dy, box.min.z + k * dz});
             }
         }
     }
     return VectorGlyph::sample(sampler, seeds, cfg);
 }
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

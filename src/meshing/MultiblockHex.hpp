@@ -30,25 +30,29 @@
 #include <string>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct HexBlock {
-    std::array<util::Vec3d, 8> corners;       // standard hex CCW ordering
-    std::array<std::uint32_t, 3> divisions{8,8,8};
-    std::array<double, 3>        grading{1.0, 1.0, 1.0};   // simpleGrading
-                                                            // expansion ratio
-                                                            // (last/first cell)
-                                                            // 1.0 == uniform
-    std::array<std::uint32_t, 6> faceZones{0,0,0,0,0,0};
+struct HexBlock
+{
+    std::array<util::Vec3d, 8> corners; // standard hex CCW ordering
+    std::array<std::uint32_t, 3> divisions{8, 8, 8};
+    std::array<double, 3> grading{1.0, 1.0, 1.0}; // simpleGrading
+                                                  // expansion ratio
+                                                  // (last/first cell)
+                                                  // 1.0 == uniform
+    std::array<std::uint32_t, 6> faceZones{0, 0, 0, 0, 0, 0};
     std::string name;
 };
 
-struct MultiblockProps {
+struct MultiblockProps
+{
     double matchTol = 1e-6;
-    bool   reorder  = true;          // RCM ordering after assembly
+    bool reorder = true; // RCM ordering after assembly
 };
 
-class MultiblockHex {
+class MultiblockHex
+{
 public:
     void initialize(MultiblockProps props);
 
@@ -63,8 +67,8 @@ public:
     const MultiblockProps& props() const noexcept { return p_; }
 
 private:
-    MultiblockProps         p_{};
-    std::vector<HexBlock>   blocks_;
+    MultiblockProps p_{};
+    std::vector<HexBlock> blocks_;
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

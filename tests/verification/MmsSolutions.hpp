@@ -16,39 +16,45 @@
 #pragma once
 
 #include "../regression/RegressionFramework.hpp"
+
 #include <cmath>
 
-namespace simall::verification {
+namespace simall::verification
+{
 
 inline constexpr double kPi = 3.14159265358979323846;
 
-[[nodiscard]] inline double heat_exact(double x, double y, double t, double nu) {
+[[nodiscard]] inline double heat_exact(double x, double y, double t, double nu)
+{
     return std::sin(kPi * x) * std::sin(kPi * y) * std::exp(-2.0 * kPi * kPi * nu * t);
 }
 
-[[nodiscard]] inline double laplacian_of_exact(double x, double y, double t, double nu) {
+[[nodiscard]] inline double laplacian_of_exact(double x, double y, double t, double nu)
+{
     return -2.0 * kPi * kPi * heat_exact(x, y, t, nu);
 }
 
 // MMS residual: ∂u/∂t − ν Δu  evaluated on the *exact* solution should be 0.
-[[nodiscard]] inline double heat_residual(double x, double y, double t, double nu) {
+[[nodiscard]] inline double heat_residual(double x, double y, double t, double nu)
+{
     const double dudt = -2.0 * kPi * kPi * nu * heat_exact(x, y, t, nu);
     return dudt - nu * laplacian_of_exact(x, y, t, nu);
 }
 
 // 5-point central FD Laplacian on a uniform grid.  Returns max-norm error
 // against the analytic Laplacian.
-[[nodiscard]] inline double fd5_laplacian_error(std::size_t n) {
+[[nodiscard]] inline double fd5_laplacian_error(std::size_t n)
+{
     const double h = 1.0 / double(n - 1);
     double maxErr = 0.0;
     for (std::size_t j = 1; j + 1 < n; ++j) {
         for (std::size_t i = 1; i + 1 < n; ++i) {
             const double x = double(i) * h, y = double(j) * h;
-            const double uc = heat_exact(x,         y,         0.0, 1.0);
-            const double up = heat_exact(x + h,     y,         0.0, 1.0);
-            const double um = heat_exact(x - h,     y,         0.0, 1.0);
-            const double vp = heat_exact(x,         y + h,     0.0, 1.0);
-            const double vm = heat_exact(x,         y - h,     0.0, 1.0);
+            const double uc = heat_exact(x, y, 0.0, 1.0);
+            const double up = heat_exact(x + h, y, 0.0, 1.0);
+            const double um = heat_exact(x - h, y, 0.0, 1.0);
+            const double vp = heat_exact(x, y + h, 0.0, 1.0);
+            const double vm = heat_exact(x, y - h, 0.0, 1.0);
             const double lapNum = (up - 2.0 * uc + um + vp - 2.0 * uc + vm) / (h * h);
             const double lapExt = laplacian_of_exact(x, y, 0.0, 1.0);
             maxErr = std::max(maxErr, std::abs(lapNum - lapExt));
@@ -57,4 +63,4 @@ inline constexpr double kPi = 3.14159265358979323846;
     return maxErr;
 }
 
-}  // namespace simall::verification
+} // namespace simall::verification

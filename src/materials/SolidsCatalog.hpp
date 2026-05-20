@@ -13,21 +13,24 @@
 #include <string>
 #include <vector>
 
-namespace simall::materials {
+namespace simall::materials
+{
 
-struct SolidProperties {
+struct SolidProperties
+{
     std::string name;
-    double      density;             // kg/m^3
-    double      specificHeat;        // J/(kg·K)
-    double      conductivity;        // W/(m·K)  (isotropic; anisotropic via AnisotropicConductivity)
-    double      youngsModulus;       // Pa
-    double      poissonsRatio;       // —
-    double      thermalExpansion;    // 1/K
-    double      emissivity;          // —      (polished surface assumption)
+    double density;          // kg/m^3
+    double specificHeat;     // J/(kg·K)
+    double conductivity;     // W/(m·K)  (isotropic; anisotropic via AnisotropicConductivity)
+    double youngsModulus;    // Pa
+    double poissonsRatio;    // —
+    double thermalExpansion; // 1/K
+    double emissivity;       // —      (polished surface assumption)
 };
 
 /// Built-in solids catalog. All values @ 300 K, representative.
-class SolidsCatalog {
+class SolidsCatalog
+{
 public:
     SolidsCatalog();
 
@@ -38,4 +41,4 @@ private:
     std::vector<SolidProperties> entries_;
 };
 
-}  // namespace simall::materials
+} // namespace simall::materials

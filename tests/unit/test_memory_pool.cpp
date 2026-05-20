@@ -10,9 +10,9 @@
 //   - ObjectPool<T> grows across slabs and tracks live_count/slab_count
 //   - ObjectPool<T>::construct/destroy invoke ctor/dtor exactly once
 // =============================================================================
-#include <catch2/catch_test_macros.hpp>
-
 #include "utilities/MemoryPool.hpp"
+
+#include <catch2/catch_test_macros.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -22,7 +22,8 @@ using simall::util::ObjectPool;
 
 // =============================================================================
 TEST_CASE("MemoryArena returns aligned allocations and reset reuses memory",
-          "[utilities][memory][arena]") {
+          "[utilities][memory][arena]")
+{
     MemoryArena a(4096);
     void* p1 = a.allocate(64, 64);
     void* p2 = a.allocate(64, 64);
@@ -32,23 +33,25 @@ TEST_CASE("MemoryArena returns aligned allocations and reset reuses memory",
 
     a.reset();
     void* p3 = a.allocate(64, 64);
-    REQUIRE(p3 == p1);                   // first slot of first block reused
+    REQUIRE(p3 == p1); // first slot of first block reused
 }
 
 // =============================================================================
 TEST_CASE("MemoryArena grows when a request exceeds the current block",
-          "[utilities][memory][arena]") {
+          "[utilities][memory][arena]")
+{
     MemoryArena a(256);
     void* small = a.allocate(64, 8);
-    void* big   = a.allocate(4096, 16); // forces a new block
+    void* big = a.allocate(4096, 16); // forces a new block
     REQUIRE(small != nullptr);
-    REQUIRE(big   != nullptr);
+    REQUIRE(big != nullptr);
     REQUIRE(reinterpret_cast<std::uintptr_t>(big) % 16 == 0);
 }
 
 // =============================================================================
 TEST_CASE("ObjectPool<T> allocate/deallocate reuses slots from the freelist",
-          "[utilities][memory][objectpool]") {
+          "[utilities][memory][objectpool]")
+{
     ObjectPool<std::uint64_t> pool(/*slot_capacity=*/8);
     std::uint64_t* a = pool.allocate();
     std::uint64_t* b = pool.allocate();
@@ -58,34 +61,39 @@ TEST_CASE("ObjectPool<T> allocate/deallocate reuses slots from the freelist",
     pool.deallocate(a);
     REQUIRE(pool.live_count() == 1);
     std::uint64_t* c = pool.allocate();
-    REQUIRE(c == a);                     // freelist LIFO reuse
+    REQUIRE(c == a); // freelist LIFO reuse
     REQUIRE(pool.live_count() == 2);
 }
 
 // =============================================================================
 TEST_CASE("ObjectPool<T> grows across slabs once initial capacity is exhausted",
-          "[utilities][memory][objectpool]") {
+          "[utilities][memory][objectpool]")
+{
     ObjectPool<std::uint64_t> pool(/*slot_capacity=*/4);
     std::vector<std::uint64_t*> ptrs;
-    for (int i = 0; i < 10; ++i) ptrs.push_back(pool.allocate());
+    for (int i = 0; i < 10; ++i)
+        ptrs.push_back(pool.allocate());
 
-    REQUIRE(pool.live_count()  == 10);
-    REQUIRE(pool.slab_count()  >= 3);    // 4 + 4 + at least 2 more
+    REQUIRE(pool.live_count() == 10);
+    REQUIRE(pool.slab_count() >= 3); // 4 + 4 + at least 2 more
 }
 
 // =============================================================================
-namespace {
-struct Counted {
-    static int  alive;
-    int         tag;
+namespace
+{
+struct Counted
+{
+    static int alive;
+    int tag;
     Counted(int t) : tag(t) { ++alive; }
-    ~Counted()              { --alive; }
+    ~Counted() { --alive; }
 };
 int Counted::alive = 0;
-}  // namespace
+} // namespace
 
 TEST_CASE("ObjectPool<T>::construct/destroy invoke ctor and dtor exactly once",
-          "[utilities][memory][objectpool]") {
+          "[utilities][memory][objectpool]")
+{
     Counted::alive = 0;
     ObjectPool<Counted> pool(4);
     auto* a = pool.construct(7);

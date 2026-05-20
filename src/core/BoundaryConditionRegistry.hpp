@@ -45,7 +45,8 @@
 #include <unordered_map>
 #include <vector>
 
-namespace simall::core {
+namespace simall::core
+{
 
 /// Generic zone identifier. Matches meshing::ZoneId underlying type so
 /// callers can static_cast at the boundary without lossy conversion.
@@ -54,22 +55,24 @@ using BcZoneId = std::uint32_t;
 /// Per-registration record. The opaque pointer carries a type-erased BC
 /// instance (e.g. std::shared_ptr<solver::bc::IBoundaryCondition>) and is
 /// retrieved by the owning subsystem via BoundaryConditionRegistry::as<T>().
-struct BoundaryConditionEntry {
-    int                    kindId   = 0;     // subsystem-defined enum value
-    std::string            kindName;         // e.g. "Wall", "MagneticInsulation"
-    BcZoneId               zone     = 0;
-    std::string            variable;         // "U", "p", "T", "E", "B", "phi", ...
-    std::string            subsystem;        // "solver", "em", "structural", ...
-    std::shared_ptr<void>  opaque;           // type-erased concrete BC instance
+struct BoundaryConditionEntry
+{
+    int kindId = 0;       // subsystem-defined enum value
+    std::string kindName; // e.g. "Wall", "MagneticInsulation"
+    BcZoneId zone = 0;
+    std::string variable;         // "U", "p", "T", "E", "B", "phi", ...
+    std::string subsystem;        // "solver", "em", "structural", ...
+    std::shared_ptr<void> opaque; // type-erased concrete BC instance
 };
 
-class BoundaryConditionRegistry {
+class BoundaryConditionRegistry
+{
 public:
-    using Handle                     = std::uint64_t;
+    using Handle = std::uint64_t;
     static constexpr Handle kInvalid = 0;
 
-    BoundaryConditionRegistry()                                            = default;
-    BoundaryConditionRegistry(const BoundaryConditionRegistry&)            = delete;
+    BoundaryConditionRegistry() = default;
+    BoundaryConditionRegistry(const BoundaryConditionRegistry&) = delete;
     BoundaryConditionRegistry& operator=(const BoundaryConditionRegistry&) = delete;
 
     /// Insert a new entry. Returns a non-zero handle on success.
@@ -95,22 +98,23 @@ public:
     /// Iterate all entries in insertion order, invoking fn(handle, entry).
     /// fn must not call add/remove/clear on this registry (the internal
     /// mutex is held for the whole walk).
-    template <class Fn>
-    void for_each(Fn&& fn) const {
+    template <class Fn> void for_each(Fn&& fn) const
+    {
         std::lock_guard<std::mutex> lk(mu_);
         for (auto h : order_) {
             auto it = entries_.find(h);
-            if (it != entries_.end()) fn(h, it->second);
+            if (it != entries_.end())
+                fn(h, it->second);
         }
     }
 
-    std::size_t size()  const noexcept;
-    bool        empty() const noexcept;
+    std::size_t size() const noexcept;
+    bool empty() const noexcept;
 
     /// Typed accessor: visits opaque as a T* (caller-owned cast). Returns
     /// nullptr if the handle is unknown or opaque is null.
-    template <class T>
-    T* as(Handle h) const noexcept {
+    template <class T> T* as(Handle h) const noexcept
+    {
         const auto* e = find(h);
         return e ? static_cast<T*>(e->opaque.get()) : nullptr;
     }
@@ -120,10 +124,10 @@ public:
     static BoundaryConditionRegistry& instance();
 
 private:
-    mutable std::mutex                                 mu_;
-    Handle                                             next_ = 1;
+    mutable std::mutex mu_;
+    Handle next_ = 1;
     std::unordered_map<Handle, BoundaryConditionEntry> entries_;
-    std::vector<Handle>                                order_;  // insertion order
+    std::vector<Handle> order_; // insertion order
 };
 
-}  // namespace simall::core
+} // namespace simall::core

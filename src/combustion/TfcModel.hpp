@@ -34,26 +34,26 @@
 #include <memory>
 #include <vector>
 
-namespace simall::combustion {
+namespace simall::combustion
+{
 
-struct TfcProps {
-    double A         = 0.52;
-    double S_L       = 0.40;        // laminar flame speed [m/s]
-    double rho_u     = 1.18;        // unburnt density   [kg/m³]
-    double rho_b     = 0.18;        // burnt density
-    double alpha_u   = 2.0e-5;      // unburnt thermal diff. [m²/s]
-    double H_combust = 50.0e6;      // J/kg fuel LHV
-    double D_t       = 1.0e-4;      // turbulent diffusivity for c-equation
+struct TfcProps
+{
+    double A = 0.52;
+    double S_L = 0.40;         // laminar flame speed [m/s]
+    double rho_u = 1.18;       // unburnt density   [kg/m³]
+    double rho_b = 0.18;       // burnt density
+    double alpha_u = 2.0e-5;   // unburnt thermal diff. [m²/s]
+    double H_combust = 50.0e6; // J/kg fuel LHV
+    double D_t = 1.0e-4;       // turbulent diffusivity for c-equation
 };
 
-class TfcModel {
+class TfcModel
+{
 public:
-    TfcModel(meshing::Mesh& mesh,
-             solver::FieldRegistry& fields,
-             solver::ILinearSolver& linear);
+    TfcModel(meshing::Mesh& mesh, solver::FieldRegistry& fields, solver::ILinearSolver& linear);
 
-    void configure(TfcProps props,
-                   const std::vector<solver::BoundarySpec>& bcs);
+    void configure(TfcProps props, const std::vector<solver::BoundarySpec>& bcs);
 
     /// One outer iteration: compute U_t, build ω̇_c source, transport c.
     /// Reads "k", "epsilon" (Favre-mean turbulence) and writes "S_progress",
@@ -63,12 +63,12 @@ public:
     const TfcProps& props() const noexcept { return p_; }
 
 private:
-    meshing::Mesh&                         mesh_;
-    solver::FieldRegistry&                 F_;
-    solver::ILinearSolver&                 lin_;
-    TfcProps                               p_{};
-    std::vector<solver::BoundarySpec>      bcs_;
+    meshing::Mesh& mesh_;
+    solver::FieldRegistry& F_;
+    solver::ILinearSolver& lin_;
+    TfcProps p_{};
+    std::vector<solver::BoundarySpec> bcs_;
     std::unique_ptr<solver::ScalarTransport> cEq_;
 };
 
-}  // namespace simall::combustion
+} // namespace simall::combustion

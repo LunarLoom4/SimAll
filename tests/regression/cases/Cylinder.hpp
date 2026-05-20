@@ -15,14 +15,17 @@
 
 #include "../RegressionFramework.hpp"
 
-namespace simall::regression::cylinder {
+namespace simall::regression::cylinder
+{
 
-[[nodiscard]] inline double roshko_strouhal(double Re) {
+[[nodiscard]] inline double roshko_strouhal(double Re)
+{
     return 0.212 * (1.0 - 21.2 / std::max(Re, 1.0));
 }
 
-[[nodiscard]] inline double henderson_drag(double Re) {
+[[nodiscard]] inline double henderson_drag(double Re)
+{
     return 1.0 + 10.0 * std::pow(Re, -2.0 / 3.0);
 }
 
-}  // namespace simall::regression::cylinder
+} // namespace simall::regression::cylinder

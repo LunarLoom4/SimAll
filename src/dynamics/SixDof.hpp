@@ -20,43 +20,47 @@
 #pragma once
 
 #include "utilities/MathTypes.hpp"
+
 #include <array>
 
-namespace simall::dynamics {
+namespace simall::dynamics
+{
 
-struct Quat {
+struct Quat
+{
     double w = 1, x = 0, y = 0, z = 0;
 };
 
-struct SixDofState {
-    util::Vec3d position {0, 0, 0};
-    util::Vec3d velocity {0, 0, 0};
-    Quat        orientation {};            // unit quaternion (w, x, y, z)
-    util::Vec3d angularVelBody {0, 0, 0};  // ω expressed in body frame
+struct SixDofState
+{
+    util::Vec3d position{0, 0, 0};
+    util::Vec3d velocity{0, 0, 0};
+    Quat orientation{};                  // unit quaternion (w, x, y, z)
+    util::Vec3d angularVelBody{0, 0, 0}; // ω expressed in body frame
 };
 
-struct SixDofParams {
-    double      mass         = 1.0;
+struct SixDofParams
+{
+    double mass = 1.0;
     /// Body-frame inertia tensor (assumed principal-axis aligned, so only
     /// diagonal entries are stored). If you have a full 3×3 tensor, rotate
     /// the body axes onto its eigenvectors first.
-    util::Vec3d inertiaDiag {1, 1, 1};
-    util::Vec3d gravity     {0, 0, -9.81};
+    util::Vec3d inertiaDiag{1, 1, 1};
+    util::Vec3d gravity{0, 0, -9.81};
     /// Per-DOF lock mask (1 = free, 0 = constrained to zero motion).
-    std::array<int, 6> dofFree {1, 1, 1, 1, 1, 1};
+    std::array<int, 6> dofFree{1, 1, 1, 1, 1, 1};
 };
 
-class SixDof {
+class SixDof
+{
 public:
     void initialize(SixDofParams p, SixDofState s0);
 
     /// Advance one fluid-coupling step under external world-frame force F
     /// and world-frame moment M (both about the body centre of mass).
-    void advance(const util::Vec3d& Fworld,
-                 const util::Vec3d& Mworld,
-                 double dt);
+    void advance(const util::Vec3d& Fworld, const util::Vec3d& Mworld, double dt);
 
-    const SixDofState&  state()  const noexcept { return state_; }
+    const SixDofState& state() const noexcept { return state_; }
     const SixDofParams& params() const noexcept { return params_; }
 
     /// Rotate a body-frame vector into the world frame using current
@@ -66,7 +70,7 @@ public:
 
 private:
     SixDofParams params_{};
-    SixDofState  state_{};
+    SixDofState state_{};
 };
 
-}  // namespace simall::dynamics
+} // namespace simall::dynamics

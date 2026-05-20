@@ -21,23 +21,25 @@
 
 #include <memory>
 
-namespace simall::solver {
+namespace simall::solver
+{
 
 // ---------------- Preconditioners -----------------------------------------
-class IPreconditioner {
+class IPreconditioner
+{
 public:
     virtual ~IPreconditioner() = default;
-    virtual void setup(const CSRMatrix& A)                                = 0;
+    virtual void setup(const CSRMatrix& A) = 0;
     virtual void apply(const util::aligned_vector<double>& r,
-                       util::aligned_vector<double>& z) const            = 0;
+                       util::aligned_vector<double>& z) const = 0;
 };
 
 std::unique_ptr<IPreconditioner> make_preconditioner(PreconditionerKind k);
 
 // ---------------- Solvers (factory in Solver.cpp dispatches here) ---------
-std::unique_ptr<ILinearSolver> make_gmres   (LinearSolverConfig cfg);
+std::unique_ptr<ILinearSolver> make_gmres(LinearSolverConfig cfg);
 std::unique_ptr<ILinearSolver> make_bicgstab(LinearSolverConfig cfg);
-std::unique_ptr<ILinearSolver> make_cg      (LinearSolverConfig cfg);
-std::unique_ptr<ILinearSolver> make_tfqmr   (LinearSolverConfig cfg);
+std::unique_ptr<ILinearSolver> make_cg(LinearSolverConfig cfg);
+std::unique_ptr<ILinearSolver> make_tfqmr(LinearSolverConfig cfg);
 
-}  // namespace simall::solver
+} // namespace simall::solver

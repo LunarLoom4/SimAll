@@ -23,21 +23,25 @@
 #include "meshing/MeshStorage.hpp"
 #include "solver/FieldRegistry.hpp"
 
-namespace simall::heat_transfer {
+namespace simall::heat_transfer
+{
 
-struct SolidificationProps {
-    double T_solidus    = 1700.0;     // K
-    double T_liquidus   = 1730.0;
-    double latentHeat   = 2.7e5;      // J/kg
-    double rho          = 7800.0;     // kg/m³
-    double cp           = 750.0;      // J/(kg·K)
-    double A_mush       = 1.0e6;      // Darcy coefficient (Pa·s/m²)
-    double eps          = 1.0e-3;
+struct SolidificationProps
+{
+    double T_solidus = 1700.0; // K
+    double T_liquidus = 1730.0;
+    double latentHeat = 2.7e5; // J/kg
+    double rho = 7800.0;       // kg/m³
+    double cp = 750.0;         // J/(kg·K)
+    double A_mush = 1.0e6;     // Darcy coefficient (Pa·s/m²)
+    double eps = 1.0e-3;
 };
 
-class Solidification {
+class Solidification
+{
 public:
-    void initialize(const meshing::Mesh& mesh, solver::FieldRegistry& fields,
+    void initialize(const meshing::Mesh& mesh,
+                    solver::FieldRegistry& fields,
                     SolidificationProps props);
 
     /// Update liquid fraction, Darcy momentum sink, and latent-heat source
@@ -46,10 +50,10 @@ public:
     void update(double dt, solver::FieldRegistry& fields);
 
 private:
-    const meshing::Mesh*  mesh_   = nullptr;
-    SolidificationProps   p_{};
+    const meshing::Mesh* mesh_ = nullptr;
+    SolidificationProps p_{};
     // Previous-step liquid fraction for ∂f_l/∂t latent source.
     util::aligned_vector<double> fl_prev_;
 };
 
-}  // namespace simall::heat_transfer
+} // namespace simall::heat_transfer

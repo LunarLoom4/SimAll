@@ -12,7 +12,8 @@ using namespace simall::cad::sketch;
 using Catch::Matchers::WithinAbs;
 
 TEST_CASE("Sketch creates parameters with sequential ids and retrievable values",
-          "[cad][sketch][model]") {
+          "[cad][sketch][model]")
+{
     Sketch s;
     auto a = s.add_parameter(1.5);
     auto b = s.add_parameter(2.5, /*fixed=*/true, "x_pin");
@@ -23,11 +24,11 @@ TEST_CASE("Sketch creates parameters with sequential ids and retrievable values"
     REQUIRE(s.parameter(b).name == "x_pin");
 }
 
-TEST_CASE("Adding a point allocates exactly two parameters",
-          "[cad][sketch][model]") {
+TEST_CASE("Adding a point allocates exactly two parameters", "[cad][sketch][model]")
+{
     Sketch s;
     const auto pid = s.add_point({3.0, 4.0});
-    const auto& e  = s.entity(pid);
+    const auto& e = s.entity(pid);
     REQUIRE(e.kind == EntityKind::Point);
     REQUIRE(e.params.size() == 2);
     const auto v = s.point_value(pid);
@@ -35,8 +36,8 @@ TEST_CASE("Adding a point allocates exactly two parameters",
     REQUIRE_THAT(v.y, WithinAbs(4.0, 1e-15));
 }
 
-TEST_CASE("Adding a line allocates four parameters and exposes endpoints",
-          "[cad][sketch][model]") {
+TEST_CASE("Adding a line allocates four parameters and exposes endpoints", "[cad][sketch][model]")
+{
     Sketch s;
     const auto lid = s.add_line({0.0, 0.0}, {1.0, 2.0});
     REQUIRE(s.entity(lid).kind == EntityKind::Line);
@@ -47,8 +48,8 @@ TEST_CASE("Adding a line allocates four parameters and exposes endpoints",
     REQUIRE_THAT(b.y, WithinAbs(2.0, 1e-15));
 }
 
-TEST_CASE("Circle and arc store center and radius",
-          "[cad][sketch][model]") {
+TEST_CASE("Circle and arc store center and radius", "[cad][sketch][model]")
+{
     Sketch s;
     const auto cid = s.add_circle({1.0, 1.0}, 0.5);
     REQUIRE(s.entity(cid).kind == EntityKind::Circle);
@@ -60,16 +61,16 @@ TEST_CASE("Circle and arc store center and radius",
     REQUIRE(s.entity(aid).params.size() == 5);
 }
 
-TEST_CASE("Spline stores 2*N parameters",
-          "[cad][sketch][model]") {
+TEST_CASE("Spline stores 2*N parameters", "[cad][sketch][model]")
+{
     Sketch s;
-    const auto sid = s.add_spline({{0,0}, {1,1}, {2,0}, {3,1}});
+    const auto sid = s.add_spline({{0, 0}, {1, 1}, {2, 0}, {3, 1}});
     REQUIRE(s.entity(sid).kind == EntityKind::Spline);
     REQUIRE(s.entity(sid).params.size() == 8);
 }
 
-TEST_CASE("Removing an entity drops its dependent constraints",
-          "[cad][sketch][model]") {
+TEST_CASE("Removing an entity drops its dependent constraints", "[cad][sketch][model]")
+{
     Sketch s;
     const auto p1 = s.add_point({0, 0});
     const auto p2 = s.add_point({1, 0});
@@ -79,11 +80,12 @@ TEST_CASE("Removing an entity drops its dependent constraints",
     REQUIRE(s.constraints().empty());
 }
 
-TEST_CASE("Fix constraint pins the underlying point parameters",
-          "[cad][sketch][model]") {
+TEST_CASE("Fix constraint pins the underlying point parameters", "[cad][sketch][model]")
+{
     Sketch s;
     const auto p = s.add_point({7.0, 8.0});
     s.add_fix(p);
     const auto& ent = s.entity(p);
-    for (auto pid : ent.params) REQUIRE(s.parameter(pid).fixed);
+    for (auto pid : ent.params)
+        REQUIRE(s.parameter(pid).fixed);
 }

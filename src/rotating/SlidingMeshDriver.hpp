@@ -25,34 +25,39 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::rotating {
+namespace simall::rotating
+{
 
 using FaceIdx = std::uint32_t;
 
-struct InterfaceFace {
-    FaceIdx               id;
+struct InterfaceFace
+{
+    FaceIdx id;
     std::array<double, 3> centroid;
     std::array<double, 3> normal;
-    double                area = 0.0;
+    double area = 0.0;
 };
 
-struct DonorWeight {
+struct DonorWeight
+{
     FaceIdx receiver;
     FaceIdx donor;
-    double  w;                                 // ∈ [0,1]
+    double w; // ∈ [0,1]
 };
 
-struct SlidingInterfaceMap {
+struct SlidingInterfaceMap
+{
     std::vector<DonorWeight> entries;
 };
 
-class SlidingMeshDriver {
+class SlidingMeshDriver
+{
 public:
     SlidingMeshDriver(std::array<double, 3> axisOrigin,
-                       std::array<double, 3> axisDir,
-                       double                omega);
+                      std::array<double, 3> axisDir,
+                      double omega);
 
-    void set_rotor_faces (std::vector<InterfaceFace> faces);
+    void set_rotor_faces(std::vector<InterfaceFace> faces);
     void set_stator_faces(std::vector<InterfaceFace> faces);
 
     /// Advance the rotor by Ω·dt; returns the new cumulative angle (rad).
@@ -68,12 +73,12 @@ public:
 private:
     std::array<double, 3> axisOrigin_;
     std::array<double, 3> axisDir_;
-    double                omega_;
-    double                angle_ = 0.0;
+    double omega_;
+    double angle_ = 0.0;
     std::vector<InterfaceFace> rotor_;
     std::vector<InterfaceFace> stator_;
 
     [[nodiscard]] InterfaceFace rotated_rotor_face(const InterfaceFace& f) const;
 };
 
-}  // namespace simall::rotating
+} // namespace simall::rotating

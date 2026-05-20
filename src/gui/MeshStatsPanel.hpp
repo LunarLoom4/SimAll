@@ -15,25 +15,28 @@ class QTableWidget;
 class QComboBox;
 class QLabel;
 
-namespace simall::gui {
+namespace simall::gui
+{
 
-struct MeshZoneStat {
+struct MeshZoneStat
+{
     QString zoneName;
-    int     cells   = 0;
-    int     faces   = 0;
-    int     nodes   = 0;
-    double  minSkew = 0.0;
-    double  avgSkew = 0.0;
-    double  maxSkew = 0.0;
-    double  minAspect = 0.0;
-    double  avgAspect = 0.0;
-    double  maxAspect = 0.0;
-    double  minOrtho  = 0.0;
-    double  avgOrtho  = 0.0;
-    double  maxOrtho  = 0.0;
+    int cells = 0;
+    int faces = 0;
+    int nodes = 0;
+    double minSkew = 0.0;
+    double avgSkew = 0.0;
+    double maxSkew = 0.0;
+    double minAspect = 0.0;
+    double avgAspect = 0.0;
+    double maxAspect = 0.0;
+    double minOrtho = 0.0;
+    double avgOrtho = 0.0;
+    double maxOrtho = 0.0;
 };
 
-class MeshStatsPanel : public QWidget {
+class MeshStatsPanel : public QWidget
+{
     Q_OBJECT
 public:
     explicit MeshStatsPanel(QWidget* parent = nullptr);
@@ -46,11 +49,11 @@ protected:
     void paintEvent(QPaintEvent*) override;
 
 private:
-    QTableWidget*           table_       = nullptr;
-    QComboBox*              metricCombo_ = nullptr;
-    QLabel*                 totalLabel_  = nullptr;
-    std::vector<double>     histBins_;
-    double                  histMin_ = 0.0, histMax_ = 1.0;
+    QTableWidget* table_ = nullptr;
+    QComboBox* metricCombo_ = nullptr;
+    QLabel* totalLabel_ = nullptr;
+    std::vector<double> histBins_;
+    double histMin_ = 0.0, histMax_ = 1.0;
 };
 
-}  // namespace simall::gui
+} // namespace simall::gui

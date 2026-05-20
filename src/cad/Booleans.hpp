@@ -14,20 +14,23 @@
 
 #include <vector>
 
-namespace simall::cad {
+namespace simall::cad
+{
 
-struct BooleanOptions {
-    double fuzzyValue       = 0.0;   // 0 → OCC default tolerance
-    bool   runParallel      = true;
-    bool   gluePartial      = false; // BOPAlgo glue mode for non-overlapping touching faces
-    bool   checkInverted    = true;
-    bool   nonDestructive   = true;  // copy inputs so source shapes are preserved
+struct BooleanOptions
+{
+    double fuzzyValue = 0.0; // 0 → OCC default tolerance
+    bool runParallel = true;
+    bool gluePartial = false; // BOPAlgo glue mode for non-overlapping touching faces
+    bool checkInverted = true;
+    bool nonDestructive = true; // copy inputs so source shapes are preserved
 };
 
-class Booleans {
+class Booleans
+{
 public:
-    ShapeHandle fuse  (const ShapeHandle& a, const ShapeHandle& b, const BooleanOptions& o = {});
-    ShapeHandle cut   (const ShapeHandle& a, const ShapeHandle& b, const BooleanOptions& o = {});
+    ShapeHandle fuse(const ShapeHandle& a, const ShapeHandle& b, const BooleanOptions& o = {});
+    ShapeHandle cut(const ShapeHandle& a, const ShapeHandle& b, const BooleanOptions& o = {});
     ShapeHandle common(const ShapeHandle& a, const ShapeHandle& b, const BooleanOptions& o = {});
 
     /// Fuse many shapes at once (more efficient than pairwise loop).
@@ -35,4 +38,4 @@ public:
                          const BooleanOptions& o = {});
 };
 
-}  // namespace simall::cad
+} // namespace simall::cad

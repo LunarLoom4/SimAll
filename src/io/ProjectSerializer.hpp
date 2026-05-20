@@ -24,20 +24,23 @@
 #include <string>
 #include <vector>
 
-namespace simall::io {
+namespace simall::io
+{
 
-struct ProjectChunk {
-    std::string                mime;       // "application/vnd.simall.mesh.cgns" etc.
-    std::vector<std::uint8_t>  bytes;
+struct ProjectChunk
+{
+    std::string mime; // "application/vnd.simall.mesh.cgns" etc.
+    std::vector<std::uint8_t> bytes;
 };
 
-class ProjectSerializer {
+class ProjectSerializer
+{
 public:
-    void                 put(std::string name, ProjectChunk chunk);
+    void put(std::string name, ProjectChunk chunk);
     [[nodiscard]] const ProjectChunk* get(std::string_view name) const noexcept;
     [[nodiscard]] std::vector<std::string> names() const;
     [[nodiscard]] std::size_t size() const noexcept { return chunks_.size(); }
-    void                 clear();
+    void clear();
 
     bool save(const std::string& path) const;
     bool load(const std::string& path);
@@ -46,4 +49,4 @@ private:
     std::map<std::string, ProjectChunk> chunks_;
 };
 
-}  // namespace simall::io
+} // namespace simall::io

@@ -32,22 +32,25 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::particles {
+namespace simall::particles
+{
 
-struct WallFilmProps {
-    double rho_l   = 998.2;
-    double mu_l    = 1.0e-3;
-    double sigma   = 0.072;
-    double h_min   = 1.0e-9;
-    double h_max   = 5.0e-3;
-    double Weks    = 5.0;
-    double Wespd   = 10.0;
-    double Wereb   = 18.0;
-    double splash_ratio = 0.6;       // mass fraction splashed when We > Wereb
-    std::vector<std::int32_t> wallZones;  // boundary zone IDs treated as walls
+struct WallFilmProps
+{
+    double rho_l = 998.2;
+    double mu_l = 1.0e-3;
+    double sigma = 0.072;
+    double h_min = 1.0e-9;
+    double h_max = 5.0e-3;
+    double Weks = 5.0;
+    double Wespd = 10.0;
+    double Wereb = 18.0;
+    double splash_ratio = 0.6;           // mass fraction splashed when We > Wereb
+    std::vector<std::int32_t> wallZones; // boundary zone IDs treated as walls
 };
 
-class WallFilm {
+class WallFilm
+{
 public:
     void initialize(const meshing::Mesh& mesh, WallFilmProps props);
 
@@ -57,7 +60,7 @@ public:
     double deposit(double dt, LagrangianTracker& tracker);
 
     /// Apply explicit face-based advection of film mass under shear.
-    void   advect(double dt);
+    void advect(double dt);
 
     double film_thickness(std::size_t faceIdx) const;
     double film_mass(std::size_t faceIdx) const;
@@ -69,10 +72,10 @@ private:
     bool is_wall_face(std::int32_t zone) const;
 
     const meshing::Mesh* mesh_ = nullptr;
-    WallFilmProps        p_{};
-    std::vector<double>  h_;        // film thickness per face
-    std::vector<double>  m_;        // film mass per face
-    std::vector<util::Vec3d> u_;    // film velocity per face
+    WallFilmProps p_{};
+    std::vector<double> h_;      // film thickness per face
+    std::vector<double> m_;      // film mass per face
+    std::vector<util::Vec3d> u_; // film velocity per face
 };
 
-}  // namespace simall::particles
+} // namespace simall::particles

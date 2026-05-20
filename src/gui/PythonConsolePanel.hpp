@@ -11,19 +11,21 @@
 // =============================================================================
 #pragma once
 
-#include <QWidget>
 #include <functional>
+#include <QWidget>
 #include <vector>
 
 class QPlainTextEdit;
 class QLineEdit;
 class QPushButton;
 
-namespace simall::gui {
+namespace simall::gui
+{
 
 using PythonExecutor = std::function<QString(const QString&)>;
 
-class PythonConsolePanel : public QWidget {
+class PythonConsolePanel : public QWidget
+{
     Q_OBJECT
 public:
     explicit PythonConsolePanel(QWidget* parent = nullptr);
@@ -45,14 +47,14 @@ private:
     void print_banner();
     void append(const QString& text, const QString& colour = QString());
 
-    QPlainTextEdit* output_   = nullptr;
-    QLineEdit*      prompt_   = nullptr;
-    QPushButton*    runBtn_   = nullptr;
-    QPushButton*    clearBtn_ = nullptr;
+    QPlainTextEdit* output_ = nullptr;
+    QLineEdit* prompt_ = nullptr;
+    QPushButton* runBtn_ = nullptr;
+    QPushButton* clearBtn_ = nullptr;
 
-    PythonExecutor  executor_;
-    QStringList     history_;
-    int             historyIdx_ = -1;
+    PythonExecutor executor_;
+    QStringList history_;
+    int historyIdx_ = -1;
 };
 
-}  // namespace simall::gui
+} // namespace simall::gui

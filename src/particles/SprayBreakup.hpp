@@ -34,35 +34,40 @@
 
 #include <vector>
 
-namespace simall::particles {
+namespace simall::particles
+{
 
-struct SprayBreakupProps {
-    double sigma     = 0.072;     // surface tension liquid-gas [N/m] (water/air)
-    double mu_l      = 1.0e-3;    // dynamic viscosity of liquid [Pa·s]
-    double rho_l     = 998.2;     // density of liquid [kg/m³]
-    double rho_g     = 1.225;     // density of gas    [kg/m³]
-    double B0        = 0.61;      // KH child-radius ratio: r_KH = B0 · Λ_KH
-    double B1        = 1.73;      // KH timescale coefficient
-    double C_RT      = 0.1;       // RT-wave size limiter (× critical Λ_RT)
-    double Ctau_RT   = 1.0;       // RT timescale scaling
-    double WeCrit    = 6.0;       // KH only active if We_g > WeCrit
+struct SprayBreakupProps
+{
+    double sigma = 0.072; // surface tension liquid-gas [N/m] (water/air)
+    double mu_l = 1.0e-3; // dynamic viscosity of liquid [Pa·s]
+    double rho_l = 998.2; // density of liquid [kg/m³]
+    double rho_g = 1.225; // density of gas    [kg/m³]
+    double B0 = 0.61;     // KH child-radius ratio: r_KH = B0 · Λ_KH
+    double B1 = 1.73;     // KH timescale coefficient
+    double C_RT = 0.1;    // RT-wave size limiter (× critical Λ_RT)
+    double Ctau_RT = 1.0; // RT timescale scaling
+    double WeCrit = 6.0;  // KH only active if We_g > WeCrit
 };
 
-class SprayBreakup {
+class SprayBreakup
+{
 public:
-    void initialize(const SprayBreakupProps& props) { p_ = props; rt_age_.clear(); }
+    void initialize(const SprayBreakupProps& props)
+    {
+        p_ = props;
+        rt_age_.clear();
+    }
 
     /// Advance the breakup state by dt for the given tracker / fluid.
     /// `accel` is the per-particle deceleration magnitude (zero ⇒ no RT).
-    void apply(double dt,
-               LagrangianTracker& tracker,
-               const solver::FieldRegistry& fields);
+    void apply(double dt, LagrangianTracker& tracker, const solver::FieldRegistry& fields);
 
     const SprayBreakupProps& props() const noexcept { return p_; }
 
 private:
     SprayBreakupProps p_{};
-    std::vector<double> rt_age_;     ///< accumulated RT clock per particle
+    std::vector<double> rt_age_; ///< accumulated RT clock per particle
 };
 
-}  // namespace simall::particles
+} // namespace simall::particles

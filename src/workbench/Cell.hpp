@@ -15,21 +15,23 @@
 #include <string>
 #include <vector>
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
-class Cell {
+class Cell
+{
 public:
     Cell(CellId id, CellKind kind, std::string label);
 
     // ----- identity ----------------------------------------------------
-    [[nodiscard]] CellId             id()    const noexcept { return id_; }
-    [[nodiscard]] CellKind           kind()  const noexcept { return kind_; }
+    [[nodiscard]] CellId id() const noexcept { return id_; }
+    [[nodiscard]] CellKind kind() const noexcept { return kind_; }
     [[nodiscard]] const std::string& label() const noexcept { return label_; }
-    void set_label(std::string l)       { label_ = std::move(l); }
+    void set_label(std::string l) { label_ = std::move(l); }
 
     // ----- state -------------------------------------------------------
     [[nodiscard]] CellState state() const noexcept { return state_; }
-    void set_state(CellState s)          noexcept  { state_ = s; }
+    void set_state(CellState s) noexcept { state_ = s; }
 
     // ----- adapter binding (Pass 22.5) ---------------------------------
     // Each cell may carry an opaque adapter identifier string, e.g.
@@ -45,20 +47,20 @@ public:
     // ----- ports -------------------------------------------------------
     // Returns the minted port id.  Names need not be unique across input
     // and output, but must be unique within their direction (debug check).
-    PortId add_input (std::string name, std::string data_type, bool required = true);
+    PortId add_input(std::string name, std::string data_type, bool required = true);
     PortId add_output(std::string name, std::string data_type);
 
     [[nodiscard]] const std::vector<CellPort>& ports() const noexcept { return ports_; }
-    [[nodiscard]] const CellPort*              find_port(PortId)        const noexcept;
+    [[nodiscard]] const CellPort* find_port(PortId) const noexcept;
 
 private:
-    CellId                id_;
-    CellKind              kind_;
-    std::string           label_;
-    std::string           adapter_id_;
-    CellState             state_{CellState::Unfulfilled};
+    CellId id_;
+    CellKind kind_;
+    std::string label_;
+    std::string adapter_id_;
+    CellState state_{CellState::Unfulfilled};
     std::vector<CellPort> ports_;
-    PortId                next_port_id_{0};
+    PortId next_port_id_{0};
 };
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

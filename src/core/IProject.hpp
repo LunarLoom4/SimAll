@@ -14,17 +14,19 @@
 #include <memory>
 #include <string>
 
-namespace simall::core {
+namespace simall::core
+{
 
-class IProject {
+class IProject
+{
 public:
-    virtual ~IProject()                              = default;
-    virtual void        save(const std::string&)    = 0;
-    virtual std::string path() const                = 0;
-    virtual bool        is_dirty() const            = 0;
+    virtual ~IProject() = default;
+    virtual void save(const std::string&) = 0;
+    virtual std::string path() const = 0;
+    virtual bool is_dirty() const = 0;
 };
 
 using ProjectFactory =
     std::function<std::unique_ptr<IProject>(const std::string& path /* "" = new */)>;
 
-}  // namespace simall::core
+} // namespace simall::core

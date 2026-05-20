@@ -15,9 +15,11 @@
 #include "workbench/Schematic.hpp"
 #include "workbench/Workbench.hpp"
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
-class StateMachine {
+class StateMachine
+{
 public:
     explicit StateMachine(Schematic& s) noexcept : schematic_(&s) {}
 
@@ -52,4 +54,4 @@ private:
     Schematic* schematic_;
 };
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

@@ -22,9 +22,11 @@
 
 #include <vector>
 
-namespace simall::amr {
+namespace simall::amr
+{
 
-class RefinementApplier {
+class RefinementApplier
+{
 public:
     /// `level` carries the current refinement level per cell of `in` (use
     /// zeros if you have never refined before). On return `outLevel` carries
@@ -36,4 +38,4 @@ public:
                std::vector<std::int32_t>& outLevel);
 };
 
-}  // namespace simall::amr
+} // namespace simall::amr

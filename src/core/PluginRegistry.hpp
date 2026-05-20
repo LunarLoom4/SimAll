@@ -23,9 +23,11 @@
 #include <unordered_map>
 #include <vector>
 
-namespace simall::core {
+namespace simall::core
+{
 
-class PluginRegistry {
+class PluginRegistry
+{
 public:
     using Category = plugins::PluginCategory;
 
@@ -51,14 +53,14 @@ public:
 
     /// Total count.
     std::size_t size() const;
-    void        clear();
+    void clear();
 
     /// Process-wide singleton.  The UI and CLI both consult this instance.
     static PluginRegistry& instance();
 
 private:
-    mutable std::mutex                                            mtx_;
+    mutable std::mutex mtx_;
     std::unordered_map<Category, std::vector<plugins::IPlugin*>> buckets_;
 };
 
-}  // namespace simall::core
+} // namespace simall::core

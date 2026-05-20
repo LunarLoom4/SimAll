@@ -23,55 +23,61 @@
 #pragma once
 
 #include "meshing/OversetInterpolation.hpp"
-#include "solver/SimpleAlgorithm.hpp"
 #include "solver/bc/OversetBc.hpp"
 #include "solver/FieldRegistry.hpp"
+#include "solver/SimpleAlgorithm.hpp"
 
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-struct OversetDomain {
-    meshing::Mesh*                          mesh    = nullptr;
-    FieldRegistry*                          fields  = nullptr;
-    SimpleAlgorithm*                        solver  = nullptr;     // SIMPLE/PISO/SIMPLEC subclass
+struct OversetDomain
+{
+    meshing::Mesh* mesh = nullptr;
+    FieldRegistry* fields = nullptr;
+    SimpleAlgorithm* solver = nullptr; // SIMPLE/PISO/SIMPLEC subclass
     /// Receptor cells in this mesh that need donor values each iter.
-    std::vector<meshing::CellId>            receptorCells;
+    std::vector<meshing::CellId> receptorCells;
     /// Overset BC objects keyed by zone whose donor values we will refresh
     /// every outer iteration (one per scalar/vector channel).
-    std::vector<bc::OversetBc*>             oversetBcs;
+    std::vector<bc::OversetBc*> oversetBcs;
 };
 
-struct OversetLink {
+struct OversetLink
+{
     /// Index of the donor and receptor domains in the domains vector.
-    int donor    = -1;
+    int donor = -1;
     int receptor = -1;
     std::unique_ptr<meshing::OversetInterpolation> interp;
     /// Scalar field names to transfer (e.g., "p"); vector names go in vecVars.
-    std::vector<std::string>                       scalarVars;
-    std::vector<std::string>                       vectorVars;
-    std::string                                    holeMaskField;   // optional
+    std::vector<std::string> scalarVars;
+    std::vector<std::string> vectorVars;
+    std::string holeMaskField; // optional
 };
 
-struct OversetDriverOptions {
-    int    maxOuterIters = 25;
-    double relTol        = 1.0e-4;     // relative change of donor-side variable across iter
-    bool   verbose       = false;
+struct OversetDriverOptions
+{
+    int maxOuterIters = 25;
+    double relTol = 1.0e-4; // relative change of donor-side variable across iter
+    bool verbose = false;
 };
 
-struct OversetReport {
-    int    iters       = 0;
+struct OversetReport
+{
+    int iters = 0;
     double finalChange = 0.0;
-    bool   converged   = false;
+    bool converged = false;
 };
 
-class OversetCouplingDriver {
+class OversetCouplingDriver
+{
 public:
     OversetCouplingDriver(std::vector<OversetDomain> domains,
-                          std::vector<OversetLink>   links,
-                          OversetDriverOptions       opts = {});
+                          std::vector<OversetLink> links,
+                          OversetDriverOptions opts = {});
 
     /// Build interpolation stencils for all links (called once after
     /// meshes are immutable). Returns false if any link fails to build.
@@ -91,12 +97,12 @@ public:
 private:
     void interpolate_all_links();
     void apply_donor_values_to_bcs();
-    double measure_max_change();   // compares donor field snapshots
+    double measure_max_change(); // compares donor field snapshots
 
-    std::vector<OversetDomain>  domains_;
-    std::vector<OversetLink>    links_;
-    OversetDriverOptions        opt_;
-    bool                        built_ = false;
+    std::vector<OversetDomain> domains_;
+    std::vector<OversetLink> links_;
+    OversetDriverOptions opt_;
+    bool built_ = false;
 
     // Snapshot of last-iteration donor field values (per link, per receptor)
     // used for change measurement. Each entry is a flat array of scalars
@@ -104,4 +110,4 @@ private:
     std::vector<std::vector<double>> lastSnapshot_;
 };
 
-}  // namespace simall::solver
+} // namespace simall::solver

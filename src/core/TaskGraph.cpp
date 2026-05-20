@@ -6,10 +6,13 @@
 
 #include <stack>
 
-namespace simall::core {
+namespace simall::core
+{
 
-void TaskGraph::dependOn(TaskHandle child, TaskHandle dep) {
-    if (started_) throw std::runtime_error("TaskGraph: dependOn() after run()");
+void TaskGraph::dependOn(TaskHandle child, TaskHandle dep)
+{
+    if (started_)
+        throw std::runtime_error("TaskGraph: dependOn() after run()");
     if (!child.valid() || !dep.valid() || child.graph_ != this || dep.graph_ != this)
         throw std::runtime_error("TaskGraph: dependOn handle from another graph");
     if (child.id() == dep.id())
@@ -18,20 +21,29 @@ void TaskGraph::dependOn(TaskHandle child, TaskHandle dep) {
     ++nodes_[child.id()]->predecessorCount;
 }
 
-void TaskGraph::detectCycles() const {
-    enum { kUnseen, kOpen, kDone };
+void TaskGraph::detectCycles() const
+{
+    enum
+    {
+        kUnseen,
+        kOpen,
+        kDone
+    };
     std::vector<int> color(nodes_.size(), kUnseen);
     std::vector<std::size_t> stack;
     for (std::size_t root = 0; root < nodes_.size(); ++root) {
-        if (color[root] != kUnseen) continue;
+        if (color[root] != kUnseen)
+            continue;
         stack.push_back(root);
         while (!stack.empty()) {
             std::size_t u = stack.back();
             if (color[u] == kUnseen) {
                 color[u] = kOpen;
                 for (std::size_t v : nodes_[u]->successors) {
-                    if (color[v] == kOpen)  throw std::runtime_error("TaskGraph: cycle detected");
-                    if (color[v] == kUnseen) stack.push_back(v);
+                    if (color[v] == kOpen)
+                        throw std::runtime_error("TaskGraph: cycle detected");
+                    if (color[v] == kUnseen)
+                        stack.push_back(v);
                 }
             } else {
                 color[u] = kDone;
@@ -41,7 +53,8 @@ void TaskGraph::detectCycles() const {
     }
 }
 
-void TaskGraph::schedule(std::size_t id) {
+void TaskGraph::schedule(std::size_t id)
+{
     pool_->submit([this, id]() {
         auto& node = *nodes_[id];
         node.fn();
@@ -57,8 +70,10 @@ void TaskGraph::schedule(std::size_t id) {
     });
 }
 
-void TaskGraph::run() {
-    if (started_) throw std::runtime_error("TaskGraph: run() twice");
+void TaskGraph::run()
+{
+    if (started_)
+        throw std::runtime_error("TaskGraph: run() twice");
     started_ = true;
     detectCycles();
 
@@ -72,18 +87,22 @@ void TaskGraph::run() {
         nodes_[i]->remaining.store(nodes_[i]->predecessorCount, std::memory_order_release);
     }
     for (std::size_t i = 0; i < nodes_.size(); ++i) {
-        if (nodes_[i]->predecessorCount == 0) schedule(i);
+        if (nodes_[i]->predecessorCount == 0)
+            schedule(i);
     }
 }
 
-void TaskGraph::waitAll() {
-    if (!started_) throw std::runtime_error("TaskGraph: waitAll() before run()");
+void TaskGraph::waitAll()
+{
+    if (!started_)
+        throw std::runtime_error("TaskGraph: waitAll() before run()");
     completeFut_.wait();
     // Propagate first exception, if any.
     for (auto& node : nodes_) {
         auto fut = node->done->get_future();
-        if (fut.valid()) fut.get();   // rethrows on stored exception
+        if (fut.valid())
+            fut.get(); // rethrows on stored exception
     }
 }
 
-}  // namespace simall::core
+} // namespace simall::core

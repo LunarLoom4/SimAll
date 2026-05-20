@@ -24,9 +24,11 @@ class QMainWindow;
 class QDockWidget;
 class QWidget;
 
-namespace simall::gui {
+namespace simall::gui
+{
 
-class DockManager : public QObject {
+class DockManager : public QObject
+{
     Q_OBJECT
 public:
     explicit DockManager(QMainWindow* main, QObject* parent = nullptr);
@@ -35,7 +37,7 @@ public:
     // gui_core::PanelRegistry registration so save/restore can round-trip.
     QDockWidget* add_panel(const QString& panelId,
                            const QString& title,
-                           QWidget*       panel,
+                           QWidget* panel,
                            gui_core::DockArea area = gui_core::DockArea::Right);
 
     void show_panel(const QString& panelId, bool visible = true);
@@ -54,9 +56,9 @@ public:
     void restore_from_settings(const QString& settingsKey);
 
 private:
-    QMainWindow*                                main_;
-    std::unordered_map<QString, QDockWidget*>   docks_;
+    QMainWindow* main_;
+    std::unordered_map<QString, QDockWidget*> docks_;
     std::unordered_map<std::string, gui_core::DockPerspective> perspectives_;
 };
 
-}  // namespace simall::gui
+} // namespace simall::gui

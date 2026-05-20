@@ -12,15 +12,17 @@
 // =============================================================================
 #include "core/Application.hpp"
 #include "core/Logger.hpp"
+#include "gui/MainWindow.hpp"
 #include "io/Project.hpp"
 #include "parallel/Parallel.hpp"
-#include "gui/MainWindow.hpp"
 
 #include <QApplication>
 #include <QSurfaceFormat>
+
 #include <QVTKOpenGLNativeWidget.h>
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     QSurfaceFormat::setDefaultFormat(QVTKOpenGLNativeWidget::defaultFormat());
 
     QApplication qt(argc, argv);

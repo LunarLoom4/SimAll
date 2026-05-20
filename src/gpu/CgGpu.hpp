@@ -43,39 +43,49 @@
 #include <memory>
 #include <vector>
 
-namespace simall::gpu {
+namespace simall::gpu
+{
 
-enum class GpuPreconditioner { None, Jacobi, ILU0 };
-
-struct GpuSolverConfig {
-    GpuPreconditioner preconditioner = GpuPreconditioner::Jacobi;
-    double            tolerance      = 1.0e-8;   ///< ||r|| / ||b||
-    int               maxIterations  = 1000;
-    /// If positive, stop when ||r||/||b|| drops by this many orders.
-    /// Combined with tolerance via "first-trigger-wins" semantics.
-    double            relativeOrders = 0.0;
+enum class GpuPreconditioner
+{
+    None,
+    Jacobi,
+    ILU0
 };
 
-struct GpuSolverStats {
-    int    iterations    = 0;
-    double finalResidual = 0.0;     ///< ||r||₂
+struct GpuSolverConfig
+{
+    GpuPreconditioner preconditioner = GpuPreconditioner::Jacobi;
+    double tolerance = 1.0e-8; ///< ||r|| / ||b||
+    int maxIterations = 1000;
+    /// If positive, stop when ||r||/||b|| drops by this many orders.
+    /// Combined with tolerance via "first-trigger-wins" semantics.
+    double relativeOrders = 0.0;
+};
+
+struct GpuSolverStats
+{
+    int iterations = 0;
+    double finalResidual = 0.0; ///< ||r||₂
     double initialResidual = 0.0;
-    bool   converged     = false;
-    double timeSeconds   = 0.0;
+    bool converged = false;
+    double timeSeconds = 0.0;
 };
 
 /// Read-only view of a CSR matrix that the GPU solver consumes.  The
 /// solver makes its own device copies; the caller retains ownership of
 /// the host arrays.
-struct HostCsrView {
-    std::size_t   n      = 0;
-    std::size_t   nnz    = 0;
-    const int*    rowPtr = nullptr;     ///< [n+1]
-    const int*    colIdx = nullptr;     ///< [nnz]
-    const double* values = nullptr;     ///< [nnz]
+struct HostCsrView
+{
+    std::size_t n = 0;
+    std::size_t nnz = 0;
+    const int* rowPtr = nullptr;    ///< [n+1]
+    const int* colIdx = nullptr;    ///< [nnz]
+    const double* values = nullptr; ///< [nnz]
 };
 
-class CgGpu {
+class CgGpu
+{
 public:
     explicit CgGpu(GpuSolverConfig cfg = {});
     ~CgGpu();
@@ -86,33 +96,32 @@ public:
     void set_matrix(const HostCsrView& A);
 
     /// Solve A x = b.  ``x`` is both initial guess (in) and solution (out).
-    GpuSolverStats solve(const std::vector<double>& b,
-                         std::vector<double>&       x);
+    GpuSolverStats solve(const std::vector<double>& b, std::vector<double>& x);
 
     const GpuSolverConfig& config() const noexcept { return cfg_; }
-    void set_config(GpuSolverConfig c) noexcept    { cfg_ = c; }
+    void set_config(GpuSolverConfig c) noexcept { cfg_ = c; }
 
     /// Last residual norm returned by solve().
     double last_residual() const noexcept { return lastResidual_; }
 
 private:
     GpuSolverConfig cfg_;
-    double          lastResidual_ = 0.0;
+    double lastResidual_ = 0.0;
 
     // Device-resident matrix.
-    HostDeviceMirror<int>    dRowPtr_;
-    HostDeviceMirror<int>    dColIdx_;
+    HostDeviceMirror<int> dRowPtr_;
+    HostDeviceMirror<int> dColIdx_;
     HostDeviceMirror<double> dValues_;
-    std::size_t              n_   = 0;
-    std::size_t              nnz_ = 0;
+    std::size_t n_ = 0;
+    std::size_t nnz_ = 0;
 
     // Preconditioner state.
-    HostDeviceMirror<double> dDiag_;        ///< Jacobi
-    HostDeviceMirror<double> dLU_;          ///< ILU0 factored values
-    bool                     iluValid_ = false;
+    HostDeviceMirror<double> dDiag_; ///< Jacobi
+    HostDeviceMirror<double> dLU_;   ///< ILU0 factored values
+    bool iluValid_ = false;
 
     // Krylov workspace.
     HostDeviceMirror<double> dB_, dX_, dR_, dZ_, dP_, dQ_;
 };
 
-}  // namespace simall::gpu
+} // namespace simall::gpu

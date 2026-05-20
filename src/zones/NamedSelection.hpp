@@ -23,24 +23,27 @@
 #include <string>
 #include <vector>
 
-namespace simall::zones {
+namespace simall::zones
+{
 
-enum class SelectionEntity : std::uint8_t {
-    Face   = 0,
-    Cell   = 1,
-    Edge   = 2,
+enum class SelectionEntity : std::uint8_t
+{
+    Face = 0,
+    Cell = 1,
+    Edge = 2,
     Vertex = 3
 };
 
-struct NamedSelection {
-    std::string                       name;                ///< unique within a project
-    SelectionEntity                   entity = SelectionEntity::Face;
-    std::vector<util::PersistentId>   ids;                 ///< persistent CAD/topology IDs
-    std::string                       color   = "#7fb3ff"; ///< visualization tint
-    std::string                       comment;             ///< user note (optional)
+struct NamedSelection
+{
+    std::string name; ///< unique within a project
+    SelectionEntity entity = SelectionEntity::Face;
+    std::vector<util::PersistentId> ids; ///< persistent CAD/topology IDs
+    std::string color = "#7fb3ff";       ///< visualization tint
+    std::string comment;                 ///< user note (optional)
 
     bool empty() const noexcept { return ids.empty(); }
     std::size_t size() const noexcept { return ids.size(); }
 };
 
-}  // namespace simall::zones
+} // namespace simall::zones

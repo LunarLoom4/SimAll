@@ -24,16 +24,17 @@
 #include <cstddef>
 #include <vector>
 
-namespace simall::optimization {
+namespace simall::optimization
+{
 
-class KrigingModel {
+class KrigingModel
+{
 public:
     KrigingModel() = default;
 
     /// Train on `X` (n rows, d cols) and outputs `y` (size n).
     /// Returns true if Cholesky succeeded.
-    bool fit(const std::vector<std::vector<double>>& X,
-             const std::vector<double>&              y);
+    bool fit(const std::vector<std::vector<double>>& X, const std::vector<double>& y);
 
     /// Predict mean at `x`.
     [[nodiscard]] double predict(const std::vector<double>& x) const;
@@ -42,17 +43,17 @@ public:
     void predict(const std::vector<double>& x, double& mean, double& var) const;
 
     [[nodiscard]] const std::vector<double>& theta() const noexcept { return theta_; }
-    [[nodiscard]] double                     sigma2() const noexcept { return sigma2_; }
-    [[nodiscard]] std::size_t                n_train() const noexcept { return X_.size(); }
+    [[nodiscard]] double sigma2() const noexcept { return sigma2_; }
+    [[nodiscard]] std::size_t n_train() const noexcept { return X_.size(); }
 
 private:
     std::vector<std::vector<double>> X_;
-    std::vector<double>              y_;
-    std::vector<double>              theta_;
-    std::vector<std::vector<double>> L_;       // lower Cholesky factor
-    std::vector<double>              alpha_;   // K⁻¹ (y - μ)
-    double                           mu_   = 0.0;
-    double                           sigma2_ = 1.0;
+    std::vector<double> y_;
+    std::vector<double> theta_;
+    std::vector<std::vector<double>> L_; // lower Cholesky factor
+    std::vector<double> alpha_;          // K⁻¹ (y - μ)
+    double mu_ = 0.0;
+    double sigma2_ = 1.0;
 };
 
-}  // namespace simall::optimization
+} // namespace simall::optimization

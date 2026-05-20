@@ -28,33 +28,42 @@
 #include <string>
 #include <vector>
 
-namespace simall::io {
+namespace simall::io
+{
 
-enum class StoreDtype : std::uint8_t { F64 = 1, F32 = 2, I32 = 3, I64 = 4, U8 = 5 };
+enum class StoreDtype : std::uint8_t
+{
+    F64 = 1,
+    F32 = 2,
+    I32 = 3,
+    I64 = 4,
+    U8 = 5
+};
 
-struct Dataset {
-    StoreDtype                 dtype = StoreDtype::F64;
-    std::vector<std::uint64_t> shape;       // length = rank
-    std::vector<std::uint8_t>  bytes;       // packed raw values (LE)
+struct Dataset
+{
+    StoreDtype dtype = StoreDtype::F64;
+    std::vector<std::uint64_t> shape; // length = rank
+    std::vector<std::uint8_t> bytes;  // packed raw values (LE)
     [[nodiscard]] std::uint64_t element_count() const noexcept;
-    [[nodiscard]] std::size_t  element_size()  const noexcept;
+    [[nodiscard]] std::size_t element_size() const noexcept;
 };
 
-struct Group {
-    std::map<std::string, std::string>             attributes;
-    std::map<std::string, Dataset>                 datasets;
-    std::map<std::string, std::unique_ptr<Group>>  children;
+struct Group
+{
+    std::map<std::string, std::string> attributes;
+    std::map<std::string, Dataset> datasets;
+    std::map<std::string, std::unique_ptr<Group>> children;
 
-    Group*       create_group(const std::string& name);
-    Group*       find_group  (const std::string& path);          // "/run/iter_000123"
-    Dataset*     find_dataset(const std::string& path);
-    void         set_dataset (const std::string& path, Dataset ds);
-    void         set_attribute(const std::string& path,
-                                const std::string& key,
-                                const std::string& value);
+    Group* create_group(const std::string& name);
+    Group* find_group(const std::string& path); // "/run/iter_000123"
+    Dataset* find_dataset(const std::string& path);
+    void set_dataset(const std::string& path, Dataset ds);
+    void set_attribute(const std::string& path, const std::string& key, const std::string& value);
 };
 
-class Hdf5ResultStore {
+class Hdf5ResultStore
+{
 public:
     Hdf5ResultStore();
     ~Hdf5ResultStore();
@@ -66,9 +75,8 @@ public:
                      const std::string& name,
                      const std::vector<double>& values,
                      FieldLocation loc = FieldLocation::Cell);
-    [[nodiscard]] std::vector<double> read_field_f64(
-                     const std::string& groupPath,
-                     const std::string& name) const;
+    [[nodiscard]] std::vector<double> read_field_f64(const std::string& groupPath,
+                                                     const std::string& name) const;
 
     // -- file IO -------------------------------------------------------------
     bool save_native(const std::string& path) const;
@@ -81,4 +89,4 @@ private:
     std::unique_ptr<Group> root_;
 };
 
-}  // namespace simall::io
+} // namespace simall::io

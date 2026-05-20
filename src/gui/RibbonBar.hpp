@@ -10,11 +10,14 @@
 
 #include <QTabWidget>
 #include <QToolButton>
+
 #include <QAction>
 
-namespace simall::gui {
+namespace simall::gui
+{
 
-class RibbonBar : public QTabWidget {
+class RibbonBar : public QTabWidget
+{
     Q_OBJECT
 public:
     explicit RibbonBar(QWidget* parent = nullptr);
@@ -25,4 +28,4 @@ private:
     void add_tab(const QString& name);
 };
 
-}  // namespace simall::gui
+} // namespace simall::gui

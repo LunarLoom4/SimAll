@@ -10,13 +10,16 @@
 #include <string>
 #include <unordered_set>
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
 // ---------------------------------------------------------------------------
 // Edge insertion / removal
 // ---------------------------------------------------------------------------
-bool WorkflowEngine::connect(const CellLink& link) {
-    if (!schematic_->add_link(link)) return false;
+bool WorkflowEngine::connect(const CellLink& link)
+{
+    if (!schematic_->add_link(link))
+        return false;
     // Downstream-invalidation rule: a brand-new upstream edge always
     // invalidates the sink (and everyone downstream of it).  We can NOT
     // simply call recompute_all here -- doing so would silently demote
@@ -26,8 +29,10 @@ bool WorkflowEngine::connect(const CellLink& link) {
     return true;
 }
 
-bool WorkflowEngine::disconnect(const CellLink& link) {
-    if (!schematic_->remove_link(link)) return false;
+bool WorkflowEngine::disconnect(const CellLink& link)
+{
+    if (!schematic_->remove_link(link))
+        return false;
     // Removing an edge can leave the sink with an unwired required
     // input.  mark_modified will re-derive correctly (Unfulfilled when
     // a required input is missing).
@@ -39,27 +44,35 @@ bool WorkflowEngine::disconnect(const CellLink& link) {
 // ---------------------------------------------------------------------------
 // Readiness predicates
 // ---------------------------------------------------------------------------
-bool WorkflowEngine::is_ready(CellId id) const {
-    if (!schematic_->inputs_satisfied(id)) return false;
+bool WorkflowEngine::is_ready(CellId id) const
+{
+    if (!schematic_->inputs_satisfied(id))
+        return false;
     for (const CellId u : schematic_->upstream(id)) {
         const Cell* parent = schematic_->cell(u);
-        if (!parent) return false;
-        if (parent->state() != CellState::UpToDate) return false;
+        if (!parent)
+            return false;
+        if (parent->state() != CellState::UpToDate)
+            return false;
     }
     return true;
 }
 
-bool WorkflowEngine::has_failed_ancestor(CellId id) const {
+bool WorkflowEngine::has_failed_ancestor(CellId id) const
+{
     std::unordered_set<CellId> seen;
-    std::vector<CellId>        stack{id};
+    std::vector<CellId> stack{id};
     while (!stack.empty()) {
         const CellId cur = stack.back();
         stack.pop_back();
-        if (!seen.insert(cur).second) continue;
+        if (!seen.insert(cur).second)
+            continue;
         for (const CellId u : schematic_->upstream(cur)) {
             const Cell* p = schematic_->cell(u);
-            if (!p) continue;
-            if (p->state() == CellState::Failed) return true;
+            if (!p)
+                continue;
+            if (p->state() == CellState::Failed)
+                return true;
             stack.push_back(u);
         }
     }
@@ -70,19 +83,20 @@ bool WorkflowEngine::has_failed_ancestor(CellId id) const {
 // ---------------------------------------------------------------------------
 // Refresh policy
 // ---------------------------------------------------------------------------
-std::vector<CellId>
-WorkflowEngine::refresh_plan(RefreshPolicy policy) const {
+std::vector<CellId> WorkflowEngine::refresh_plan(RefreshPolicy policy) const
+{
     const auto order = schematic_->topological_order();
     std::vector<CellId> plan;
     plan.reserve(order.size());
 
     for (const CellId id : order) {
         const Cell* c = schematic_->cell(id);
-        if (!c) continue;
-        if (c->state() != CellState::RefreshRequired) continue;
+        if (!c)
+            continue;
+        if (c->state() != CellState::RefreshRequired)
+            continue;
 
-        if (has_flag(policy, RefreshPolicy::StopOnFailed)
-            && has_failed_ancestor(id)) {
+        if (has_flag(policy, RefreshPolicy::StopOnFailed) && has_failed_ancestor(id)) {
             continue;
         }
 
@@ -96,19 +110,22 @@ WorkflowEngine::refresh_plan(RefreshPolicy policy) const {
 }
 
 
-std::optional<CellId>
-WorkflowEngine::next_refreshable(RefreshPolicy policy) const {
+std::optional<CellId> WorkflowEngine::next_refreshable(RefreshPolicy policy) const
+{
     const auto plan = refresh_plan(policy);
-    if (plan.empty()) return std::nullopt;
+    if (plan.empty())
+        return std::nullopt;
     return plan.front();
 }
 
 
-bool WorkflowEngine::refresh_one(CellId id,
-                                 std::function<bool(CellId)> runner) {
+bool WorkflowEngine::refresh_one(CellId id, std::function<bool(CellId)> runner)
+{
     const bool ok = runner ? runner(id) : false;
-    if (ok) state_->mark_solved(id);
-    else    state_->mark_failed(id);
+    if (ok)
+        state_->mark_solved(id);
+    else
+        state_->mark_failed(id);
     return ok;
 }
 
@@ -118,7 +135,8 @@ bool WorkflowEngine::refresh_one(CellId id,
 // ---------------------------------------------------------------------------
 bool WorkflowEngine::refresh_one(CellId id,
                                  const CellAdapterRegistry& registry,
-                                 ExecutionContext&          ctx) {
+                                 ExecutionContext& ctx)
+{
     Cell* cell = schematic_->cell(id);
     if (!cell) {
         ctx.error("workflow: unknown cell id");
@@ -134,24 +152,22 @@ bool WorkflowEngine::refresh_one(CellId id,
 
     auto adapter = registry.make(aid);
     if (!adapter) {
-        ctx.error(std::string("workflow: no adapter registered for id '")
-                  + aid + "'");
+        ctx.error(std::string("workflow: no adapter registered for id '") + aid + "'");
         state_->mark_failed(id);
         return false;
     }
 
     // Sanity-check the kind match.  We only WARN -- a "Custom" adapter
     // is intentionally polymorphic and may legitimately serve any kind.
-    if (adapter->kind() != cell->kind()
-        && adapter->kind() != CellKind::Custom) {
-        ctx.warn(std::string("workflow: adapter kind mismatch for '")
-                 + aid + "'");
+    if (adapter->kind() != cell->kind() && adapter->kind() != CellKind::Custom) {
+        ctx.warn(std::string("workflow: adapter kind mismatch for '") + aid + "'");
     }
 
     const bool ok = adapter->execute(*cell, ctx);
     if (!ok) {
         const auto err = adapter->last_error();
-        if (!err.empty()) ctx.error(err);
+        if (!err.empty())
+            ctx.error(err);
         state_->mark_failed(id);
         return false;
     }
@@ -163,8 +179,9 @@ bool WorkflowEngine::refresh_one(CellId id,
 // ---------------------------------------------------------------------------
 // Deterministic full-graph order
 // ---------------------------------------------------------------------------
-std::vector<CellId> WorkflowEngine::evaluation_order() const {
+std::vector<CellId> WorkflowEngine::evaluation_order() const
+{
     return schematic_->topological_order();
 }
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

@@ -22,25 +22,27 @@
 #include <string>
 #include <unordered_map>
 
-namespace simall::multiphase {
+namespace simall::multiphase
+{
 
-struct CsfProps {
-    double sigma         = 0.072;     // N/m   (water/air @ 25°C)
+struct CsfProps
+{
+    double sigma = 0.072; // N/m   (water/air @ 25°C)
     std::string alphaField = "alpha";
     /// Per-wall-zone equilibrium contact angle [rad]. Missing zones default
     /// to 90° (no adhesion adjustment).
     std::unordered_map<meshing::ZoneId, double> contactAngles;
 };
 
-class SurfaceTensionCsf {
+class SurfaceTensionCsf
+{
 public:
-    void initialize(const meshing::Mesh& mesh, solver::FieldRegistry& fields,
-                    CsfProps props);
+    void initialize(const meshing::Mesh& mesh, solver::FieldRegistry& fields, CsfProps props);
     void compute(solver::FieldRegistry& fields);
 
 private:
     const meshing::Mesh* mesh_ = nullptr;
-    CsfProps             p_{};
+    CsfProps p_{};
 };
 
-}  // namespace simall::multiphase
+} // namespace simall::multiphase

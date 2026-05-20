@@ -12,18 +12,21 @@
 #pragma once
 
 #include "io/MeshFormats.hpp"
+
 #include <string>
 
-namespace simall::io {
+namespace simall::io
+{
 
-struct TecplotWriteResult {
-    bool        ok = false;
+struct TecplotWriteResult
+{
+    bool ok = false;
     std::string error;
 };
 
 [[nodiscard]] TecplotWriteResult write_tecplot_ascii(const std::string& path,
-                                                      const ImportedMesh& mesh,
-                                                      const FieldFrame*   fields = nullptr,
-                                                      const std::string&  title  = "SimAll Beta");
+                                                     const ImportedMesh& mesh,
+                                                     const FieldFrame* fields = nullptr,
+                                                     const std::string& title = "SimAll Beta");
 
-}  // namespace simall::io
+} // namespace simall::io

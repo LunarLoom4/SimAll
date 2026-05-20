@@ -10,12 +10,14 @@
 // =============================================================================
 #pragma once
 
-#include "visualization/ClippingPlane.hpp"   // brings in Plane
+#include "visualization/ClippingPlane.hpp" // brings in Plane
 #include "visualization/VisualizationTypes.hpp"
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-class SectionCut {
+class SectionCut
+{
 public:
     /// Slice `volume` with `plane`.  Returns a triangulated SurfaceMesh
     /// embedded in the cut plane, with pointScalars populated when the
@@ -23,4 +25,4 @@ public:
     static SurfaceMesh slice(const VolumeMesh& volume, const Plane& plane);
 };
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

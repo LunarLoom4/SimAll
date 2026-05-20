@@ -31,23 +31,26 @@
 #include <array>
 #include <vector>
 
-namespace simall::combustion {
+namespace simall::combustion
+{
 
-inline constexpr int MOMIC_K = 4;          // number of moments tracked (0..3)
+inline constexpr int MOMIC_K = 4; // number of moments tracked (0..3)
 
-struct MomicProps {
-    double rho_soot      = 1800.0;
-    double Mw_C2H2       = 26.04e-3;        // HACA growth precursor
-    double C_inc         = 1.0e5;           // nucleation prefactor
-    double T_inc         = 21000.0;
-    double C_sg          = 6000.0;          // HACA surface growth
-    double T_sg          = 12100.0;
-    double C_ox_O2       = 1.0e3;
-    double T_ox_O2       = 19680.0;
-    double C_ox_OH       = 0.36;            // Neoh collision efficiency
+struct MomicProps
+{
+    double rho_soot = 1800.0;
+    double Mw_C2H2 = 26.04e-3; // HACA growth precursor
+    double C_inc = 1.0e5;      // nucleation prefactor
+    double T_inc = 21000.0;
+    double C_sg = 6000.0; // HACA surface growth
+    double T_sg = 12100.0;
+    double C_ox_O2 = 1.0e3;
+    double T_ox_O2 = 19680.0;
+    double C_ox_OH = 0.36; // Neoh collision efficiency
 };
 
-class SootMomMethod {
+class SootMomMethod
+{
 public:
     void initialize(const meshing::Mesh& mesh, MomicProps props = {});
 
@@ -63,7 +66,7 @@ public:
 
 private:
     const meshing::Mesh* mesh_ = nullptr;
-    MomicProps           p_{};
+    MomicProps p_{};
 };
 
-}  // namespace simall::combustion
+} // namespace simall::combustion

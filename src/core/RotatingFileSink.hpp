@@ -18,16 +18,18 @@
 #include <mutex>
 #include <string>
 
-namespace simall::core {
+namespace simall::core
+{
 
-class RotatingFileSink {
+class RotatingFileSink
+{
 public:
     RotatingFileSink(std::filesystem::path path,
-                     std::uint64_t         maxBytes = 16ull * 1024ull * 1024ull,
-                     unsigned              maxFiles = 5);
+                     std::uint64_t maxBytes = 16ull * 1024ull * 1024ull,
+                     unsigned maxFiles = 5);
     ~RotatingFileSink();
 
-    RotatingFileSink(const RotatingFileSink&)            = delete;
+    RotatingFileSink(const RotatingFileSink&) = delete;
     RotatingFileSink& operator=(const RotatingFileSink&) = delete;
 
     /// Write a pre-formatted message. Rotation happens transparently.
@@ -49,11 +51,11 @@ private:
     void rotate();
 
     std::filesystem::path basePath_;
-    std::uint64_t         maxBytes_;
-    unsigned              maxFiles_;
-    std::FILE*            fp_       = nullptr;
-    std::uint64_t         written_  = 0;
-    std::mutex            mtx_;
+    std::uint64_t maxBytes_;
+    unsigned maxFiles_;
+    std::FILE* fp_ = nullptr;
+    std::uint64_t written_ = 0;
+    std::mutex mtx_;
 };
 
-}  // namespace simall::core
+} // namespace simall::core

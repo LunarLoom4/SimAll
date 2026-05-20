@@ -30,16 +30,19 @@
 #include <string>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct OversetStencil {
-    std::int64_t                 receptor = -1;
-    std::array<std::int64_t, 8>  donors{-1,-1,-1,-1,-1,-1,-1,-1};
-    std::array<double, 8>        weights{0,0,0,0,0,0,0,0};
-    int                          count = 0;
+struct OversetStencil
+{
+    std::int64_t receptor = -1;
+    std::array<std::int64_t, 8> donors{-1, -1, -1, -1, -1, -1, -1, -1};
+    std::array<double, 8> weights{0, 0, 0, 0, 0, 0, 0, 0};
+    int count = 0;
 };
 
-class OversetInterpolation {
+class OversetInterpolation
+{
 public:
     /// Pre-compute receptor→donor stencils. `holeMaskField` (if non-empty)
     /// is consulted on the donor mesh to skip cells marked as inside a body.
@@ -51,32 +54,33 @@ public:
     /// Interpolate a scalar field from donor to receptor.
     /// Receptors with no donor are left untouched.
     void interpolate_scalar(const solver::ScalarField& srcDonor,
-                            solver::ScalarField&       dstReceptor) const;
+                            solver::ScalarField& dstReceptor) const;
     void interpolate_vector(const solver::VectorField& srcDonor,
-                            solver::VectorField&       dstReceptor) const;
+                            solver::VectorField& dstReceptor) const;
 
     const std::vector<OversetStencil>& stencils() const noexcept { return stencils_; }
 
 private:
-    struct BvhNode {
+    struct BvhNode
+    {
         util::BoundingBox aabb;
-        int left  = -1;
+        int left = -1;
         int right = -1;
         int first = -1;
         int count = 0;
     };
-    int  build_bvh(int first, int count);
+    int build_bvh(int first, int count);
     void cell_aabb(CellId c, util::BoundingBox& out) const;
     bool point_in_cell(const util::Vec3d& p, CellId c) const;
     CellId locate(const util::Vec3d& p) const;
 
-    const Mesh*  donor_    = nullptr;
-    const Mesh*  receptor_ = nullptr;
-    std::vector<BvhNode>      bvh_;
-    std::vector<int>          bvhIdx_;
+    const Mesh* donor_ = nullptr;
+    const Mesh* receptor_ = nullptr;
+    std::vector<BvhNode> bvh_;
+    std::vector<int> bvhIdx_;
     std::vector<util::BoundingBox> cellBox_;
-    std::vector<OversetStencil>    stencils_;
-    std::vector<std::uint8_t>      holeMask_;
+    std::vector<OversetStencil> stencils_;
+    std::vector<std::uint8_t> holeMask_;
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

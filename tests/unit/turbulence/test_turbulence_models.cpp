@@ -20,28 +20,32 @@
 // shielding) require a fully-coupled flow case and are covered by the
 // verification-suite (tests/verification/).
 // =============================================================================
-#include <catch2/catch_test_macros.hpp>
-
-#include "turbulence/ITurbulenceModel.hpp"
-#include "turbulence/KEpsilonRng.hpp"
-#include "turbulence/KEpsilonRealizable.hpp"
-#include "turbulence/KOmegaStandard.hpp"
 #include "turbulence/DynamicSmagorinsky.hpp"
 #include "turbulence/IDDES.hpp"
-#include "turbulence/SasSst.hpp"
-#include "turbulence/LRR_Reynolds_Stress.hpp"
+#include "turbulence/ITurbulenceModel.hpp"
+#include "turbulence/KEpsilonRealizable.hpp"
+#include "turbulence/KEpsilonRng.hpp"
 #include "turbulence/KKLOmegaTransition.hpp"
+#include "turbulence/KOmegaStandard.hpp"
+#include "turbulence/LRR_Reynolds_Stress.hpp"
+#include "turbulence/SasSst.hpp"
+
+#include <catch2/catch_test_macros.hpp>
 
 using namespace simall::turbulence;
 
 TEST_CASE("Week 6 turbulence models — registry contains all 8 new closures",
-          "[turbulence][registry][week6]") {
+          "[turbulence][registry][week6]")
+{
     auto& reg = TurbulenceRegistry::instance();
-    for (const char* key : {
-        "kEpsilonRNG", "kEpsilonRealizable", "kOmegaStandard",
-        "dynamicSmagorinsky", "SA-IDDES", "SAS-SST", "LRR-RSM",
-        "kKLOmegaTransition"})
-    {
+    for (const char* key : {"kEpsilonRNG",
+                            "kEpsilonRealizable",
+                            "kOmegaStandard",
+                            "dynamicSmagorinsky",
+                            "SA-IDDES",
+                            "SAS-SST",
+                            "LRR-RSM",
+                            "kKLOmegaTransition"}) {
         auto m = reg.create(key);
         REQUIRE(m);
         REQUIRE_FALSE(m->name().empty());
@@ -51,36 +55,38 @@ TEST_CASE("Week 6 turbulence models — registry contains all 8 new closures",
 }
 
 TEST_CASE("KEpsilonRNG and Realizable variants report distinct names",
-          "[turbulence][week6][k-epsilon]") {
-    KEpsilonRng_Full        rng;
+          "[turbulence][week6][k-epsilon]")
+{
+    KEpsilonRng_Full rng;
     KEpsilonRealizable_Full real;
-    REQUIRE(rng.name()  == "kEpsilonRNG");
+    REQUIRE(rng.name() == "kEpsilonRNG");
     REQUIRE(real.name() == "kEpsilonRealizable");
 }
 
 TEST_CASE("KOmegaStandard reports Wilcox name and has direct construction",
-          "[turbulence][week6][k-omega]") {
+          "[turbulence][week6][k-omega]")
+{
     KOmegaStandard_Full m;
     REQUIRE(m.name() == "kOmegaStandard");
     REQUIRE(m.turbulent_viscosity(0) == 0.0);
 }
 
-TEST_CASE("DynamicSmagorinsky exposes csMax setter",
-          "[turbulence][week6][dynamic-smag]") {
+TEST_CASE("DynamicSmagorinsky exposes csMax setter", "[turbulence][week6][dynamic-smag]")
+{
     DynamicSmagorinsky_LES m;
     REQUIRE(m.name() == "dynamicSmagorinsky");
-    m.set_cs_max(0.20);                         // physical upper bound
-    REQUIRE(m.turbulent_viscosity(99) == 0.0);  // unset cells return 0
+    m.set_cs_max(0.20);                        // physical upper bound
+    REQUIRE(m.turbulent_viscosity(99) == 0.0); // unset cells return 0
 }
 
-TEST_CASE("IDDES and SAS-SST and LRR distinct names",
-          "[turbulence][week6][hybrid][rsm]") {
-    IDDES_Full                    iddes;
-    SasSst_Full                   sas;
-    LRR_Reynolds_Stress_Full      lrr;
-    KKLOmegaTransition_Full       kklw;
+TEST_CASE("IDDES and SAS-SST and LRR distinct names", "[turbulence][week6][hybrid][rsm]")
+{
+    IDDES_Full iddes;
+    SasSst_Full sas;
+    LRR_Reynolds_Stress_Full lrr;
+    KKLOmegaTransition_Full kklw;
     REQUIRE(iddes.name() == "SA-IDDES");
-    REQUIRE(sas  .name() == "SAS-SST");
-    REQUIRE(lrr  .name() == "LRR-RSM");
-    REQUIRE(kklw .name() == "kKLOmegaTransition");
+    REQUIRE(sas.name() == "SAS-SST");
+    REQUIRE(lrr.name() == "LRR-RSM");
+    REQUIRE(kklw.name() == "kKLOmegaTransition");
 }

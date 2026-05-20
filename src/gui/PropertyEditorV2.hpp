@@ -26,9 +26,11 @@ class QFormLayout;
 class QCheckBox;
 class QGroupBox;
 
-namespace simall::gui {
+namespace simall::gui
+{
 
-class PropertyEditorV2 : public QWidget {
+class PropertyEditorV2 : public QWidget
+{
     Q_OBJECT
 public:
     explicit PropertyEditorV2(QWidget* parent = nullptr);
@@ -38,7 +40,7 @@ public:
     [[nodiscard]] const std::vector<gui_core::PropertyDescriptor>& bag() const { return bag_; }
 
     void set_show_advanced(bool on);
-    void refresh_visibility();   // re-evaluates predicates for all widgets
+    void refresh_visibility(); // re-evaluates predicates for all widgets
 
 signals:
     void valueCommitted(const QString& propertyName);
@@ -46,16 +48,17 @@ signals:
 
 private:
     QWidget* build_widget_for(gui_core::PropertyDescriptor& d);
-    void     wire_commit(QWidget* w, gui_core::PropertyDescriptor& d,
-                         std::function<gui_core::Variant()> reader);
+    void wire_commit(QWidget* w,
+                     gui_core::PropertyDescriptor& d,
+                     std::function<gui_core::Variant()> reader);
 
-    QVBoxLayout*                          root_         = nullptr;
-    QCheckBox*                            showAdvanced_ = nullptr;
+    QVBoxLayout* root_ = nullptr;
+    QCheckBox* showAdvanced_ = nullptr;
     std::vector<gui_core::PropertyDescriptor> bag_;
-    std::unordered_map<std::string, QWidget*>  widgets_;     // propertyName → widget
-    std::unordered_map<std::string, QWidget*>  rowParents_;  // propertyName → row container
-    std::unordered_map<std::string, QWidget*>  errorLabels_; // propertyName → micro-label
-    bool                                   advanced_     = false;
+    std::unordered_map<std::string, QWidget*> widgets_;     // propertyName → widget
+    std::unordered_map<std::string, QWidget*> rowParents_;  // propertyName → row container
+    std::unordered_map<std::string, QWidget*> errorLabels_; // propertyName → micro-label
+    bool advanced_ = false;
 };
 
-}  // namespace simall::gui
+} // namespace simall::gui

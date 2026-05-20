@@ -29,18 +29,21 @@
 #include "meshing/MeshStorage.hpp"
 #include "solver/FieldRegistry.hpp"
 
-namespace simall::multiphase {
+namespace simall::multiphase
+{
 
-struct LeeProps {
-    double T_sat        = 373.15;      // K (water @ 1 atm)
-    double L_vap        = 2.257e6;     // J/kg latent heat
-    double rho_liquid   = 958.0;       // kg/m³
-    double rho_vapor    = 0.598;       // kg/m³
-    double c_evap       = 0.1;         // Lee evaporation constant [1/s]
-    double c_cond       = 0.1;         // Lee condensation constant [1/s]
+struct LeeProps
+{
+    double T_sat = 373.15;     // K (water @ 1 atm)
+    double L_vap = 2.257e6;    // J/kg latent heat
+    double rho_liquid = 958.0; // kg/m³
+    double rho_vapor = 0.598;  // kg/m³
+    double c_evap = 0.1;       // Lee evaporation constant [1/s]
+    double c_cond = 0.1;       // Lee condensation constant [1/s]
 };
 
-class LeeMassTransfer {
+class LeeMassTransfer
+{
 public:
     void initialize(const meshing::Mesh& mesh, const LeeProps& props);
     /// Returns total integrated phase change (∫ṁ dV) [kg/s] (diagnostic).
@@ -50,7 +53,7 @@ public:
 
 private:
     const meshing::Mesh* mesh_ = nullptr;
-    LeeProps             p_{};
+    LeeProps p_{};
 };
 
-}  // namespace simall::multiphase
+} // namespace simall::multiphase

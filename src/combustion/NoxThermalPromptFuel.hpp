@@ -31,20 +31,23 @@
 #include "meshing/MeshStorage.hpp"
 #include "solver/FieldRegistry.hpp"
 
-namespace simall::combustion {
+namespace simall::combustion
+{
 
-struct NoxProps {
-    bool   includeThermal = true;
-    bool   includePrompt  = true;
-    bool   includeFuel    = false;
-    double rho_default    = 1.0;     // [kg/m³]  (when no rho field present)
-    double Mw_NO          = 30.006e-3;
-    double Mw_N2          = 28.014e-3;
-    double Mw_O2          = 31.998e-3;
-    double Mw_fuelN       = 17.031e-3;     // NH3 default
+struct NoxProps
+{
+    bool includeThermal = true;
+    bool includePrompt = true;
+    bool includeFuel = false;
+    double rho_default = 1.0; // [kg/m³]  (when no rho field present)
+    double Mw_NO = 30.006e-3;
+    double Mw_N2 = 28.014e-3;
+    double Mw_O2 = 31.998e-3;
+    double Mw_fuelN = 17.031e-3; // NH3 default
 };
 
-class NoxThermalPromptFuel {
+class NoxThermalPromptFuel
+{
 public:
     void initialize(const meshing::Mesh& mesh, NoxProps props = {});
 
@@ -55,7 +58,7 @@ public:
 
 private:
     const meshing::Mesh* mesh_ = nullptr;
-    NoxProps             p_{};
+    NoxProps p_{};
 };
 
-}  // namespace simall::combustion
+} // namespace simall::combustion

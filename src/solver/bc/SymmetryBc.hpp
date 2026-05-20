@@ -12,17 +12,22 @@
 
 #include "solver/bc/Bc.hpp"
 
-namespace simall::solver::bc {
+namespace simall::solver::bc
+{
 
-class SymmetryBc : public IBoundaryCondition {
+class SymmetryBc : public IBoundaryCondition
+{
 public:
     BcKind kind() const noexcept override { return BcKind::Symmetry; }
     const char* name() const noexcept override { return "Symmetry"; }
 
     std::size_t apply(BcContext& ctx) override;
-    std::unique_ptr<IBoundaryCondition> clone() const override {
-        auto c = std::make_unique<SymmetryBc>(); c->setZone(zone()); return c;
+    std::unique_ptr<IBoundaryCondition> clone() const override
+    {
+        auto c = std::make_unique<SymmetryBc>();
+        c->setZone(zone());
+        return c;
     }
 };
 
-}  // namespace simall::solver::bc
+} // namespace simall::solver::bc

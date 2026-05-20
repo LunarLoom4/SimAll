@@ -3,20 +3,23 @@
 // File   : src/cad/IgesReader.cpp
 // =============================================================================
 #include "cad/IgesReader.hpp"
-#include "cad/ShapeHandleInternal.hpp"
-#include "cad/Healing.hpp"
-#include "core/Logger.hpp"
 
-#include <IGESControl_Reader.hxx>
-#include <Interface_Static.hxx>
-#include <IFSelect_ReturnStatus.hxx>
+#include "cad/Healing.hpp"
+#include "cad/ShapeHandleInternal.hpp"
+#include "core/Logger.hpp"
 
 #include <filesystem>
 #include <stdexcept>
 
-namespace simall::cad {
+#include <IFSelect_ReturnStatus.hxx>
+#include <IGESControl_Reader.hxx>
+#include <Interface_Static.hxx>
 
-ShapeHandle IgesReader::read(const std::string& path, const IgesReadOptions& opts) {
+namespace simall::cad
+{
+
+ShapeHandle IgesReader::read(const std::string& path, const IgesReadOptions& opts)
+{
     report_ = {};
 
     if (!std::filesystem::exists(path))
@@ -24,14 +27,15 @@ ShapeHandle IgesReader::read(const std::string& path, const IgesReadOptions& opt
 
     IGESControl_Reader reader;
     Interface_Static::SetIVal("read.iges.bspline.continuity", opts.fixContinuity ? 1 : 0);
-    Interface_Static::SetIVal("read.iges.faulty.entities",    1);
+    Interface_Static::SetIVal("read.iges.faulty.entities", 1);
 
     IFSelect_ReturnStatus status = reader.ReadFile(path.c_str());
     if (status != IFSelect_RetDone)
-        throw std::runtime_error("IgesReader: read failed for " + path +
-                                 " (status=" + std::to_string(int(status)) + ")");
+        throw std::runtime_error("IgesReader: read failed for " + path
+                                 + " (status=" + std::to_string(int(status)) + ")");
 
-    if (opts.readVisible) reader.SetReadVisible(Standard_True);
+    if (opts.readVisible)
+        reader.SetReadVisible(Standard_True);
 
     Standard_Integer nRoots = reader.NbRootsForTransfer();
     report_.entityCount = std::size_t(nRoots);
@@ -45,11 +49,20 @@ ShapeHandle IgesReader::read(const std::string& path, const IgesReadOptions& opt
         throw std::runtime_error("IgesReader: shape is null after transfer");
 
     auto h = makeHandle(std::move(shape));
-    if (opts.heal) Healing{}.repair(h);
+    if (opts.heal)
+        Healing{}.repair(h);
 
-    SIMALL_LOG_INFO("CAD/IGES", "Loaded ", path, " — ", transferred, "/", nRoots,
-                    " roots, ", h.topology().size(), " topo nodes");
+    SIMALL_LOG_INFO("CAD/IGES",
+                    "Loaded ",
+                    path,
+                    " — ",
+                    transferred,
+                    "/",
+                    nRoots,
+                    " roots, ",
+                    h.topology().size(),
+                    " topo nodes");
     return h;
 }
 
-}  // namespace simall::cad
+} // namespace simall::cad

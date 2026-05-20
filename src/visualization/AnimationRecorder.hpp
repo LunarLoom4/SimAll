@@ -19,26 +19,30 @@
 #include <string>
 #include <vector>
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-struct AnimationConfig {
+struct AnimationConfig
+{
     std::filesystem::path outputDir;
-    std::string           filenameStem = "frame";
-    std::uint32_t         fps          = 30;       // wall-clock framerate
-    double                startTime    = 0.0;
-    double                endTime      = 1e300;
-    bool                  rgbaRaw      = false;    // false → PPM, true → RGBA blob
-    std::uint32_t         filenameDigits = 6;
+    std::string filenameStem = "frame";
+    std::uint32_t fps = 30; // wall-clock framerate
+    double startTime = 0.0;
+    double endTime = 1e300;
+    bool rgbaRaw = false; // false → PPM, true → RGBA blob
+    std::uint32_t filenameDigits = 6;
 };
 
-struct AnimationStats {
-    FrameIdx framesQueued   = 0;
-    FrameIdx framesWritten  = 0;
-    FrameIdx framesDropped  = 0;     // frames arriving before next due
-    double   lastSimTime    = -1.0;
+struct AnimationStats
+{
+    FrameIdx framesQueued = 0;
+    FrameIdx framesWritten = 0;
+    FrameIdx framesDropped = 0; // frames arriving before next due
+    double lastSimTime = -1.0;
 };
 
-class AnimationRecorder {
+class AnimationRecorder
+{
 public:
     explicit AnimationRecorder(AnimationConfig cfg);
 
@@ -51,18 +55,23 @@ public:
     FrameIdx flush();
 
     AnimationStats stats() const;
-    void           reset();
+    void reset();
 
 private:
-    struct Pending { double t; Image img; FrameIdx index; };
+    struct Pending
+    {
+        double t;
+        Image img;
+        FrameIdx index;
+    };
 
     std::filesystem::path frame_path(FrameIdx idx) const;
 
-    mutable std::mutex      mu_;
-    AnimationConfig         cfg_;
-    AnimationStats          stats_;
-    std::vector<Pending>    queue_;
-    double                  nextDueTime_ = 0.0;
+    mutable std::mutex mu_;
+    AnimationConfig cfg_;
+    AnimationStats stats_;
+    std::vector<Pending> queue_;
+    double nextDueTime_ = 0.0;
 };
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

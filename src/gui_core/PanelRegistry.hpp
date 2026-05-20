@@ -18,33 +18,40 @@
 #include <unordered_map>
 #include <vector>
 
-namespace simall::gui_core {
+namespace simall::gui_core
+{
 
-struct PanelInfo {
-    std::string id;                 // canonical, e.g. "Console"
-    std::string displayName;        // shown in tab/menus
-    std::string category;           // "Workspace", "Diagnostics", "Solver"
-    std::string iconResource;       // optional QResource path
-    bool        singletonPerWindow = true;
+struct PanelInfo
+{
+    std::string id;           // canonical, e.g. "Console"
+    std::string displayName;  // shown in tab/menus
+    std::string category;     // "Workspace", "Diagnostics", "Solver"
+    std::string iconResource; // optional QResource path
+    bool singletonPerWindow = true;
 };
 
-using PanelFactory = std::function<void*()>;  // returns a QWidget* opaquely
+using PanelFactory = std::function<void*()>; // returns a QWidget* opaquely
 
-class PanelRegistry {
+class PanelRegistry
+{
 public:
     static PanelRegistry& instance();
 
     void register_panel(PanelInfo info, PanelFactory factory);
-    [[nodiscard]] bool   has(std::string_view id) const;
-    [[nodiscard]] const PanelInfo*    info(std::string_view id) const;
+    [[nodiscard]] bool has(std::string_view id) const;
+    [[nodiscard]] const PanelInfo* info(std::string_view id) const;
     [[nodiscard]] void* create(std::string_view id) const;
     [[nodiscard]] std::vector<PanelInfo> list() const;
     void clear();
 
 private:
     PanelRegistry() = default;
-    struct Entry { PanelInfo info; PanelFactory factory; };
+    struct Entry
+    {
+        PanelInfo info;
+        PanelFactory factory;
+    };
     std::unordered_map<std::string, Entry> entries_;
 };
 
-}  // namespace simall::gui_core
+} // namespace simall::gui_core

@@ -15,7 +15,8 @@
 using namespace simall::materials;
 using Catch::Matchers::WithinRel;
 
-TEST_CASE("Janaf parses a NASA-7 record (H2)", "[materials][janaf]") {
+TEST_CASE("Janaf parses a NASA-7 record (H2)", "[materials][janaf]")
+{
     // CHEMKIN thermo format -- one species record (4 lines, each 80 cols).
     // Columns:  name(1-18)  date(25-30)  comp(25-44)  phase(45)
     //           Tlow(46-55)  Thigh(56-65)  Tmid(66-73)
@@ -35,18 +36,14 @@ TEST_CASE("Janaf parses a NASA-7 record (H2)", "[materials][janaf]") {
     REQUIRE(sp.Tmax == 3500.0);
 
     // Assign a molecular weight so cp/h/s return per-kg quantities.
-    sp.molecularWeight = 0.002016;   // kg/mol
+    sp.molecularWeight = 0.002016; // kg/mol
 
     // cp/R at 1000 K must equal (a1 + a2*T + ... )_low.
     // For the low coeffs above:  a1=2.34433112, a2=7.98052075e-3,
     // a3=-1.94781510e-5, a4=2.01572094e-8, a5=-7.37611761e-12.
     const double T = 1000.0;
-    const double cpOverR =
-          2.34433112
-        + 7.98052075e-3 * T
-        - 1.94781510e-5 * T*T
-        + 2.01572094e-8 * T*T*T
-        - 7.37611761e-12 * T*T*T*T;
+    const double cpOverR = 2.34433112 + 7.98052075e-3 * T - 1.94781510e-5 * T * T
+                           + 2.01572094e-8 * T * T * T - 7.37611761e-12 * T * T * T * T;
     const double expected = cpOverR * 8.314462618 / sp.molecularWeight;
     CHECK_THAT(sp.cp(T), WithinRel(expected, 1.0e-9));
 }

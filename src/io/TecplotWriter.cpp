@@ -7,45 +7,69 @@
 #include <fstream>
 #include <sstream>
 
-namespace simall::io {
+namespace simall::io
+{
 
-namespace {
+namespace
+{
 
-const char* zone_etype(ElementType t) {
+const char* zone_etype(ElementType t)
+{
     switch (t) {
-        case ElementType::Tri3:   return "FETRIANGLE";
-        case ElementType::Quad4:  return "FEQUADRILATERAL";
-        case ElementType::Tetra4: return "FETETRAHEDRON";
-        case ElementType::Hexa8:  return "FEBRICK";
-        case ElementType::Penta6: return "FEBRICK";        // Tecplot collapses prisms onto a hex
-        case ElementType::Pyra5:  return "FEBRICK";
-        case ElementType::Poly:   return "FEPOLYHEDRON";
-        default:                  return "FETRIANGLE";
+    case ElementType::Tri3:
+        return "FETRIANGLE";
+    case ElementType::Quad4:
+        return "FEQUADRILATERAL";
+    case ElementType::Tetra4:
+        return "FETETRAHEDRON";
+    case ElementType::Hexa8:
+        return "FEBRICK";
+    case ElementType::Penta6:
+        return "FEBRICK"; // Tecplot collapses prisms onto a hex
+    case ElementType::Pyra5:
+        return "FEBRICK";
+    case ElementType::Poly:
+        return "FEPOLYHEDRON";
+    default:
+        return "FETRIANGLE";
     }
 }
 
-void write_block_doubles(std::ofstream& f, const std::vector<double>& v) {
+void write_block_doubles(std::ofstream& f, const std::vector<double>& v)
+{
     int col = 0;
     for (double x : v) {
         f << x;
-        if (++col == 5) { f << '\n'; col = 0; } else { f << ' '; }
+        if (++col == 5) {
+            f << '\n';
+            col = 0;
+        } else {
+            f << ' ';
+        }
     }
-    if (col) f << '\n';
+    if (col)
+        f << '\n';
 }
 
-}  // namespace
+} // namespace
 
 TecplotWriteResult write_tecplot_ascii(const std::string& path,
-                                        const ImportedMesh& mesh,
-                                        const FieldFrame* fields,
-                                        const std::string& title) {
+                                       const ImportedMesh& mesh,
+                                       const FieldFrame* fields,
+                                       const std::string& title)
+{
     TecplotWriteResult r;
     std::ofstream f(path);
-    if (!f) { r.error = "Cannot open: " + path; return r; }
+    if (!f) {
+        r.error = "Cannot open: " + path;
+        return r;
+    }
 
     f << "TITLE = \"" << title << "\"\n";
     f << "VARIABLES = \"X\" \"Y\" \"Z\"";
-    if (fields) for (const auto& c : fields->components) f << " \"" << c.name << "\"";
+    if (fields)
+        for (const auto& c : fields->components)
+            f << " \"" << c.name << "\"";
     f << '\n';
 
     for (std::size_t zi = 0; zi < mesh.zones.size(); ++zi) {
@@ -53,12 +77,16 @@ TecplotWriteResult write_tecplot_ascii(const std::string& path,
 
         // Determine dominant element type from the largest volume section.
         const ElementSection* dominant = nullptr;
-        std::size_t           bestCount = 0;
+        std::size_t bestCount = 0;
         for (const auto& s : z.sections) {
             const auto ne = s.element_count();
-            if (ne > bestCount) { bestCount = ne; dominant = &s; }
+            if (ne > bestCount) {
+                bestCount = ne;
+                dominant = &s;
+            }
         }
-        if (!dominant) continue;
+        if (!dominant)
+            continue;
 
         f << "ZONE T=\"" << z.name << "\"\n";
         f << " NODES=" << z.x.size() << " ELEMENTS=" << dominant->element_count() << "\n";
@@ -68,18 +96,20 @@ TecplotWriteResult write_tecplot_ascii(const std::string& path,
         if (fields && !fields->components.empty()) {
             f << " VARLOCATION=(";
             for (std::size_t k = 0; k < fields->components.size(); ++k) {
-                if (k) f << ",";
+                if (k)
+                    f << ",";
                 f << "[" << (4 + k) << "]=CELLCENTERED";
             }
             f << ")\n";
         }
-        f << " SOLUTIONTIME=" << (fields ? fields->time : 0.0)
-          << " STRANDID="     << (zi + 1) << "\n";
+        f << " SOLUTIONTIME=" << (fields ? fields->time : 0.0) << " STRANDID=" << (zi + 1) << "\n";
 
         write_block_doubles(f, z.x);
         write_block_doubles(f, z.y);
         write_block_doubles(f, z.z);
-        if (fields) for (const auto& c : fields->components) write_block_doubles(f, c.values);
+        if (fields)
+            for (const auto& c : fields->components)
+                write_block_doubles(f, c.values);
 
         // Connectivity (1-based for Tecplot).
         const std::uint8_t v = vertices_per_element(dominant->type);
@@ -92,8 +122,9 @@ TecplotWriteResult write_tecplot_ascii(const std::string& path,
         }
     }
     r.ok = f.good();
-    if (!r.ok) r.error = "I/O error writing " + path;
+    if (!r.ok)
+        r.error = "I/O error writing " + path;
     return r;
 }
 
-}  // namespace simall::io
+} // namespace simall::io

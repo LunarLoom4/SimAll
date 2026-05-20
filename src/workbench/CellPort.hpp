@@ -13,14 +13,16 @@
 
 #include <string>
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
-struct CellPort {
-    PortId        id{kInvalidPortId};
+struct CellPort
+{
+    PortId id{kInvalidPortId};
     PortDirection direction{PortDirection::Input};
-    std::string   name;
-    std::string   data_type;   // free-form tag: "geometry", "mesh", "case", ...
-    bool          required{true};   // input-only: blocks state if unwired
+    std::string name;
+    std::string data_type; // free-form tag: "geometry", "mesh", "case", ...
+    bool required{true};   // input-only: blocks state if unwired
 };
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

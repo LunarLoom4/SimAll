@@ -30,29 +30,34 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct MedialPoint {
+struct MedialPoint
+{
     util::Vec3d position;
-    double      radius;     // inscribed-sphere radius
-    int         branchId;
+    double radius; // inscribed-sphere radius
+    int branchId;
 };
 
-struct MedialRegion {
+struct MedialRegion
+{
     util::Vec3d minCorner;
     util::Vec3d maxCorner;
     util::Vec3d axisStart;
     util::Vec3d axisEnd;
-    int         branchId;
+    int branchId;
 };
 
-struct MedialProps {
-    double  clusterRadius     = 5e-2;     // medial-point clustering distance
-    double  branchMinLength   = 0.05;
-    std::size_t maxBranches   = 1024;
+struct MedialProps
+{
+    double clusterRadius = 5e-2; // medial-point clustering distance
+    double branchMinLength = 0.05;
+    std::size_t maxBranches = 1024;
 };
 
-class MedialAxisDecomposition {
+class MedialAxisDecomposition
+{
 public:
     void initialize(MedialProps props);
 
@@ -67,8 +72,8 @@ public:
     const MedialProps& props() const noexcept { return p_; }
 
 private:
-    MedialProps              p_{};
+    MedialProps p_{};
     std::vector<MedialPoint> pts_;
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

@@ -30,33 +30,37 @@
 
 #include "meshing/MeshStorage.hpp"
 #include "solver/FieldRegistry.hpp"
+#include "solver/LinearSolvers.hpp"
 #include "solver/ScalarTransport.hpp"
 #include "solver/Solver.hpp"
-#include "solver/LinearSolvers.hpp"
 #include "utilities/AlignedAllocator.hpp"
 
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace simall::multiphase {
+namespace simall::multiphase
+{
 
-struct EulerianPhase {
+struct EulerianPhase
+{
     std::string name;
-    double rho;                     // kg/m³
-    double mu;                      // Pa·s
-    double cp;                      // J/(kg K)
-    double k_thermal;               // W/(m K)
-    double diameter;                // m   (representative particle/bubble)
-    bool   dispersed = true;        // false → continuous carrier phase
+    double rho;            // kg/m³
+    double mu;             // Pa·s
+    double cp;             // J/(kg K)
+    double k_thermal;      // W/(m K)
+    double diameter;       // m   (representative particle/bubble)
+    bool dispersed = true; // false → continuous carrier phase
 };
 
-struct DragPair {
-    std::size_t i, j;               // phase indices
-    double      K;                  // last computed K_ij = ρ_m C_d (3/4) |U_r| / d_p
+struct DragPair
+{
+    std::size_t i, j; // phase indices
+    double K;         // last computed K_ij = ρ_m C_d (3/4) |U_r| / d_p
 };
 
-class EulerianMultifluid {
+class EulerianMultifluid
+{
 public:
     EulerianMultifluid(meshing::Mesh& mesh,
                        solver::FieldRegistry& fields,
@@ -64,7 +68,9 @@ public:
 
     void configure(std::vector<EulerianPhase> phases,
                    const std::vector<solver::BoundarySpec>& bcs,
-                   double gx = 0.0, double gy = 0.0, double gz = -9.81);
+                   double gx = 0.0,
+                   double gy = 0.0,
+                   double gz = -9.81);
 
     /// Per-time-step coupled iteration.  Solves α_k transport equations,
     /// updates interphase drag coefficients K_ij, applies them as explicit
@@ -76,7 +82,7 @@ public:
 
     std::size_t num_phases() const noexcept { return phases_.size(); }
     const std::vector<EulerianPhase>& phases() const noexcept { return phases_; }
-    const std::vector<DragPair>&      drag_pairs() const noexcept { return drag_; }
+    const std::vector<DragPair>& drag_pairs() const noexcept { return drag_; }
 
 private:
     void update_mixture_density();
@@ -84,17 +90,17 @@ private:
     void apply_interphase_momentum();
     void apply_interphase_energy();
 
-    meshing::Mesh&             mesh_;
-    solver::FieldRegistry&     F_;
-    solver::ILinearSolver&     lin_;
+    meshing::Mesh& mesh_;
+    solver::FieldRegistry& F_;
+    solver::ILinearSolver& lin_;
     std::vector<EulerianPhase> phases_;
     std::vector<solver::BoundarySpec> bcs_;
-    double g_[3]{0,0,-9.81};
+    double g_[3]{0, 0, -9.81};
 
     // Per-phase α-transport equations.
     std::vector<std::unique_ptr<solver::ScalarTransport>> alphaEq_;
     // Interphase drag coefficients K_ij (one per ordered pair i<j).
-    std::vector<DragPair>      drag_;
+    std::vector<DragPair> drag_;
 };
 
-}  // namespace simall::multiphase
+} // namespace simall::multiphase

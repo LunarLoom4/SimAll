@@ -28,18 +28,21 @@
 #include "solver/FieldRegistry.hpp"
 #include "utilities/AlignedAllocator.hpp"
 
-namespace simall::multiphase {
+namespace simall::multiphase
+{
 
-struct CavitationProps {
-    double rhoLiquid     = 998.2;        // kg/m³
-    double rhoVapor      = 0.02308;      // kg/m³
-    double pSaturation   = 2339.0;       // Pa (water @ 20°C)
-    double nucleiDensity = 1.0e13;       // 1/m³
-    double evapCoeff     = 1.0;          // empirical multiplier on ṁ⁻
-    double condCoeff     = 1.0;          // empirical multiplier on ṁ⁺
+struct CavitationProps
+{
+    double rhoLiquid = 998.2;      // kg/m³
+    double rhoVapor = 0.02308;     // kg/m³
+    double pSaturation = 2339.0;   // Pa (water @ 20°C)
+    double nucleiDensity = 1.0e13; // 1/m³
+    double evapCoeff = 1.0;        // empirical multiplier on ṁ⁻
+    double condCoeff = 1.0;        // empirical multiplier on ṁ⁺
 };
 
-class CavitationSchnerrSauer {
+class CavitationSchnerrSauer
+{
 public:
     void initialize(const meshing::Mesh& mesh, CavitationProps props);
 
@@ -53,7 +56,7 @@ public:
 
 private:
     const meshing::Mesh* mesh_ = nullptr;
-    CavitationProps      p_{};
+    CavitationProps p_{};
 };
 
-}  // namespace simall::multiphase
+} // namespace simall::multiphase

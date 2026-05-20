@@ -21,28 +21,32 @@
 // =============================================================================
 #pragma once
 
+#include "meshing/MeshStorage.hpp"
 #include "solver/EnergyEquation.hpp"
 #include "solver/Solver.hpp"
-#include "meshing/MeshStorage.hpp"
 
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace simall::heat {
+namespace simall::heat
+{
 
-struct SolidMaterial {
+struct SolidMaterial
+{
     double rho = 7850.0;
-    double cp  = 460.0;
-    double k   = 50.0;          // [W/(m·K)]   (e.g. steel)
+    double cp = 460.0;
+    double k = 50.0; // [W/(m·K)]   (e.g. steel)
 };
 
-struct InterfacePair {
+struct InterfacePair
+{
     meshing::ZoneId fluidZone;
     meshing::ZoneId solidZone;
 };
 
-class SolidRegion {
+class SolidRegion
+{
 public:
     SolidRegion(meshing::Mesh mesh, SolidMaterial mat, std::string name);
     void initialize(double T0);
@@ -50,29 +54,30 @@ public:
     /// the CHT coupler overrides interface zone fluxes before calling.
     double step(double dt);
 
-    meshing::Mesh&            mesh()    { return mesh_; }
-    solver::FieldRegistry&    fields()  { return F_; }
-    const std::string&        name() const { return name_; }
-    double                    conductivity() const { return mat_.k; }
+    meshing::Mesh& mesh() { return mesh_; }
+    solver::FieldRegistry& fields() { return F_; }
+    const std::string& name() const { return name_; }
+    double conductivity() const { return mat_.k; }
     /// Set Neumann flux (W/m²) on every face of a given boundary zone.
     void set_interface_flux(meshing::ZoneId z, double q);
     /// Mean interface temperature (used by fluid-side Dirichlet handoff).
     double interface_temperature(meshing::ZoneId z) const;
 
 private:
-    meshing::Mesh                    mesh_;
-    solver::FieldRegistry            F_;
-    SolidMaterial                    mat_;
-    std::string                      name_;
+    meshing::Mesh mesh_;
+    solver::FieldRegistry F_;
+    SolidMaterial mat_;
+    std::string name_;
     std::vector<solver::BoundarySpec> bcs_;
-    std::unique_ptr<solver::ILinearSolver>   lin_;
-    std::unique_ptr<solver::EnergyEquation>  Teq_;
+    std::unique_ptr<solver::ILinearSolver> lin_;
+    std::unique_ptr<solver::EnergyEquation> Teq_;
 };
 
-class ConjugateHeatTransfer {
+class ConjugateHeatTransfer
+{
 public:
     void add_solid(std::unique_ptr<SolidRegion> r) { solids_.push_back(std::move(r)); }
-    void add_interface(InterfacePair p)            { ifaces_.push_back(p); }
+    void add_interface(InterfacePair p) { ifaces_.push_back(p); }
 
     /// Drive a partitioned Dirichlet-Neumann iteration to convergence.
     /// `fluidEnergy` is the already-configured fluid-side energy solver.
@@ -80,11 +85,12 @@ public:
               solver::EnergyEquation& fluidEnergy,
               meshing::Mesh& fluidMesh,
               solver::FieldRegistry& fluidFields,
-              double tol = 1e-4, int maxOuter = 20);
+              double tol = 1e-4,
+              int maxOuter = 20);
 
 private:
     std::vector<std::unique_ptr<SolidRegion>> solids_;
-    std::vector<InterfacePair>                ifaces_;
+    std::vector<InterfacePair> ifaces_;
 };
 
-}  // namespace simall::heat
+} // namespace simall::heat

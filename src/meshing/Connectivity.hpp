@@ -16,13 +16,16 @@
 #pragma once
 
 #include "MeshStorage.hpp"
+
 #include <cstdint>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
 /// Description of a single cell prior to global face stitching.
-struct CellDescriptor {
+struct CellDescriptor
+{
     /// One inner vector per face, listing vertex indices in CCW order
     /// (outward normal convention). For a hex this contains 6 vectors of 4.
     std::vector<std::vector<NodeId>> faces;
@@ -33,11 +36,12 @@ struct CellDescriptor {
 /// invokes Mesh::compute_geometry() to populate areas / centroids / volumes.
 /// `boundary_face_zones` maps `(sorted vertex tuple) → zone id` for any face
 /// that lies on a named boundary; faces not present default to zone 1.
-class ConnectivityBuilder {
+class ConnectivityBuilder
+{
 public:
     static void build(Mesh& out,
                       const NodeStorage& nodes,
                       const std::vector<CellDescriptor>& cells);
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

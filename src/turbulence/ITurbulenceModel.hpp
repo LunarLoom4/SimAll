@@ -9,36 +9,45 @@
 // =============================================================================
 #pragma once
 
-#include "solver/FieldRegistry.hpp"
 #include "meshing/MeshStorage.hpp"
+#include "solver/FieldRegistry.hpp"
 
 #include <memory>
 #include <string>
 #include <unordered_map>
 
-namespace simall::turbulence {
+namespace simall::turbulence
+{
 
-class ITurbulenceModel {
+class ITurbulenceModel
+{
 public:
-    virtual ~ITurbulenceModel()       = default;
-    virtual std::string name()  const = 0;
-    virtual void  initialize(meshing::Mesh&, solver::FieldRegistry&)            = 0;
-    virtual void  solve(double dt, solver::FieldRegistry&)                       = 0;
-    virtual double turbulent_viscosity(std::size_t cellId) const                 = 0;
+    virtual ~ITurbulenceModel() = default;
+    virtual std::string name() const = 0;
+    virtual void initialize(meshing::Mesh&, solver::FieldRegistry&) = 0;
+    virtual void solve(double dt, solver::FieldRegistry&) = 0;
+    virtual double turbulent_viscosity(std::size_t cellId) const = 0;
 };
 
-class TurbulenceRegistry {
+class TurbulenceRegistry
+{
 public:
-    static TurbulenceRegistry& instance() { static TurbulenceRegistry r; return r; }
+    static TurbulenceRegistry& instance()
+    {
+        static TurbulenceRegistry r;
+        return r;
+    }
 
-    using Factory = std::unique_ptr<ITurbulenceModel>(*)();
+    using Factory = std::unique_ptr<ITurbulenceModel> (*)();
     void register_model(const std::string& key, Factory f) { factories_[key] = f; }
-    std::unique_ptr<ITurbulenceModel> create(const std::string& key) const {
+    std::unique_ptr<ITurbulenceModel> create(const std::string& key) const
+    {
         auto it = factories_.find(key);
         return it == factories_.end() ? nullptr : it->second();
     }
+
 private:
     std::unordered_map<std::string, Factory> factories_;
 };
 
-}  // namespace simall::turbulence
+} // namespace simall::turbulence

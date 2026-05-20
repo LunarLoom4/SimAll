@@ -30,22 +30,30 @@
 #include <string>
 #include <vector>
 
-namespace simall::combustion {
+namespace simall::combustion
+{
 
-enum class TciMode { EDM, EDC };
-
-struct EdcProps {
-    TciMode mode    = TciMode::EDC;
-    double  A_EDM   = 4.0;        // EDM A constant (mixing rate scaling)
-    double  B_EDM   = 0.5;        // EDM B constant (oxidiser side)
-    double  C_gamma = 2.1377;     // EDC γ_λ coefficient
-    double  C_tau   = 0.4082;     // EDC τ*    coefficient
-    double  nu      = 1.5e-5;     // kinematic viscosity (m²/s)
+enum class TciMode
+{
+    EDM,
+    EDC
 };
 
-class EddyDissipationConcept {
+struct EdcProps
+{
+    TciMode mode = TciMode::EDC;
+    double A_EDM = 4.0;      // EDM A constant (mixing rate scaling)
+    double B_EDM = 0.5;      // EDM B constant (oxidiser side)
+    double C_gamma = 2.1377; // EDC γ_λ coefficient
+    double C_tau = 0.4082;   // EDC τ*    coefficient
+    double nu = 1.5e-5;      // kinematic viscosity (m²/s)
+};
+
+class EddyDissipationConcept
+{
 public:
-    void initialize(const meshing::Mesh& mesh, solver::FieldRegistry& fields,
+    void initialize(const meshing::Mesh& mesh,
+                    solver::FieldRegistry& fields,
                     std::vector<Species> species,
                     std::vector<Reaction> reactions,
                     EdcProps props);
@@ -59,17 +67,21 @@ private:
     ///   dY/dt = ω̇_lam(Y) / ρ
     /// Integrated by BDF1 from Y_in over time τ.
     void psr_step(const std::vector<double>& Yin,
-                  double rho, double T, double tau,
+                  double rho,
+                  double T,
+                  double tau,
                   std::vector<double>& Yout) const;
 
     /// Evaluate laminar Arrhenius rates ω̇_k for a single cell state.
-    void laminar_rates(const std::vector<double>& Y, double rho, double T,
+    void laminar_rates(const std::vector<double>& Y,
+                       double rho,
+                       double T,
                        std::vector<double>& wdot) const;
 
-    const meshing::Mesh* mesh_   = nullptr;
-    EdcProps             p_{};
-    std::vector<Species>  species_;
+    const meshing::Mesh* mesh_ = nullptr;
+    EdcProps p_{};
+    std::vector<Species> species_;
     std::vector<Reaction> reactions_;
 };
 
-}  // namespace simall::combustion
+} // namespace simall::combustion

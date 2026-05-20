@@ -24,23 +24,26 @@
 #include <string>
 #include <vector>
 
-namespace simall::core {
+namespace simall::core
+{
 
-struct LoadedPlugin {
-    std::filesystem::path             path;
-    void*                             handle = nullptr;  // OS module handle
+struct LoadedPlugin
+{
+    std::filesystem::path path;
+    void* handle = nullptr; // OS module handle
     std::unique_ptr<plugins::IPlugin> plugin;
-    std::string                       name;
-    std::string                       version;
-    int                               abi = 0;
+    std::string name;
+    std::string version;
+    int abi = 0;
 };
 
-class PluginLoader {
+class PluginLoader
+{
 public:
     PluginLoader() = default;
     ~PluginLoader();
 
-    PluginLoader(const PluginLoader&)            = delete;
+    PluginLoader(const PluginLoader&) = delete;
     PluginLoader& operator=(const PluginLoader&) = delete;
 
     /// Load a single plugin file. Returns the assigned cookie on success,
@@ -62,8 +65,8 @@ public:
     std::vector<LoadedPlugin> snapshot() const;
 
 private:
-    mutable std::mutex                       mtx_;
+    mutable std::mutex mtx_;
     std::vector<std::unique_ptr<LoadedPlugin>> plugins_;
 };
 
-}  // namespace simall::core
+} // namespace simall::core

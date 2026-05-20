@@ -31,18 +31,21 @@
 #include <array>
 #include <vector>
 
-namespace simall::radiation {
+namespace simall::radiation
+{
 
-constexpr int kWsggBands = 4;        // 1 transparent + 3 grey
+constexpr int kWsggBands = 4; // 1 transparent + 3 grey
 
-struct WsggProps {
-    double p_H2O = 0.2;              // partial pressure [atm]
+struct WsggProps
+{
+    double p_H2O = 0.2; // partial pressure [atm]
     double p_CO2 = 0.1;
-    double meanBeamLength = 0.5;     // L_m [m]
-    bool   useBordbar = false;       // true ⇒ Bordbar 2014 (else Smith 1982)
+    double meanBeamLength = 0.5; // L_m [m]
+    bool useBordbar = false;     // true ⇒ Bordbar 2014 (else Smith 1982)
 };
 
-class WsggSpectral {
+class WsggSpectral
+{
 public:
     bool initialize(const meshing::Mesh& mesh,
                     solver::FieldRegistry& fields,
@@ -53,7 +56,7 @@ public:
 
     double compute_emissivity(double T, double pwL) const;
     double compute_weight(double T, int k) const;
-    double compute_kappa(int k) const;    // [1/(atm·m)]; multiply by (p_w+p_c)
+    double compute_kappa(int k) const; // [1/(atm·m)]; multiply by (p_w+p_c)
 
     const WsggProps& props() const noexcept { return p_; }
 
@@ -61,12 +64,12 @@ private:
     void load_smith_coefficients();
     void load_bordbar_coefficients();
 
-    const meshing::Mesh*    mesh_ = nullptr;
-    solver::FieldRegistry*  F_    = nullptr;
-    WsggProps               p_{};
+    const meshing::Mesh* mesh_ = nullptr;
+    solver::FieldRegistry* F_ = nullptr;
+    WsggProps p_{};
     // a_k(T) = b_{k,0} + b_{k,1} T + b_{k,2} T² + b_{k,3} T³
-    std::array<std::array<double,4>, kWsggBands> b_{};
-    std::array<double, kWsggBands>               kappa_{};
+    std::array<std::array<double, 4>, kWsggBands> b_{};
+    std::array<double, kWsggBands> kappa_{};
 };
 
-}  // namespace simall::radiation
+} // namespace simall::radiation

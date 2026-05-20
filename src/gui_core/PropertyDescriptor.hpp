@@ -25,41 +25,47 @@
 #include <variant>
 #include <vector>
 
-namespace simall::gui_core {
+namespace simall::gui_core
+{
 
 // -- type tag -----------------------------------------------------------------
-enum class PropertyType : uint8_t {
+enum class PropertyType : uint8_t
+{
     Double = 0,
     Int,
     Bool,
     Enum,
     String,
     Vec3,
-    FilePath,   // requires `fileFilter` and `pathMustExist`
-    Color,      // stored as Vec3 (RGB, linear, 0..1)
-    Range       // pair-of-doubles; stored as Vec3 {min, max, 0}
+    FilePath, // requires `fileFilter` and `pathMustExist`
+    Color,    // stored as Vec3 (RGB, linear, 0..1)
+    Range     // pair-of-doubles; stored as Vec3 {min, max, 0}
 };
 
 // -- value -------------------------------------------------------------------
-using Variant = std::variant<double, int, bool, std::string,
-                             std::array<double, 3>>;
+using Variant = std::variant<double, int, bool, std::string, std::array<double, 3>>;
 
-inline bool variant_holds_numeric(const Variant& v) {
+inline bool variant_holds_numeric(const Variant& v)
+{
     return std::holds_alternative<double>(v) || std::holds_alternative<int>(v);
 }
 
-inline double variant_as_double(const Variant& v) {
-    if (auto* d = std::get_if<double>(&v)) return *d;
-    if (auto* i = std::get_if<int>(&v))    return static_cast<double>(*i);
+inline double variant_as_double(const Variant& v)
+{
+    if (auto* d = std::get_if<double>(&v))
+        return *d;
+    if (auto* i = std::get_if<int>(&v))
+        return static_cast<double>(*i);
     return 0.0;
 }
 
 // -- validation result -------------------------------------------------------
-struct ValidationResult {
-    bool        ok = true;
-    std::string message;   // empty when ok
-    static ValidationResult success()                       { return {true, {}}; }
-    static ValidationResult failure(std::string msg)        { return {false, std::move(msg)}; }
+struct ValidationResult
+{
+    bool ok = true;
+    std::string message; // empty when ok
+    static ValidationResult success() { return {true, {}}; }
+    static ValidationResult failure(std::string msg) { return {false, std::move(msg)}; }
 };
 
 // -- descriptor --------------------------------------------------------------
@@ -67,58 +73,56 @@ struct ValidationResult {
 // All fields are public-by-design: GUI code reads them straight; scripting
 // code constructs them by aggregate init.
 //
-struct PropertyDescriptor {
+struct PropertyDescriptor
+{
     // identity
-    std::string  propertyName;
-    std::string  displayName;       // optional; falls back to propertyName
-    std::string  category;          // optional; controls grouping in v2 editor
+    std::string propertyName;
+    std::string displayName; // optional; falls back to propertyName
+    std::string category;    // optional; controls grouping in v2 editor
 
     // type + default
-    PropertyType type             = PropertyType::Double;
-    Variant      defaultValue     = double{0};
-    Variant      currentValue     = double{0};
+    PropertyType type = PropertyType::Double;
+    Variant defaultValue = double{0};
+    Variant currentValue = double{0};
 
     // numeric bounds (apply to Double / Int / Range)
-    double       minimum          = -1e300;
-    double       maximum          =  1e300;
-    double       step             = 0.0;     // 0 → editor default
+    double minimum = -1e300;
+    double maximum = 1e300;
+    double step = 0.0; // 0 → editor default
 
     // enum
     std::vector<std::string> enumOptions;
 
     // file-path
-    std::string  fileFilter;        // "STEP (*.step *.stp);;All (*)"
-    bool         pathMustExist     = false;
+    std::string fileFilter; // "STEP (*.step *.stp);;All (*)"
+    bool pathMustExist = false;
 
     // metadata
-    std::string  tooltip;
-    std::string  units;
-    std::string  helpUrl;
-    bool         requiresRestart   = false;
-    bool         advanced          = false;  // hidden unless Show Advanced
+    std::string tooltip;
+    std::string units;
+    std::string helpUrl;
+    bool requiresRestart = false;
+    bool advanced = false; // hidden unless Show Advanced
 
     // dynamic predicates — pure functions of the *property bag* they live in.
     // The editor passes `this` as the lookup context; descriptors closure
     // over whichever PropertyDescriptor* references they need.
-    std::function<bool()>                 visibilityCondition;
-    std::function<bool()>                 enabledCondition;
+    std::function<bool()> visibilityCondition;
+    std::function<bool()> enabledCondition;
 
     // custom validator runs after built-in min/max/enum checks.
     std::function<ValidationResult(const Variant&)> customValidator;
 
     // notification — invoked AFTER successful commit.
-    std::function<void(const Variant&)>   onChanged;
+    std::function<void(const Variant&)> onChanged;
 
     // -- API ---------------------------------------------------------------
-    [[nodiscard]] const std::string& display() const noexcept {
+    [[nodiscard]] const std::string& display() const noexcept
+    {
         return displayName.empty() ? propertyName : displayName;
     }
-    [[nodiscard]] bool is_visible() const {
-        return !visibilityCondition || visibilityCondition();
-    }
-    [[nodiscard]] bool is_enabled() const {
-        return !enabledCondition || enabledCondition();
-    }
+    [[nodiscard]] bool is_visible() const { return !visibilityCondition || visibilityCondition(); }
+    [[nodiscard]] bool is_enabled() const { return !enabledCondition || enabledCondition(); }
 
     // validate a candidate value against the descriptor's constraints.
     // Used by the GUI BEFORE commit and by scripting code BEFORE assignment.
@@ -137,14 +141,14 @@ struct PropertyDescriptor {
 //         return p && std::get<int>(p->currentValue) != 0;
 //     };
 //
-[[nodiscard]] PropertyDescriptor*       find(std::vector<PropertyDescriptor>& bag,
-                                              std::string_view name) noexcept;
+[[nodiscard]] PropertyDescriptor* find(std::vector<PropertyDescriptor>& bag,
+                                       std::string_view name) noexcept;
 [[nodiscard]] const PropertyDescriptor* find(const std::vector<PropertyDescriptor>& bag,
-                                              std::string_view name) noexcept;
+                                             std::string_view name) noexcept;
 
 // Snapshot the bag's name → currentValue pairs in textual form (for project
 // serialization, undo history, and diff display).  Numeric values are
 // printed with std::to_string; vectors are "x,y,z"; booleans are "true"/"false".
 [[nodiscard]] std::string to_textual_snapshot(const std::vector<PropertyDescriptor>& bag);
 
-}  // namespace simall::gui_core
+} // namespace simall::gui_core

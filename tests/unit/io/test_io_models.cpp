@@ -6,18 +6,18 @@
 // ASCII writer / Hdf5ResultStore native SRS / ProjectGraph commit & topo /
 // ProjectSerializer round-trip / MovieEncoder APNG header.
 // =============================================================================
-#include <catch2/catch_test_macros.hpp>
-
-#include "io/MeshFormats.hpp"
-#include "io/FluentMshReader.hpp"
-#include "io/Plot3dReader.hpp"
 #include "io/CgnsReader.hpp"
 #include "io/CgnsWriter.hpp"
-#include "io/TecplotWriter.hpp"
+#include "io/FluentMshReader.hpp"
 #include "io/Hdf5ResultStore.hpp"
+#include "io/MeshFormats.hpp"
+#include "io/MovieEncoder.hpp"
+#include "io/Plot3dReader.hpp"
 #include "io/ProjectGraph.hpp"
 #include "io/ProjectSerializer.hpp"
-#include "io/MovieEncoder.hpp"
+#include "io/TecplotWriter.hpp"
+
+#include <catch2/catch_test_macros.hpp>
 
 #include <cstdio>
 #include <filesystem>
@@ -28,19 +28,24 @@
 namespace fs = std::filesystem;
 using namespace simall::io;
 
-namespace {
-std::string tmp_path(const char* tag) {
+namespace
+{
+std::string tmp_path(const char* tag)
+{
     auto p = fs::temp_directory_path() / (std::string("simall_w17_") + tag);
     return p.string();
 }
-std::string slurp(const std::string& path) {
+std::string slurp(const std::string& path)
+{
     std::ifstream f(path, std::ios::binary);
-    std::ostringstream ss; ss << f.rdbuf();
+    std::ostringstream ss;
+    ss << f.rdbuf();
     return ss.str();
 }
-}  // namespace
+} // namespace
 
-TEST_CASE("FluentMshReader parses synthetic ASCII msh", "[io][fluent]") {
+TEST_CASE("FluentMshReader parses synthetic ASCII msh", "[io][fluent]")
+{
     // Minimal synthetic Fluent ASCII file:
     //   (0 "comment")
     //   (2 3)               -- 3D
@@ -52,17 +57,16 @@ TEST_CASE("FluentMshReader parses synthetic ASCII msh", "[io][fluent]") {
     //     0.0 0.0 1.0))
     //   (12 (0 1 1 1 4))    -- cells header (1 tet)
     //   (12 (2 1 1 1 4))    -- 1 cell of type Tetra4 (cell-type 4)
-    const char* text =
-        "(0 \"hello\")\n"
-        "(2 3)\n"
-        "(10 (0 1 4 1 3))\n"
-        "(10 (1 1 4 1 3)(\n"
-        "  0.0 0.0 0.0\n"
-        "  1.0 0.0 0.0\n"
-        "  0.0 1.0 0.0\n"
-        "  0.0 0.0 1.0))\n"
-        "(12 (0 1 1 1 4))\n"
-        "(12 (2 1 1 1 4))\n";
+    const char* text = "(0 \"hello\")\n"
+                       "(2 3)\n"
+                       "(10 (0 1 4 1 3))\n"
+                       "(10 (1 1 4 1 3)(\n"
+                       "  0.0 0.0 0.0\n"
+                       "  1.0 0.0 0.0\n"
+                       "  0.0 1.0 0.0\n"
+                       "  0.0 0.0 1.0))\n"
+                       "(12 (0 1 1 1 4))\n"
+                       "(12 (2 1 1 1 4))\n";
     auto r = parse_fluent_msh_string(text, "<test>");
     REQUIRE(r.ok);
     REQUIRE(r.dimension == 3);
@@ -71,7 +75,8 @@ TEST_CASE("FluentMshReader parses synthetic ASCII msh", "[io][fluent]") {
     REQUIRE(r.mesh.zones[0].x[1] == 1.0);
 }
 
-TEST_CASE("Plot3D formatted multi-block parse", "[io][plot3d]") {
+TEST_CASE("Plot3D formatted multi-block parse", "[io][plot3d]")
+{
     const std::string path = tmp_path("grid.p3d");
     {
         std::ofstream f(path);
@@ -79,18 +84,24 @@ TEST_CASE("Plot3D formatted multi-block parse", "[io][plot3d]") {
         f << "2 2 1\n";
         f << "2 2 1\n";
         // block 0 x,y,z
-        for (int i = 0; i < 4; ++i) f << double(i) << " ";
+        for (int i = 0; i < 4; ++i)
+            f << double(i) << " ";
         f << "\n";
-        for (int i = 0; i < 4; ++i) f << double(i * 2) << " ";
+        for (int i = 0; i < 4; ++i)
+            f << double(i * 2) << " ";
         f << "\n";
-        for (int i = 0; i < 4; ++i) f << 0.0 << " ";
+        for (int i = 0; i < 4; ++i)
+            f << 0.0 << " ";
         f << "\n";
         // block 1
-        for (int i = 0; i < 4; ++i) f << double(10 + i) << " ";
+        for (int i = 0; i < 4; ++i)
+            f << double(10 + i) << " ";
         f << "\n";
-        for (int i = 0; i < 4; ++i) f << double(20 + i) << " ";
+        for (int i = 0; i < 4; ++i)
+            f << double(20 + i) << " ";
         f << "\n";
-        for (int i = 0; i < 4; ++i) f << 1.0 << " ";
+        for (int i = 0; i < 4; ++i)
+            f << 1.0 << " ";
         f << "\n";
     }
     Plot3dOptions opt;
@@ -105,7 +116,8 @@ TEST_CASE("Plot3D formatted multi-block parse", "[io][plot3d]") {
     std::remove(path.c_str());
 }
 
-TEST_CASE("CGNS native writer/reader round-trip", "[io][cgns]") {
+TEST_CASE("CGNS native writer/reader round-trip", "[io][cgns]")
+{
     ImportedMesh m;
     m.sourceFormat = "synthetic";
     UnstructuredZone z;
@@ -114,8 +126,8 @@ TEST_CASE("CGNS native writer/reader round-trip", "[io][cgns]") {
     z.y = {0.0, 0.0, 1.0, 0.0};
     z.z = {0.0, 0.0, 0.0, 1.0};
     ElementSection s;
-    s.name  = "Tetras";
-    s.type  = ElementType::Tetra4;
+    s.name = "Tetras";
+    s.type = ElementType::Tetra4;
     s.nodes = {0, 1, 2, 3};
     z.sections.push_back(s);
     BoundaryPatch bp;
@@ -141,14 +153,17 @@ TEST_CASE("CGNS native writer/reader round-trip", "[io][cgns]") {
     std::remove(path.c_str());
 }
 
-TEST_CASE("Tecplot ASCII writer emits expected header tokens", "[io][tecplot]") {
+TEST_CASE("Tecplot ASCII writer emits expected header tokens", "[io][tecplot]")
+{
     ImportedMesh m;
     UnstructuredZone z;
     z.name = "blk";
-    z.x = {0,1,0,0}; z.y = {0,0,1,0}; z.z = {0,0,0,1};
+    z.x = {0, 1, 0, 0};
+    z.y = {0, 0, 1, 0};
+    z.z = {0, 0, 0, 1};
     ElementSection s;
     s.type = ElementType::Tetra4;
-    s.nodes = {0,1,2,3};
+    s.nodes = {0, 1, 2, 3};
     z.sections.push_back(s);
     m.zones.push_back(z);
 
@@ -161,9 +176,11 @@ TEST_CASE("Tecplot ASCII writer emits expected header tokens", "[io][tecplot]") 
     std::remove(path.c_str());
 }
 
-TEST_CASE("Hdf5ResultStore native SRS round-trip", "[io][srs]") {
+TEST_CASE("Hdf5ResultStore native SRS round-trip", "[io][srs]")
+{
     Hdf5ResultStore s;
-    s.write_field("/run/iter_000001", "pressure",
+    s.write_field("/run/iter_000001",
+                  "pressure",
                   std::vector<double>{1.0, 2.0, 3.0, 4.0},
                   FieldLocation::Cell);
     s.root().set_attribute("/run", "solver", "SIMPLE");
@@ -181,44 +198,46 @@ TEST_CASE("Hdf5ResultStore native SRS round-trip", "[io][srs]") {
     std::remove(path.c_str());
 }
 
-TEST_CASE("ProjectGraph hash commit invalidates downstream", "[io][graph]") {
+TEST_CASE("ProjectGraph hash commit invalidates downstream", "[io][graph]")
+{
     ProjectGraph g;
     auto* geom = g.add_node(NodeKind::Geometry, "geom");
-    auto* mesh = g.add_node(NodeKind::Mesh,     "mesh");
-    auto* sol  = g.add_node(NodeKind::Solution, "sol");
+    auto* mesh = g.add_node(NodeKind::Mesh, "mesh");
+    auto* sol = g.add_node(NodeKind::Solution, "sol");
     g.link(geom, mesh);
     g.link(mesh, sol);
 
     const std::string a = "geomBlobA";
     g.commit(geom, a.data(), a.size());
     g.commit(mesh, "meshBlob1", 9);
-    g.commit(sol,  "solBlob1",  8);
+    g.commit(sol, "solBlob1", 8);
 
     REQUIRE(geom->state() == NodeState::Valid);
     REQUIRE(mesh->state() == NodeState::Valid);
-    REQUIRE(sol->state()  == NodeState::Valid);
+    REQUIRE(sol->state() == NodeState::Valid);
 
     // Mutate geometry → both mesh and sol must be Stale.
     const std::string b = "geomBlobB";
     g.commit(geom, b.data(), b.size());
     REQUIRE(geom->state() == NodeState::Valid);
     REQUIRE(mesh->state() == NodeState::Stale);
-    REQUIRE(sol->state()  == NodeState::Stale);
+    REQUIRE(sol->state() == NodeState::Stale);
 
     REQUIRE_FALSE(g.uuid_of(geom).empty());
     REQUIRE(g.find_by_uuid(g.uuid_of(geom)) == geom);
     REQUIRE(g.topological_order().size() == 3);
 }
 
-TEST_CASE("ProjectSerializer chunked .simall round-trip", "[io][simall]") {
+TEST_CASE("ProjectSerializer chunked .simall round-trip", "[io][simall]")
+{
     ProjectSerializer w;
     ProjectChunk c;
-    c.mime  = "application/vnd.simall.mesh.cgns";
+    c.mime = "application/vnd.simall.mesh.cgns";
     c.bytes = {0xDE, 0xAD, 0xBE, 0xEF};
     w.put("mesh.cgns", c);
     ProjectChunk c2;
-    c2.mime  = "text/plain";
-    c2.bytes = {'h','i'};
+    c2.mime = "text/plain";
+    c2.bytes = {'h', 'i'};
     w.put("readme.txt", c2);
 
     const std::string path = tmp_path("proj.simall");
@@ -235,10 +254,11 @@ TEST_CASE("ProjectSerializer chunked .simall round-trip", "[io][simall]") {
     std::remove(path.c_str());
 }
 
-TEST_CASE("APNG encoder emits PNG signature + acTL", "[io][movie]") {
+TEST_CASE("APNG encoder emits PNG signature + acTL", "[io][movie]")
+{
     const std::uint32_t w = 4, h = 4;
     std::vector<std::uint8_t> rgb(w * h * 3, 0x80);
-    std::vector<std::vector<std::uint8_t>> frames = { rgb, rgb };
+    std::vector<std::vector<std::uint8_t>> frames = {rgb, rgb};
     auto bytes = apng_encode(w, h, 30, true, frames);
     REQUIRE(bytes.size() > 100);
     // PNG signature
@@ -254,11 +274,14 @@ TEST_CASE("APNG encoder emits PNG signature + acTL", "[io][movie]") {
     REQUIRE(haystack.find("IEND") != std::string::npos);
 }
 
-TEST_CASE("MovieEncoder APNG end-to-end", "[io][movie]") {
+TEST_CASE("MovieEncoder APNG end-to-end", "[io][movie]")
+{
     const std::uint32_t w = 8, h = 8;
     const std::string path = tmp_path("movie.apng");
     MovieEncoder enc;
-    MovieOptions opt; opt.codec = MovieCodec::Apng; opt.fps = 24;
+    MovieOptions opt;
+    opt.codec = MovieCodec::Apng;
+    opt.fps = 24;
     REQUIRE(enc.begin(path, w, h, opt));
     std::vector<std::uint8_t> frame(w * h * 3, 0);
     for (int k = 0; k < 3; ++k) {

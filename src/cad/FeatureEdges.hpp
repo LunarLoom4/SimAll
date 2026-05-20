@@ -17,27 +17,31 @@
 
 #include <vector>
 
-namespace simall::cad {
+namespace simall::cad
+{
 
-struct FeatureEdgeOptions {
-    double dihedralAngleDeg   = 30.0;
-    bool   includeBoundary    = true;
-    bool   includeNonManifold = true;
-    bool   includeSharp       = true;
+struct FeatureEdgeOptions
+{
+    double dihedralAngleDeg = 30.0;
+    bool includeBoundary = true;
+    bool includeNonManifold = true;
+    bool includeSharp = true;
 };
 
-struct FeatureEdgePolyline {
+struct FeatureEdgePolyline
+{
     std::vector<util::Vec3d> points;
-    util::PersistentId       edgeId   = 0;
-    bool                     isSharp     = false;
-    bool                     isBoundary  = false;
-    bool                     isNonManifold = false;
+    util::PersistentId edgeId = 0;
+    bool isSharp = false;
+    bool isBoundary = false;
+    bool isNonManifold = false;
 };
 
-class FeatureEdges {
+class FeatureEdges
+{
 public:
     std::vector<FeatureEdgePolyline> extract(const ShapeHandle& shape,
                                              const FeatureEdgeOptions& opts = {});
 };
 
-}  // namespace simall::cad
+} // namespace simall::cad

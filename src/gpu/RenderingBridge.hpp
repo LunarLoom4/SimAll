@@ -48,27 +48,31 @@
 #include <string>
 #include <vector>
 
-namespace simall::gpu {
+namespace simall::gpu
+{
 
 using BufferId = std::uint64_t;
 constexpr BufferId kInvalidBufferId = 0;
 
-enum class BufferKind {
-    Scalar,   ///< 1 float per cell/point
-    Vector3,  ///< 3 floats per cell/point (xyz)
-    Indices,  ///< 32-bit indices (e.g. triangle list)
+enum class BufferKind
+{
+    Scalar,  ///< 1 float per cell/point
+    Vector3, ///< 3 floats per cell/point (xyz)
+    Indices, ///< 32-bit indices (e.g. triangle list)
 };
 
-struct BufferDescriptor {
-    BufferId    id        = kInvalidBufferId;
-    BufferKind  kind      = BufferKind::Scalar;
-    std::string name;             ///< human-readable for diagnostics / pickers
+struct BufferDescriptor
+{
+    BufferId id = kInvalidBufferId;
+    BufferKind kind = BufferKind::Scalar;
+    std::string name; ///< human-readable for diagnostics / pickers
     std::size_t element_count = 0;
-    bool        gl_interop_requested = false;
-    bool        gl_interop_active    = false;   ///< true once W14 wires GL
+    bool gl_interop_requested = false;
+    bool gl_interop_active = false; ///< true once W14 wires GL
 };
 
-class RenderingBridge {
+class RenderingBridge
+{
 public:
     RenderingBridge();
     ~RenderingBridge();
@@ -77,9 +81,9 @@ public:
 
     /// Register a typed mirror with the bridge.  The mirror MUST outlive
     /// any pending ``acquire`` calls.  Returns a stable BufferId.
-    BufferId register_scalar (const std::string& name, HostDeviceMirror<float>* m);
+    BufferId register_scalar(const std::string& name, HostDeviceMirror<float>* m);
     BufferId register_vector3(const std::string& name, HostDeviceMirror<float>* m);
-    BufferId register_indices(const std::string& name, HostDeviceMirror<int>*   m);
+    BufferId register_indices(const std::string& name, HostDeviceMirror<int>* m);
 
     /// Drop a buffer (renderer will get a null pointer on next acquire).
     void unregister(BufferId id);
@@ -105,7 +109,7 @@ public:
     /// Snapshot for property panels.
     std::vector<BufferDescriptor> list_buffers() const;
 
-    RenderingBridge(const RenderingBridge&)            = delete;
+    RenderingBridge(const RenderingBridge&) = delete;
     RenderingBridge& operator=(const RenderingBridge&) = delete;
 
 private:
@@ -113,4 +117,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-}  // namespace simall::gpu
+} // namespace simall::gpu

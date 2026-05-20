@@ -18,49 +18,53 @@
 // =============================================================================
 #pragma once
 
-#include "turbulence/ITurbulenceModel.hpp"
-#include "solver/ScalarTransport.hpp"
-#include "solver/WallDistance.hpp"
 #include "solver/LinearSolvers.hpp"
+#include "solver/ScalarTransport.hpp"
 #include "solver/Solver.hpp"
+#include "solver/WallDistance.hpp"
+#include "turbulence/ITurbulenceModel.hpp"
 #include "utilities/AlignedAllocator.hpp"
 
 #include <memory>
 #include <vector>
 
-namespace simall::turbulence {
+namespace simall::turbulence
+{
 
-class SaDdes_Full final : public ITurbulenceModel {
+class SaDdes_Full final : public ITurbulenceModel
+{
 public:
     std::string name() const override { return "SA-DDES"; }
-    void   initialize(meshing::Mesh& m, solver::FieldRegistry& f) override;
-    void   solve(double dt, solver::FieldRegistry& f) override;
+    void initialize(meshing::Mesh& m, solver::FieldRegistry& f) override;
+    void solve(double dt, solver::FieldRegistry& f) override;
     double turbulent_viscosity(std::size_t c) const override
-        { return c < mut_.size() ? mut_[c] : 0.0; }
+    {
+        return c < mut_.size() ? mut_[c] : 0.0;
+    }
 
     void set_boundaries(const std::vector<solver::BoundarySpec>& bcs) { bcs_ = bcs; }
-    void set_density(double rho)   { rho_ = rho; }
-    void set_viscosity(double mu)  { mu_  = mu;  }
-    void set_C_DES(double c)       { C_DES_ = c; }
+    void set_density(double rho) { rho_ = rho; }
+    void set_viscosity(double mu) { mu_ = mu; }
+    void set_C_DES(double c) { C_DES_ = c; }
 
 private:
     void compute_length_scales(const solver::FieldRegistry& f);
     void compute_sources(const solver::FieldRegistry& f);
 
-    meshing::Mesh*               mesh_   = nullptr;
-    solver::FieldRegistry*       fields_ = nullptr;
+    meshing::Mesh* mesh_ = nullptr;
+    solver::FieldRegistry* fields_ = nullptr;
     std::vector<solver::BoundarySpec> bcs_;
     double rho_ = 1.0, mu_ = 1.0e-3, C_DES_ = 0.65;
 
-    std::unique_ptr<solver::ILinearSolver>   lin_;
-    std::unique_ptr<solver::IWallDistance>   wallDist_;
+    std::unique_ptr<solver::ILinearSolver> lin_;
+    std::unique_ptr<solver::IWallDistance> wallDist_;
     std::unique_ptr<solver::ScalarTransport> nuTildeEq_;
 
     util::aligned_vector<double> dHybrid_;
     util::aligned_vector<double> delta_;
     util::aligned_vector<double> mut_;
     util::aligned_vector<double> src_;
-    util::aligned_vector<double> Smag_;     // strain magnitude
+    util::aligned_vector<double> Smag_; // strain magnitude
 };
 
-}  // namespace simall::turbulence
+} // namespace simall::turbulence

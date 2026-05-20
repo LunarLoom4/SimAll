@@ -21,25 +21,28 @@
 #pragma once
 
 #include "io/MeshFormats.hpp"
+
 #include <string>
 
-namespace simall::io {
+namespace simall::io
+{
 
-struct Plot3dOptions {
-    bool   doublePrecision = false;
-    bool   forceBinary     = false;   // skip auto-detection
-    bool   forceFormatted  = false;
+struct Plot3dOptions
+{
+    bool doublePrecision = false;
+    bool forceBinary = false; // skip auto-detection
+    bool forceFormatted = false;
 };
 
-struct Plot3dReadResult {
-    bool            ok = false;
-    std::string     error;
-    StructuredGrid  grid;
+struct Plot3dReadResult
+{
+    bool ok = false;
+    std::string error;
+    StructuredGrid grid;
 };
 
-[[nodiscard]] Plot3dReadResult read_plot3d(const std::string& path,
-                                           Plot3dOptions opts = {});
+[[nodiscard]] Plot3dReadResult read_plot3d(const std::string& path, Plot3dOptions opts = {});
 [[nodiscard]] Plot3dReadResult parse_plot3d_formatted(const std::string& text,
                                                       std::string sourceHint = "<string>");
 
-}  // namespace simall::io
+} // namespace simall::io

@@ -17,22 +17,20 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::optimization {
+namespace simall::optimization
+{
 
-[[nodiscard]] std::vector<std::vector<double>> doe_full_factorial(
-        const std::vector<double>& xLow,
-        const std::vector<double>& xUp,
-        std::size_t                levels);
+[[nodiscard]] std::vector<std::vector<double>> doe_full_factorial(const std::vector<double>& xLow,
+                                                                  const std::vector<double>& xUp,
+                                                                  std::size_t levels);
 
-[[nodiscard]] std::vector<std::vector<double>> doe_latin_hypercube(
-        const std::vector<double>& xLow,
-        const std::vector<double>& xUp,
-        std::size_t                nSamples,
-        std::uint64_t              seed = 0xA5A5A5A5);
+[[nodiscard]] std::vector<std::vector<double>> doe_latin_hypercube(const std::vector<double>& xLow,
+                                                                   const std::vector<double>& xUp,
+                                                                   std::size_t nSamples,
+                                                                   std::uint64_t seed = 0xA5A5A5A5);
 
-[[nodiscard]] std::vector<std::vector<double>> doe_sobol(
-        const std::vector<double>& xLow,
-        const std::vector<double>& xUp,
-        std::size_t                nSamples);
+[[nodiscard]] std::vector<std::vector<double>> doe_sobol(const std::vector<double>& xLow,
+                                                         const std::vector<double>& xUp,
+                                                         std::size_t nSamples);
 
-}  // namespace simall::optimization
+} // namespace simall::optimization

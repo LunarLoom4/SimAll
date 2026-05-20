@@ -16,77 +16,99 @@
 #include <string_view>
 #include <unordered_map>
 
-namespace simall::io {
+namespace simall::io
+{
 
-namespace {
+namespace
+{
 
 // -- lexical helpers ---------------------------------------------------------
 
-[[nodiscard]] std::string read_whole_file(const std::string& path) {
+[[nodiscard]] std::string read_whole_file(const std::string& path)
+{
     std::ifstream f(path, std::ios::binary);
-    if (!f) return {};
+    if (!f)
+        return {};
     std::ostringstream oss;
     oss << f.rdbuf();
     return oss.str();
 }
 
-void rtrim(std::string& s) {
+void rtrim(std::string& s)
+{
     while (!s.empty()
-           && (s.back() == '\r' || s.back() == '\n' || s.back() == ' '
-               || s.back() == '\t')) {
+           && (s.back() == '\r' || s.back() == '\n' || s.back() == ' ' || s.back() == '\t')) {
         s.pop_back();
     }
 }
-void ltrim(std::string& s) {
+void ltrim(std::string& s)
+{
     std::size_t i = 0;
-    while (i < s.size()
-           && (s[i] == ' ' || s[i] == '\t' || s[i] == '\r' || s[i] == '\n')) {
+    while (i < s.size() && (s[i] == ' ' || s[i] == '\t' || s[i] == '\r' || s[i] == '\n')) {
         ++i;
     }
-    if (i > 0) s.erase(0, i);
+    if (i > 0)
+        s.erase(0, i);
 }
-void trim(std::string& s) { rtrim(s); ltrim(s); }
+void trim(std::string& s)
+{
+    rtrim(s);
+    ltrim(s);
+}
 
 // Strip an in-line `#` comment (everything from the first `#` to EOL).
-void strip_comment(std::string& s) {
+void strip_comment(std::string& s)
+{
     auto p = s.find('#');
-    if (p != std::string::npos) s.erase(p);
+    if (p != std::string::npos)
+        s.erase(p);
 }
 
-[[nodiscard]] std::vector<std::string> split_ws(const std::string& line) {
+[[nodiscard]] std::vector<std::string> split_ws(const std::string& line)
+{
     std::vector<std::string> out;
-    std::string              cur;
+    std::string cur;
     for (char c : line) {
         if (std::isspace(static_cast<unsigned char>(c))) {
-            if (!cur.empty()) { out.push_back(std::move(cur)); cur.clear(); }
+            if (!cur.empty()) {
+                out.push_back(std::move(cur));
+                cur.clear();
+            }
         } else {
             cur.push_back(c);
         }
     }
-    if (!cur.empty()) out.push_back(std::move(cur));
+    if (!cur.empty())
+        out.push_back(std::move(cur));
     return out;
 }
 
-[[nodiscard]] bool to_long(const std::string& s, long long& out) {
-    if (s.empty()) return false;
+[[nodiscard]] bool to_long(const std::string& s, long long& out)
+{
+    if (s.empty())
+        return false;
     char* end = nullptr;
-    out       = std::strtoll(s.c_str(), &end, 10);
+    out = std::strtoll(s.c_str(), &end, 10);
     return end != s.c_str() && (end == nullptr || *end == '\0');
 }
-[[nodiscard]] bool to_double(const std::string& s, double& out) {
-    if (s.empty()) return false;
+[[nodiscard]] bool to_double(const std::string& s, double& out)
+{
+    if (s.empty())
+        return false;
     char* end = nullptr;
-    out       = std::strtod(s.c_str(), &end);
+    out = std::strtod(s.c_str(), &end);
     return end != s.c_str() && (end == nullptr || *end == '\0');
 }
 
 // -- line source that auto-skips comments / blanks ---------------------------
 
-struct DataLineSource {
+struct DataLineSource
+{
     std::vector<std::string> lines;
-    std::size_t              pos = 0;
+    std::size_t pos = 0;
 
-    explicit DataLineSource(const std::string& src) {
+    explicit DataLineSource(const std::string& src)
+    {
         std::string cur;
         for (char c : src) {
             if (c == '\n') {
@@ -97,19 +119,24 @@ struct DataLineSource {
                 cur.push_back(c);
             }
         }
-        if (!cur.empty()) { rtrim(cur); lines.push_back(std::move(cur)); }
+        if (!cur.empty()) {
+            rtrim(cur);
+            lines.push_back(std::move(cur));
+        }
     }
 
     /// Yield the next line that contains at least one non-comment token.
     /// `toks` is populated with the whitespace-split tokens (comment
     /// stripped); `lineNo` is the 1-based line number.
-    bool next(std::vector<std::string>& toks, std::size_t& lineNo) {
+    bool next(std::vector<std::string>& toks, std::size_t& lineNo)
+    {
         while (pos < lines.size()) {
             std::string s = lines[pos++];
             strip_comment(s);
             trim(s);
-            if (s.empty()) continue;
-            toks   = split_ws(s);
+            if (s.empty())
+                continue;
+            toks = split_ws(s);
             lineNo = pos;
             return true;
         }
@@ -117,23 +144,23 @@ struct DataLineSource {
     }
 };
 
-}  // namespace
+} // namespace
 
 // -- main parser --------------------------------------------------------------
 
 TetgenReadResult parse_tetgen_strings(const std::string& nodeText,
-                                       const std::string& eleText,
-                                       const std::string& faceText,
-                                       std::string        sourceHint) {
+                                      const std::string& eleText,
+                                      const std::string& faceText,
+                                      std::string sourceHint)
+{
     TetgenReadResult r;
     r.mesh.sourceFormat = "tetgen";
-    r.mesh.sourcePath   = sourceHint;
+    r.mesh.sourcePath = sourceHint;
 
     std::size_t lineNo = 0;
     auto fail = [&](const std::string& which, const std::string& msg) {
-        r.ok    = false;
-        r.error = "[" + sourceHint + ":" + which + ":"
-                + std::to_string(lineNo) + "] " + msg;
+        r.ok = false;
+        r.error = "[" + sourceHint + ":" + which + ":" + std::to_string(lineNo) + "] " + msg;
         return r;
     };
 
@@ -143,23 +170,24 @@ TetgenReadResult parse_tetgen_strings(const std::string& nodeText,
     // -- .node ----------------------------------------------------------------
     std::unordered_map<long long, NodeIdx> tagToIdx;
     long long firstNodeId = 0;
-    bool      sawFirstNode = false;
+    bool sawFirstNode = false;
     {
-        DataLineSource             src(nodeText);
-        std::vector<std::string>   toks;
+        DataLineSource src(nodeText);
+        std::vector<std::string> toks;
         if (!src.next(toks, lineNo))
             return fail(".node", "file is empty");
         if (toks.size() < 4)
-            return fail(".node", "header needs 4 ints "
+            return fail(".node",
+                        "header needs 4 ints "
                         "(nNodes dim nAttrs hasMarker)");
         long long nNodes = 0, dim = 0, nAttrs = 0, hasMarker = 0;
-        if (!to_long(toks[0], nNodes) || !to_long(toks[1], dim)
-            || !to_long(toks[2], nAttrs) || !to_long(toks[3], hasMarker))
+        if (!to_long(toks[0], nNodes) || !to_long(toks[1], dim) || !to_long(toks[2], nAttrs)
+            || !to_long(toks[3], hasMarker))
             return fail(".node", "header has malformed integers");
-        if (nNodes < 0)  return fail(".node", "negative node count");
+        if (nNodes < 0)
+            return fail(".node", "negative node count");
         if (dim != 2 && dim != 3)
-            return fail(".node", "dim must be 2 or 3 (got "
-                        + std::to_string(dim) + ")");
+            return fail(".node", "dim must be 2 or 3 (got " + std::to_string(dim) + ")");
         if (nAttrs < 0 || hasMarker < 0 || hasMarker > 1)
             return fail(".node", "negative nAttrs or out-of-range marker flag");
 
@@ -168,21 +196,23 @@ TetgenReadResult parse_tetgen_strings(const std::string& nodeText,
         zone.z.reserve(static_cast<std::size_t>(nNodes));
         tagToIdx.reserve(static_cast<std::size_t>(nNodes));
 
-        const std::size_t expected =
-            1 + static_cast<std::size_t>(dim)
-              + static_cast<std::size_t>(nAttrs)
-              + static_cast<std::size_t>(hasMarker);
+        const std::size_t expected = 1 + static_cast<std::size_t>(dim)
+                                     + static_cast<std::size_t>(nAttrs)
+                                     + static_cast<std::size_t>(hasMarker);
         for (long long i = 0; i < nNodes; ++i) {
             if (!src.next(toks, lineNo))
                 return fail(".node", "unexpected EOF inside node table");
             if (toks.size() < expected)
-                return fail(".node", "row too short (need "
-                            + std::to_string(expected) + " tokens, got "
-                            + std::to_string(toks.size()) + ")");
+                return fail(".node",
+                            "row too short (need " + std::to_string(expected) + " tokens, got "
+                                + std::to_string(toks.size()) + ")");
             long long tag = 0;
             if (!to_long(toks[0], tag))
                 return fail(".node", "malformed node tag");
-            if (!sawFirstNode) { firstNodeId = tag; sawFirstNode = true; }
+            if (!sawFirstNode) {
+                firstNodeId = tag;
+                sawFirstNode = true;
+            }
             double xv = 0.0, yv = 0.0, zv = 0.0;
             if (!to_double(toks[1], xv) || !to_double(toks[2], yv))
                 return fail(".node", "malformed x/y");
@@ -195,8 +225,7 @@ TetgenReadResult parse_tetgen_strings(const std::string& nodeText,
             zone.y.push_back(yv);
             zone.z.push_back(zv);
             if (!tagToIdx.emplace(tag, idx).second)
-                return fail(".node", "duplicate node tag "
-                            + std::to_string(tag));
+                return fail(".node", "duplicate node tag " + std::to_string(tag));
         }
     }
 
@@ -205,24 +234,26 @@ TetgenReadResult parse_tetgen_strings(const std::string& nodeText,
 
     // -- .ele -----------------------------------------------------------------
     {
-        DataLineSource             src(eleText);
-        std::vector<std::string>   toks;
+        DataLineSource src(eleText);
+        std::vector<std::string> toks;
         if (!src.next(toks, lineNo))
             return fail(".ele", "file is empty");
         if (toks.size() < 3)
-            return fail(".ele", "header needs 3 ints "
+            return fail(".ele",
+                        "header needs 3 ints "
                         "(nTets nodesPerTet nAttrs)");
         long long nTets = 0, npe = 0, nAttrs = 0;
-        if (!to_long(toks[0], nTets) || !to_long(toks[1], npe)
-            || !to_long(toks[2], nAttrs))
+        if (!to_long(toks[0], nTets) || !to_long(toks[1], npe) || !to_long(toks[2], nAttrs))
             return fail(".ele", "header has malformed integers");
         if (nTets < 0)
             return fail(".ele", "negative tet count");
         if (npe != 4)
-            return fail(".ele", "only linear tetrahedra are supported "
-                        "(nodesPerTet=" + std::to_string(npe)
-                        + "; 10-node parabolic tets / TetGen `-o2` output "
-                          "are not yet implemented)");
+            return fail(".ele",
+                        "only linear tetrahedra are supported "
+                        "(nodesPerTet="
+                            + std::to_string(npe)
+                            + "; 10-node parabolic tets / TetGen `-o2` output "
+                              "are not yet implemented)");
         if (nAttrs < 0)
             return fail(".ele", "negative attribute count");
 
@@ -233,24 +264,22 @@ TetgenReadResult parse_tetgen_strings(const std::string& nodeText,
                 return zone.sections[it->second];
             ElementSection sec;
             sec.type = ElementType::Tetra4;
-            sec.name = (nAttrs > 0)
-                       ? ("region_" + std::to_string(attr))
-                       : std::string("tetgen_volume");
+            sec.name =
+                (nAttrs > 0) ? ("region_" + std::to_string(attr)) : std::string("tetgen_volume");
             const std::size_t sIdx = zone.sections.size();
             zone.sections.push_back(std::move(sec));
             attrToSec.emplace(attr, sIdx);
             return zone.sections[sIdx];
         };
 
-        const std::size_t expected =
-            1 + 4 + static_cast<std::size_t>(nAttrs);
+        const std::size_t expected = 1 + 4 + static_cast<std::size_t>(nAttrs);
         for (long long i = 0; i < nTets; ++i) {
             if (!src.next(toks, lineNo))
                 return fail(".ele", "unexpected EOF inside tet table");
             if (toks.size() < expected)
-                return fail(".ele", "row too short (need "
-                            + std::to_string(expected) + " tokens, got "
-                            + std::to_string(toks.size()) + ")");
+                return fail(".ele",
+                            "row too short (need " + std::to_string(expected) + " tokens, got "
+                                + std::to_string(toks.size()) + ")");
             long long n[4] = {0, 0, 0, 0};
             for (int k = 0; k < 4; ++k) {
                 if (!to_long(toks[1 + k], n[k]))
@@ -265,8 +294,7 @@ TetgenReadResult parse_tetgen_strings(const std::string& nodeText,
             for (int k = 0; k < 4; ++k) {
                 auto it = tagToIdx.find(n[k]);
                 if (it == tagToIdx.end())
-                    return fail(".ele", "tet references unknown node tag "
-                                + std::to_string(n[k]));
+                    return fail(".ele", "tet references unknown node tag " + std::to_string(n[k]));
                 sec.nodes.push_back(it->second);
             }
         }
@@ -274,8 +302,8 @@ TetgenReadResult parse_tetgen_strings(const std::string& nodeText,
 
     // -- .face (optional) -----------------------------------------------------
     if (!faceText.empty()) {
-        DataLineSource             src(faceText);
-        std::vector<std::string>   toks;
+        DataLineSource src(faceText);
+        std::vector<std::string> toks;
         if (!src.next(toks, lineNo))
             return fail(".face", "file is empty (use empty string to skip)");
         if (toks.size() < 2)
@@ -289,23 +317,19 @@ TetgenReadResult parse_tetgen_strings(const std::string& nodeText,
             return fail(".face", "marker flag must be 0 or 1");
 
         // markerValue -> (faceSecIdx, patchIdx)
-        std::unordered_map<long long,
-                           std::pair<std::size_t, std::size_t>> markerToBuckets;
-        auto get_buckets = [&](long long marker)
-                -> std::pair<std::size_t, std::size_t> {
-            if (auto it = markerToBuckets.find(marker);
-                it != markerToBuckets.end())
+        std::unordered_map<long long, std::pair<std::size_t, std::size_t>> markerToBuckets;
+        auto get_buckets = [&](long long marker) -> std::pair<std::size_t, std::size_t> {
+            if (auto it = markerToBuckets.find(marker); it != markerToBuckets.end())
                 return it->second;
             ElementSection sec;
             sec.type = ElementType::Tri3;
-            sec.name = (hasMarker == 1)
-                       ? ("marker_" + std::to_string(marker))
-                       : std::string("all_faces");
+            sec.name =
+                (hasMarker == 1) ? ("marker_" + std::to_string(marker)) : std::string("all_faces");
             const std::size_t sIdx = zone.sections.size();
             zone.sections.push_back(std::move(sec));
 
             BoundaryPatch bp;
-            bp.name   = sec.name;
+            bp.name = sec.name;
             bp.bcType = "wall";
             bp.faceElementIndices.push_back(static_cast<std::uint32_t>(sIdx));
             const std::size_t pIdx = zone.boundaries.size();
@@ -315,15 +339,14 @@ TetgenReadResult parse_tetgen_strings(const std::string& nodeText,
             return {sIdx, pIdx};
         };
 
-        const std::size_t expected =
-            1 + 3 + static_cast<std::size_t>(hasMarker);
+        const std::size_t expected = 1 + 3 + static_cast<std::size_t>(hasMarker);
         for (long long i = 0; i < nFaces; ++i) {
             if (!src.next(toks, lineNo))
                 return fail(".face", "unexpected EOF inside face table");
             if (toks.size() < expected)
-                return fail(".face", "row too short (need "
-                            + std::to_string(expected) + " tokens, got "
-                            + std::to_string(toks.size()) + ")");
+                return fail(".face",
+                            "row too short (need " + std::to_string(expected) + " tokens, got "
+                                + std::to_string(toks.size()) + ")");
             long long n[3] = {0, 0, 0};
             for (int k = 0; k < 3; ++k) {
                 if (!to_long(toks[1 + k], n[k]))
@@ -339,17 +362,16 @@ TetgenReadResult parse_tetgen_strings(const std::string& nodeText,
             for (int k = 0; k < 3; ++k) {
                 auto it = tagToIdx.find(n[k]);
                 if (it == tagToIdx.end())
-                    return fail(".face", "face references unknown node tag "
-                                + std::to_string(n[k]));
+                    return fail(".face",
+                                "face references unknown node tag " + std::to_string(n[k]));
                 fsec.nodes.push_back(it->second);
             }
         }
 
         // Deterministic patch order: by name.
-        std::sort(zone.boundaries.begin(), zone.boundaries.end(),
-                  [](const BoundaryPatch& a, const BoundaryPatch& b) {
-                      return a.name < b.name;
-                  });
+        std::sort(zone.boundaries.begin(),
+                  zone.boundaries.end(),
+                  [](const BoundaryPatch& a, const BoundaryPatch& b) { return a.name < b.name; });
     }
 
     if (zone.x.empty())
@@ -359,25 +381,26 @@ TetgenReadResult parse_tetgen_strings(const std::string& nodeText,
 
     r.mesh.zones.push_back(std::move(zone));
     r.dimension = 3;
-    r.ok        = true;
+    r.ok = true;
     return r;
 }
 
-TetgenReadResult read_tetgen(const std::string& stemPath) {
+TetgenReadResult read_tetgen(const std::string& stemPath)
+{
     TetgenReadResult r;
     const std::string nodePath = stemPath + ".node";
-    const std::string elePath  = stemPath + ".ele";
+    const std::string elePath = stemPath + ".ele";
     const std::string facePath = stemPath + ".face";
 
     const std::string nodeText = read_whole_file(nodePath);
     if (nodeText.empty()) {
-        r.ok    = false;
+        r.ok = false;
         r.error = "could not open or read '" + nodePath + "'";
         return r;
     }
     const std::string eleText = read_whole_file(elePath);
     if (eleText.empty()) {
-        r.ok    = false;
+        r.ok = false;
         r.error = "could not open or read '" + elePath + "'";
         return r;
     }
@@ -386,4 +409,4 @@ TetgenReadResult read_tetgen(const std::string& stemPath) {
     return parse_tetgen_strings(nodeText, eleText, faceText, stemPath);
 }
 
-}  // namespace simall::io
+} // namespace simall::io

@@ -18,35 +18,39 @@
 #include <memory>
 #include <vector>
 
-namespace simall::solver::bc {
+namespace simall::solver::bc
+{
 
 /// Trace stored per face of the interface zone — populated by the solver
 /// after each outer iteration on the OTHER side of the interface.
-struct InterfaceTrace {
-    std::vector<double> T_other;         // size = nFaces on this zone
+struct InterfaceTrace
+{
+    std::vector<double> T_other; // size = nFaces on this zone
     std::vector<double> q_other;
 };
 
-class InterfaceBc : public IBoundaryCondition {
+class InterfaceBc : public IBoundaryCondition
+{
 public:
-    explicit InterfaceBc(std::shared_ptr<InterfaceTrace> shared)
-        : trace_(std::move(shared)) {}
+    explicit InterfaceBc(std::shared_ptr<InterfaceTrace> shared) : trace_(std::move(shared)) {}
 
     BcKind kind() const noexcept override { return BcKind::Interface; }
     const char* name() const noexcept override { return "Interface"; }
 
     std::size_t apply(BcContext& ctx) override;
 
-    std::unique_ptr<IBoundaryCondition> clone() const override {
+    std::unique_ptr<IBoundaryCondition> clone() const override
+    {
         auto c = std::make_unique<InterfaceBc>(trace_);
-        c->setZone(zone()); return c;
+        c->setZone(zone());
+        return c;
     }
 
-    InterfaceTrace*       trace()       noexcept { return trace_.get(); }
+    InterfaceTrace* trace() noexcept { return trace_.get(); }
     const InterfaceTrace* trace() const noexcept { return trace_.get(); }
 
 private:
     std::shared_ptr<InterfaceTrace> trace_;
 };
 
-}  // namespace simall::solver::bc
+} // namespace simall::solver::bc

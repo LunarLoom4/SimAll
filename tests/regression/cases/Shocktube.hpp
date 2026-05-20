@@ -12,21 +12,27 @@
 
 #include "../RegressionFramework.hpp"
 
-namespace simall::regression::shocktube {
+namespace simall::regression::shocktube
+{
 
-struct SodReference {
-    double pStar      = 0.30313;
-    double uStar      = 0.92745;
-    double rhoLeftStar  = 0.42632;
+struct SodReference
+{
+    double pStar = 0.30313;
+    double uStar = 0.92745;
+    double rhoLeftStar = 0.42632;
     double rhoRightStar = 0.26557;
     double shockSpeed = 1.7522;
 };
 
-[[nodiscard]] inline SodReference sod_reference() { return {}; }
+[[nodiscard]] inline SodReference sod_reference()
+{
+    return {};
+}
 
 // Helper: speed of sound for a perfect gas.
-[[nodiscard]] inline double speed_of_sound(double gamma, double p, double rho) {
+[[nodiscard]] inline double speed_of_sound(double gamma, double p, double rho)
+{
     return std::sqrt(gamma * p / std::max(rho, 1e-30));
 }
 
-}  // namespace simall::regression::shocktube
+} // namespace simall::regression::shocktube

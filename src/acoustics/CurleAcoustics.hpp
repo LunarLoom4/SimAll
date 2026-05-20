@@ -31,20 +31,24 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::acoustics {
+namespace simall::acoustics
+{
 
-struct CurleSurfaceSample {
+struct CurleSurfaceSample
+{
     std::array<double, 3> position;
     std::array<double, 3> normal;
-    double                pressure = 0.0;
-    double                area     = 0.0;
+    double pressure = 0.0;
+    double area = 0.0;
 };
 
-struct CurleObserver {
+struct CurleObserver
+{
     std::array<double, 3> position;
 };
 
-class CurleAcoustics {
+class CurleAcoustics
+{
 public:
     /// `soundSpeed` is the ambient c_0 used in the leading 1/(4π c) factor.
     explicit CurleAcoustics(double soundSpeed = 343.0) : c0_(soundSpeed) {}
@@ -52,21 +56,25 @@ public:
     /// Append one time-step snapshot of the surface pressure field for the
     /// chosen observer.  After all steps are supplied, call
     /// `observer_pressure_history()` to get the differenced p'(t).
-    void push_step(double                             time,
-                    const std::vector<CurleSurfaceSample>& surface,
-                    const CurleObserver&               observer);
+    void push_step(double time,
+                   const std::vector<CurleSurfaceSample>& surface,
+                   const CurleObserver& observer);
 
     /// Returns p'(t) = (1/(4πc)) · ∂/∂t  of the integrated kernel.
     [[nodiscard]] std::vector<double> observer_pressure_history() const;
 
     [[nodiscard]] const std::vector<double>& times() const noexcept { return times_; }
 
-    void clear() { times_.clear(); kernel_.clear(); }
+    void clear()
+    {
+        times_.clear();
+        kernel_.clear();
+    }
 
 private:
-    double              c0_;
+    double c0_;
     std::vector<double> times_;
-    std::vector<double> kernel_;     // raw kernel value before time derivative
+    std::vector<double> kernel_; // raw kernel value before time derivative
 };
 
-}  // namespace simall::acoustics
+} // namespace simall::acoustics

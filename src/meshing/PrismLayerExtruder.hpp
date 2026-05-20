@@ -20,21 +20,25 @@
 #pragma once
 
 #include "MeshStorage.hpp"
+
 #include "utilities/MathTypes.hpp"
 
 #include <array>
 #include <cstdint>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct PrismLayerOptions {
-    int    nLayers          = 5;
+struct PrismLayerOptions
+{
+    int nLayers = 5;
     double firstLayerHeight = 1.0e-4;
-    double growthRatio      = 1.2;
+    double growthRatio = 1.2;
 };
 
-class PrismLayerExtruder {
+class PrismLayerExtruder
+{
 public:
     /// Generate N anisotropic prism layers offset INWARD from a wall surface.
     /// `wallTris` are triangle vertex indices into `nodes`. The result is
@@ -47,9 +51,10 @@ public:
                  Mesh& out);
 
     /// First-layer height from y+ for a known shear velocity.
-    static double first_layer_from_yplus(double yPlus, double nu, double uTau) {
+    static double first_layer_from_yplus(double yPlus, double nu, double uTau)
+    {
         return yPlus * nu / std::max(uTau, 1e-30);
     }
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

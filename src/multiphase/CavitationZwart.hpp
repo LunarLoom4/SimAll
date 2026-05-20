@@ -22,19 +22,22 @@
 #include "meshing/MeshStorage.hpp"
 #include "solver/FieldRegistry.hpp"
 
-namespace simall::multiphase {
+namespace simall::multiphase
+{
 
-struct ZwartProps {
-    double rhoLiquid   = 998.2;
-    double rhoVapor    = 0.02308;
+struct ZwartProps
+{
+    double rhoLiquid = 998.2;
+    double rhoVapor = 0.02308;
     double pSaturation = 2339.0;
-    double R_bubble    = 1.0e-6;       // m
-    double r_nucleation= 5.0e-4;       // [-]
-    double F_vap       = 50.0;
-    double F_cond      = 0.01;
+    double R_bubble = 1.0e-6;     // m
+    double r_nucleation = 5.0e-4; // [-]
+    double F_vap = 50.0;
+    double F_cond = 0.01;
 };
 
-class CavitationZwart {
+class CavitationZwart
+{
 public:
     void initialize(const meshing::Mesh& mesh, ZwartProps props);
     double apply(solver::FieldRegistry& fields);
@@ -42,7 +45,7 @@ public:
 
 private:
     const meshing::Mesh* mesh_ = nullptr;
-    ZwartProps           p_{};
+    ZwartProps p_{};
 };
 
-}  // namespace simall::multiphase
+} // namespace simall::multiphase

@@ -8,20 +8,21 @@
 // runs in milliseconds.  Covers v4.1 entity-block grammar and legacy
 // v2.2 flat-list grammar.
 // =============================================================================
-#include <catch2/catch_test_macros.hpp>
-
 #include "io/GmshReader.hpp"
 #include "io/MeshFormats.hpp"
+
+#include <catch2/catch_test_macros.hpp>
 
 #include <string>
 
 using simall::io::ElementType;
-using simall::io::GmshReadResult;
 using simall::io::gmsh_element_type;
+using simall::io::GmshReadResult;
 using simall::io::parse_gmsh_msh_string;
 using simall::io::vertices_per_element;
 
-namespace {
+namespace
+{
 
 // Minimal valid Gmsh v4.1 mesh: one tetrahedron (4 nodes, 1 tet, 4 tri faces)
 // inside a single physical volume "fluid" and three physical surfaces
@@ -73,21 +74,23 @@ $Elements
 $EndElements
 )GMSH";
 
-}  // namespace
+} // namespace
 
-TEST_CASE("gmsh_element_type translates supported codes", "[io][gmsh]") {
-    CHECK(gmsh_element_type(1)  == ElementType::Bar2);
-    CHECK(gmsh_element_type(2)  == ElementType::Tri3);
-    CHECK(gmsh_element_type(3)  == ElementType::Quad4);
-    CHECK(gmsh_element_type(4)  == ElementType::Tetra4);
-    CHECK(gmsh_element_type(5)  == ElementType::Hexa8);
-    CHECK(gmsh_element_type(6)  == ElementType::Penta6);
-    CHECK(gmsh_element_type(7)  == ElementType::Pyra5);
-    CHECK(gmsh_element_type(15) == ElementType::Unknown);  // points: caller skips
+TEST_CASE("gmsh_element_type translates supported codes", "[io][gmsh]")
+{
+    CHECK(gmsh_element_type(1) == ElementType::Bar2);
+    CHECK(gmsh_element_type(2) == ElementType::Tri3);
+    CHECK(gmsh_element_type(3) == ElementType::Quad4);
+    CHECK(gmsh_element_type(4) == ElementType::Tetra4);
+    CHECK(gmsh_element_type(5) == ElementType::Hexa8);
+    CHECK(gmsh_element_type(6) == ElementType::Penta6);
+    CHECK(gmsh_element_type(7) == ElementType::Pyra5);
+    CHECK(gmsh_element_type(15) == ElementType::Unknown); // points: caller skips
     CHECK(gmsh_element_type(99) == ElementType::Unknown);
 }
 
-TEST_CASE("Gmsh reader parses a minimal tetrahedron mesh", "[io][gmsh]") {
+TEST_CASE("Gmsh reader parses a minimal tetrahedron mesh", "[io][gmsh]")
+{
     const auto r = parse_gmsh_msh_string(kSimpleTet, "tet.msh");
     INFO(r.error);
     REQUIRE(r.ok);
@@ -125,12 +128,12 @@ TEST_CASE("Gmsh reader parses a minimal tetrahedron mesh", "[io][gmsh]") {
     CHECK(tetElems == 1);
 
     // ImportedMesh aggregates.
-    CHECK(r.mesh.total_nodes()   == 4);
+    CHECK(r.mesh.total_nodes() == 4);
     CHECK(r.mesh.total_elements() == 5);
 }
 
-TEST_CASE("Gmsh reader derives boundary patches from physical surfaces",
-          "[io][gmsh]") {
+TEST_CASE("Gmsh reader derives boundary patches from physical surfaces", "[io][gmsh]")
+{
     const auto r = parse_gmsh_msh_string(kSimpleTet, "tet.msh");
     REQUIRE(r.ok);
     const auto& z = r.mesh.zones[0];
@@ -142,7 +145,7 @@ TEST_CASE("Gmsh reader derives boundary patches from physical surfaces",
     CHECK(z.boundaries[1].name == "outlet");
     CHECK(z.boundaries[2].name == "wall");
     for (const auto& bp : z.boundaries) {
-        CHECK(bp.bcType == "wall");           // default until caller remaps
+        CHECK(bp.bcType == "wall"); // default until caller remaps
         CHECK_FALSE(bp.faceElementIndices.empty());
         // Every referenced section must be a Tri3 (surface) section.
         for (auto si : bp.faceElementIndices) {
@@ -152,34 +155,38 @@ TEST_CASE("Gmsh reader derives boundary patches from physical surfaces",
     }
 }
 
-TEST_CASE("Gmsh reader rejects binary MSH files", "[io][gmsh][error]") {
+TEST_CASE("Gmsh reader rejects binary MSH files", "[io][gmsh][error]")
+{
     const std::string bin = "$MeshFormat\n4.1 1 8\n$EndMeshFormat\n";
-    const auto        r   = parse_gmsh_msh_string(bin);
+    const auto r = parse_gmsh_msh_string(bin);
     CHECK_FALSE(r.ok);
     CHECK(r.error.find("binary") != std::string::npos);
 }
 
-TEST_CASE("Gmsh reader rejects unsupported format versions", "[io][gmsh][error]") {
+TEST_CASE("Gmsh reader rejects unsupported format versions", "[io][gmsh][error]")
+{
     // v3.x was never an official release; v5.x is future and unknown.
-    const std::string v3  = "$MeshFormat\n3.0 0 8\n$EndMeshFormat\n";
-    const auto        r3  = parse_gmsh_msh_string(v3);
+    const std::string v3 = "$MeshFormat\n3.0 0 8\n$EndMeshFormat\n";
+    const auto r3 = parse_gmsh_msh_string(v3);
     CHECK_FALSE(r3.ok);
     CHECK(r3.error.find("unsupported Gmsh format version") != std::string::npos);
 
-    const std::string v5  = "$MeshFormat\n5.0 0 8\n$EndMeshFormat\n";
-    const auto        r5  = parse_gmsh_msh_string(v5);
+    const std::string v5 = "$MeshFormat\n5.0 0 8\n$EndMeshFormat\n";
+    const auto r5 = parse_gmsh_msh_string(v5);
     CHECK_FALSE(r5.ok);
     CHECK(r5.error.find("unsupported Gmsh format version") != std::string::npos);
 }
 
-TEST_CASE("Gmsh reader rejects missing $MeshFormat", "[io][gmsh][error]") {
+TEST_CASE("Gmsh reader rejects missing $MeshFormat", "[io][gmsh][error]")
+{
     const std::string bad = "$Nodes\n0 0 0 0\n$EndNodes\n";
-    const auto        r   = parse_gmsh_msh_string(bad);
+    const auto r = parse_gmsh_msh_string(bad);
     CHECK_FALSE(r.ok);
     CHECK(r.error.find("$MeshFormat") != std::string::npos);
 }
 
-TEST_CASE("Gmsh reader reports unknown node tags", "[io][gmsh][error]") {
+TEST_CASE("Gmsh reader reports unknown node tags", "[io][gmsh][error]")
+{
     // Node 5 referenced by tet but never defined.
     const std::string bad = R"GMSH(
 $MeshFormat
@@ -208,8 +215,8 @@ $EndElements
     CHECK(r.error.find("unknown node tag") != std::string::npos);
 }
 
-TEST_CASE("Gmsh reader skips type-15 vertex elements without failing",
-          "[io][gmsh]") {
+TEST_CASE("Gmsh reader skips type-15 vertex elements without failing", "[io][gmsh]")
+{
     // One tet + one vertex element (type 15) attached to node 1.
     const std::string txt = R"GMSH(
 $MeshFormat
@@ -245,8 +252,8 @@ $EndElements
     CHECK(r.mesh.zones[0].sections[0].type == ElementType::Tetra4);
 }
 
-TEST_CASE("Gmsh reader handles 2D quad mesh and reports dimension==2",
-          "[io][gmsh]") {
+TEST_CASE("Gmsh reader handles 2D quad mesh and reports dimension==2", "[io][gmsh]")
+{
     const std::string txt = R"GMSH(
 $MeshFormat
 4.1 0 8
@@ -279,8 +286,8 @@ $EndElements
     CHECK(r.mesh.zones[0].sections[0].element_count() == 1);
 }
 
-TEST_CASE("Gmsh reader rejects high-order element type codes",
-          "[io][gmsh][error]") {
+TEST_CASE("Gmsh reader rejects high-order element type codes", "[io][gmsh][error]")
+{
     // Type 9 = 6-node second-order triangle -- not yet supported.
     const std::string txt = R"GMSH(
 $MeshFormat
@@ -330,7 +337,8 @@ $EndElements
 // boundary-derivation downstream.
 // =============================================================================
 
-namespace {
+namespace
+{
 
 // Minimal valid Gmsh v2.2 mesh: one tetrahedron (4 nodes, 1 tet, 4 tri faces)
 // with physical groups 1=inlet, 2=outlet, 3=wall (surfaces) and 100=fluid
@@ -363,10 +371,10 @@ $Elements
 $EndElements
 )GMSH";
 
-}  // namespace
+} // namespace
 
-TEST_CASE("Gmsh v2.2 reader parses a minimal tetrahedron mesh",
-          "[io][gmsh][v22]") {
+TEST_CASE("Gmsh v2.2 reader parses a minimal tetrahedron mesh", "[io][gmsh][v22]")
+{
     const auto r = parse_gmsh_msh_string(kSimpleTetV2, "tet.msh2");
     INFO(r.error);
     REQUIRE(r.ok);
@@ -402,12 +410,12 @@ TEST_CASE("Gmsh v2.2 reader parses a minimal tetrahedron mesh",
     CHECK(triElems == 4);
     CHECK(tetElems == 1);
 
-    CHECK(r.mesh.total_nodes()    == 4);
+    CHECK(r.mesh.total_nodes() == 4);
     CHECK(r.mesh.total_elements() == 5);
 }
 
-TEST_CASE("Gmsh v2.2 reader derives boundary patches from physical surfaces",
-          "[io][gmsh][v22]") {
+TEST_CASE("Gmsh v2.2 reader derives boundary patches from physical surfaces", "[io][gmsh][v22]")
+{
     const auto r = parse_gmsh_msh_string(kSimpleTetV2, "tet.msh2");
     REQUIRE(r.ok);
     const auto& z = r.mesh.zones[0];
@@ -426,8 +434,8 @@ TEST_CASE("Gmsh v2.2 reader derives boundary patches from physical surfaces",
     }
 }
 
-TEST_CASE("Gmsh v2.2 reader handles 2D quad mesh and reports dimension==2",
-          "[io][gmsh][v22]") {
+TEST_CASE("Gmsh v2.2 reader handles 2D quad mesh and reports dimension==2", "[io][gmsh][v22]")
+{
     const std::string txt = R"GMSH(
 $MeshFormat
 2.2 0 8
@@ -454,8 +462,8 @@ $EndElements
     CHECK(r.mesh.zones[0].sections[0].element_count() == 1);
 }
 
-TEST_CASE("Gmsh v2.2 reader skips type-15 vertex elements without failing",
-          "[io][gmsh][v22]") {
+TEST_CASE("Gmsh v2.2 reader skips type-15 vertex elements without failing", "[io][gmsh][v22]")
+{
     const std::string txt = R"GMSH(
 $MeshFormat
 2.2 0 8
@@ -482,7 +490,8 @@ $EndElements
     CHECK(r.mesh.zones[0].sections[0].type == ElementType::Tetra4);
 }
 
-TEST_CASE("Gmsh v2.2 reader rejects unknown node tags", "[io][gmsh][v22][error]") {
+TEST_CASE("Gmsh v2.2 reader rejects unknown node tags", "[io][gmsh][v22][error]")
+{
     const std::string bad = R"GMSH(
 $MeshFormat
 2.2 0 8
@@ -504,8 +513,8 @@ $EndElements
     CHECK(r.error.find("unknown node tag") != std::string::npos);
 }
 
-TEST_CASE("Gmsh v2.2 reader rejects truncated element rows",
-          "[io][gmsh][v22][error]") {
+TEST_CASE("Gmsh v2.2 reader rejects truncated element rows", "[io][gmsh][v22][error]")
+{
     // Tet declared but only 3 node tags supplied after the physical tag.
     const std::string bad = R"GMSH(
 $MeshFormat
@@ -528,9 +537,10 @@ $EndElements
     CHECK(r.error.find("too few nodes") != std::string::npos);
 }
 
-TEST_CASE("Gmsh v2.2 reader still rejects binary file-type", "[io][gmsh][v22][error]") {
+TEST_CASE("Gmsh v2.2 reader still rejects binary file-type", "[io][gmsh][v22][error]")
+{
     const std::string bin = "$MeshFormat\n2.2 1 8\n$EndMeshFormat\n";
-    const auto        r   = parse_gmsh_msh_string(bin);
+    const auto r = parse_gmsh_msh_string(bin);
     CHECK_FALSE(r.ok);
     CHECK(r.error.find("binary") != std::string::npos);
 }

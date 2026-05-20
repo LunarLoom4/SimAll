@@ -20,26 +20,38 @@
 #include <unordered_map>
 #include <vector>
 
-namespace simall::cad {
+namespace simall::cad
+{
 
-enum class TopologyType { Vertex, Edge, Wire, Face, Shell, Solid, Compound };
-
-struct TopologyNode {
-    util::PersistentId         id;
-    TopologyType               type;
-    std::vector<util::PersistentId> children;
-    std::vector<util::PersistentId> parents;
-    util::BoundingBox          aabb;
-    void*                      occHandle = nullptr;  // opaque TopoDS_Shape ptr
-    std::string                userName;             // for named selections
+enum class TopologyType
+{
+    Vertex,
+    Edge,
+    Wire,
+    Face,
+    Shell,
+    Solid,
+    Compound
 };
 
-class TopologyGraph {
+struct TopologyNode
+{
+    util::PersistentId id;
+    TopologyType type;
+    std::vector<util::PersistentId> children;
+    std::vector<util::PersistentId> parents;
+    util::BoundingBox aabb;
+    void* occHandle = nullptr; // opaque TopoDS_Shape ptr
+    std::string userName;      // for named selections
+};
+
+class TopologyGraph
+{
 public:
     util::PersistentId add(TopologyType t, void* occHandle);
-    void               link(util::PersistentId parent, util::PersistentId child);
+    void link(util::PersistentId parent, util::PersistentId child);
 
-    TopologyNode*       find(util::PersistentId id);
+    TopologyNode* find(util::PersistentId id);
     const TopologyNode* find(util::PersistentId id) const;
 
     std::vector<util::PersistentId> by_type(TopologyType t) const;
@@ -48,11 +60,11 @@ public:
     const auto& nodes() const noexcept { return nodes_; }
     /// Mutable accessor — for internal use by CAD operations (e.g.
     /// PersistentIdManager) that re-key nodes after a destructive edit.
-    auto&       mutable_nodes()    noexcept { return nodes_; }
+    auto& mutable_nodes() noexcept { return nodes_; }
 
 private:
     std::unordered_map<util::PersistentId, TopologyNode> nodes_;
-    std::atomic<util::PersistentId>                      next_id_{1};
+    std::atomic<util::PersistentId> next_id_{1};
 };
 
-}  // namespace simall::cad
+} // namespace simall::cad

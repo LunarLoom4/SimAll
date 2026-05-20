@@ -21,24 +21,27 @@
 #include "cad/TopologyGraph.hpp"
 
 // --- OpenCASCADE core types ------------------------------------------------
-#include <TopoDS_Shape.hxx>
 #include <TopAbs.hxx>
+#include <TopoDS_Shape.hxx>
 
-namespace simall::cad {
+namespace simall::cad
+{
 
-struct ShapeHandle::Impl {
-    TopoDS_Shape  shape;
+struct ShapeHandle::Impl
+{
+    TopoDS_Shape shape;
     TopologyGraph graph;
 };
 
 /// Internal-only accessor — friended by `ShapeHandle`. Lets every CAD
 /// translation unit reach the underlying TopoDS_Shape without exposing
 /// OpenCASCADE types in any public header.
-struct ShapeHandleAccess {
-    static ShapeHandle::Impl&       impl(ShapeHandle& h)       noexcept { return *h.impl_; }
+struct ShapeHandleAccess
+{
+    static ShapeHandle::Impl& impl(ShapeHandle& h) noexcept { return *h.impl_; }
     static const ShapeHandle::Impl& impl(const ShapeHandle& h) noexcept { return *h.impl_; }
-    static TopoDS_Shape&            shape(ShapeHandle& h)       noexcept { return h.impl_->shape; }
-    static const TopoDS_Shape&      shape(const ShapeHandle& h) noexcept { return h.impl_->shape; }
+    static TopoDS_Shape& shape(ShapeHandle& h) noexcept { return h.impl_->shape; }
+    static const TopoDS_Shape& shape(const ShapeHandle& h) noexcept { return h.impl_->shape; }
 };
 
 /// Translate an OCC topology kind into the SimAll enum used by TopologyGraph.
@@ -53,4 +56,4 @@ void rebuildTopologyGraph(const TopoDS_Shape& shape, TopologyGraph& g);
 /// to avoid re-implementing the PIMPL plumbing.
 ShapeHandle makeHandle(TopoDS_Shape shape);
 
-}  // namespace simall::cad
+} // namespace simall::cad

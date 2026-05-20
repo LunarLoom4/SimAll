@@ -15,23 +15,26 @@
 // =============================================================================
 #pragma once
 
-#include "solver/Solver.hpp"
 #include "solver/ScalarTransport.hpp"
+#include "solver/Solver.hpp"
 
 #include <memory>
 #include <vector>
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-struct EnergyOptions {
-    double rho   = 1.0;
-    double cp    = 1006.0;        // [J/(kg·K)] air default
-    double k     = 0.0262;        // [W/(m·K)]
-    double PrT   = 0.85;          // turbulent Prandtl number
-    double urf   = 0.9;
+struct EnergyOptions
+{
+    double rho = 1.0;
+    double cp = 1006.0; // [J/(kg·K)] air default
+    double k = 0.0262;  // [W/(m·K)]
+    double PrT = 0.85;  // turbulent Prandtl number
+    double urf = 0.9;
 };
 
-class EnergyEquation {
+class EnergyEquation
+{
 public:
     EnergyEquation(meshing::Mesh& mesh,
                    FieldRegistry& fields,
@@ -43,7 +46,7 @@ public:
     double iterate();
 
     /// Override an interface zone's BC at runtime (used by CHT coupler).
-    void   set_zone_bc(ScalarBC bc) { Teq_->set_zone_bc(bc); }
+    void set_zone_bc(ScalarBC bc) { Teq_->set_zone_bc(bc); }
     /// Mean temperature on a given boundary zone, computed from face owner
     /// cells of that zone (Dirichlet handoff for partitioned coupling).
     double mean_zone_temperature(meshing::ZoneId z) const;
@@ -52,10 +55,10 @@ public:
     double mean_zone_heat_flux(meshing::ZoneId z) const;
 
 private:
-    meshing::Mesh&                   mesh_;
-    FieldRegistry&                   F_;
-    EnergyOptions                    opt_;
+    meshing::Mesh& mesh_;
+    FieldRegistry& F_;
+    EnergyOptions opt_;
     std::unique_ptr<ScalarTransport> Teq_;
 };
 
-}  // namespace simall::solver
+} // namespace simall::solver

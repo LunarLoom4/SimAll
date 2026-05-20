@@ -12,18 +12,20 @@
 #include "scripting/PyBindings.hpp"
 #include "scripting/ScriptEngine.hpp"
 
-namespace simall::scripting {
+namespace simall::scripting
+{
 
-class PythonEngine : public IScriptEngine {
+class PythonEngine : public IScriptEngine
+{
 public:
     PythonEngine();
     ~PythonEngine() override;
-    void        execute(const std::string& src) override;
-    std::string repl   (const std::string& line) override;
+    void execute(const std::string& src) override;
+    std::string repl(const std::string& line) override;
 
     // Install this engine as the global `engine()` instance.  Returns the
     // previous engine pointer so callers can restore it.
     static IScriptEngine* install();
 };
 
-}  // namespace simall::scripting
+} // namespace simall::scripting

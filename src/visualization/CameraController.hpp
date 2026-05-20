@@ -16,30 +16,33 @@
 #include <string>
 #include <unordered_map>
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-enum class InteractionMode : std::uint8_t {
-    Orbit,        // LMB drag = azimuth/elevation around focal point
-    Pan,          // MMB drag = translate camera + focal point in screen XY
-    Dolly,        // RMB drag = move camera along view axis (zoom)
-    Walk          // WASD-style; arrow direction in deltas
+enum class InteractionMode : std::uint8_t
+{
+    Orbit, // LMB drag = azimuth/elevation around focal point
+    Pan,   // MMB drag = translate camera + focal point in screen XY
+    Dolly, // RMB drag = move camera along view axis (zoom)
+    Walk   // WASD-style; arrow direction in deltas
 };
 
-class CameraController {
+class CameraController
+{
 public:
     CameraController();
 
-    void  set_camera(const Camera& c);
+    void set_camera(const Camera& c);
     Camera camera() const;
 
-    void  set_mode(InteractionMode m);
+    void set_mode(InteractionMode m);
     InteractionMode mode() const noexcept { return mode_; }
 
     /// Pixel deltas from the GUI.  dx/dy are screen-pixel deltas; the
     /// controller scales them by sensitivity and the current viewport size.
     void on_drag(double dx, double dy);
-    void on_wheel(double ticks);              // positive = zoom in
-    void on_key  (double forward, double right, double up);   // walk-mode
+    void on_wheel(double ticks);                          // positive = zoom in
+    void on_key(double forward, double right, double up); // walk-mode
 
     /// Frame the camera onto the given world bbox, leaving a margin (1.05x
     /// default).  Keeps current orientation.
@@ -50,29 +53,29 @@ public:
     void snap_axis(util::Vec3d axis, util::Vec3d up);
 
     /// Named views.
-    void                       save_view(const std::string& name);
-    bool                       restore_view(const std::string& name);
-    std::vector<std::string>   saved_views() const;
+    void save_view(const std::string& name);
+    bool restore_view(const std::string& name);
+    std::vector<std::string> saved_views() const;
 
     /// Sensitivities (radians/pixel for orbit, world/pixel for pan,
     /// log-zoom per tick for dolly).
-    void set_orbit_sensitivity (double radPerPixel) { orbitSens_ = radPerPixel; }
-    void set_pan_sensitivity   (double worldPerPixel) { panSens_  = worldPerPixel; }
-    void set_dolly_sensitivity (double factorPerTick) { dollyFactor_ = factorPerTick; }
+    void set_orbit_sensitivity(double radPerPixel) { orbitSens_ = radPerPixel; }
+    void set_pan_sensitivity(double worldPerPixel) { panSens_ = worldPerPixel; }
+    void set_dolly_sensitivity(double factorPerTick) { dollyFactor_ = factorPerTick; }
 
 private:
     void apply_orbit(double dxPx, double dyPx);
-    void apply_pan  (double dxPx, double dyPx);
+    void apply_pan(double dxPx, double dyPx);
     void apply_dolly(double dyPxOrTicks);
-    void apply_walk (double forward, double right, double up);
+    void apply_walk(double forward, double right, double up);
 
-    mutable std::mutex                            mu_;
-    Camera                                        cam_;
-    InteractionMode                               mode_       = InteractionMode::Orbit;
-    double                                        orbitSens_  = 0.01;
-    double                                        panSens_    = 0.005;
-    double                                        dollyFactor_ = 0.9;
-    std::unordered_map<std::string, Camera>       saved_;
+    mutable std::mutex mu_;
+    Camera cam_;
+    InteractionMode mode_ = InteractionMode::Orbit;
+    double orbitSens_ = 0.01;
+    double panSens_ = 0.005;
+    double dollyFactor_ = 0.9;
+    std::unordered_map<std::string, Camera> saved_;
 };
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

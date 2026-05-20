@@ -23,18 +23,21 @@
 #include "meshing/MeshStorage.hpp"
 #include "solver/FieldRegistry.hpp"
 
-namespace simall::radiation {
+namespace simall::radiation
+{
 
-struct RosselandProps {
-    double absorption   = 0.5;    // κ   [1/m]
-    double scattering   = 0.0;    // σ_s [1/m]
-    double refractiveN  = 1.0;    // n   refractive index
-    double T_min        = 50.0;   // safety clamp
-    double T_max        = 5000.0;
-    bool   accumulate   = true;   // add to S_rad; false = overwrite
+struct RosselandProps
+{
+    double absorption = 0.5;  // κ   [1/m]
+    double scattering = 0.0;  // σ_s [1/m]
+    double refractiveN = 1.0; // n   refractive index
+    double T_min = 50.0;      // safety clamp
+    double T_max = 5000.0;
+    bool accumulate = true; // add to S_rad; false = overwrite
 };
 
-class Rosseland {
+class Rosseland
+{
 public:
     bool initialize(const meshing::Mesh& mesh,
                     solver::FieldRegistry& fields,
@@ -47,9 +50,9 @@ public:
     const RosselandProps& props() const noexcept { return p_; }
 
 private:
-    const meshing::Mesh*   mesh_ = nullptr;
-    solver::FieldRegistry* F_    = nullptr;
-    RosselandProps         p_{};
+    const meshing::Mesh* mesh_ = nullptr;
+    solver::FieldRegistry* F_ = nullptr;
+    RosselandProps p_{};
 };
 
-}  // namespace simall::radiation
+} // namespace simall::radiation

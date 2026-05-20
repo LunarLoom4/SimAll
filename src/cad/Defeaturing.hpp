@@ -18,31 +18,35 @@
 
 #include <vector>
 
-namespace simall::cad {
+namespace simall::cad
+{
 
-struct DefeatureOptions {
-    double maxFilletRadius = 1.0e-3;   // m
-    double minHoleRadius   = 0.0;      // m; 0 disables hole-fill
-    bool   removeFillets   = true;
-    bool   removeHoles     = true;
+struct DefeatureOptions
+{
+    double maxFilletRadius = 1.0e-3; // m
+    double minHoleRadius = 0.0;      // m; 0 disables hole-fill
+    bool removeFillets = true;
+    bool removeHoles = true;
     /// Explicit face IDs to remove (from TopologyGraph).
     std::vector<util::PersistentId> faceIds;
 };
 
-struct DefeatureReport {
+struct DefeatureReport
+{
     int filletsRemoved = 0;
-    int holesFilled    = 0;
-    int facesRemoved   = 0;
-    bool anyChange     = false;
+    int holesFilled = 0;
+    int facesRemoved = 0;
+    bool anyChange = false;
 };
 
-class Defeaturing {
+class Defeaturing
+{
 public:
-    void             apply(ShapeHandle& shape, const DefeatureOptions& opts);
-    DefeatureReport  lastReport() const noexcept { return report_; }
+    void apply(ShapeHandle& shape, const DefeatureOptions& opts);
+    DefeatureReport lastReport() const noexcept { return report_; }
 
 private:
     DefeatureReport report_;
 };
 
-}  // namespace simall::cad
+} // namespace simall::cad

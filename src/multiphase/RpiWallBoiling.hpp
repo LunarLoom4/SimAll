@@ -33,22 +33,25 @@
 
 #include <vector>
 
-namespace simall::multiphase {
+namespace simall::multiphase
+{
 
-struct RpiProps {
-    double T_sat       = 373.15;       // K (water @ 1 atm)
-    double rho_liquid  = 958.0;
-    double rho_vapor   = 0.598;
-    double cp_liquid   = 4216.0;       // J/(kg K)
-    double lambda_l    = 0.679;        // W/(m K)
-    double h_fg        = 2.257e6;      // J/kg latent heat
-    double d_ref       = 6.0e-4;       // m   Tolubinsky reference dia
-    double dT_ref      = 45.0;         // K
-    double g           = 9.81;
-    double h_conv      = 1000.0;       // W/(m²K) single-phase HTC (fallback)
+struct RpiProps
+{
+    double T_sat = 373.15; // K (water @ 1 atm)
+    double rho_liquid = 958.0;
+    double rho_vapor = 0.598;
+    double cp_liquid = 4216.0; // J/(kg K)
+    double lambda_l = 0.679;   // W/(m K)
+    double h_fg = 2.257e6;     // J/kg latent heat
+    double d_ref = 6.0e-4;     // m   Tolubinsky reference dia
+    double dT_ref = 45.0;      // K
+    double g = 9.81;
+    double h_conv = 1000.0; // W/(m²K) single-phase HTC (fallback)
 };
 
-class RpiWallBoiling {
+class RpiWallBoiling
+{
 public:
     void initialize(const meshing::Mesh& mesh,
                     const std::vector<solver::BoundarySpec>& bcs,
@@ -62,9 +65,9 @@ public:
     const RpiProps& props() const noexcept { return p_; }
 
 private:
-    const meshing::Mesh*              mesh_ = nullptr;
+    const meshing::Mesh* mesh_ = nullptr;
     std::vector<solver::BoundarySpec> bcs_;
-    RpiProps                          p_{};
+    RpiProps p_{};
 };
 
-}  // namespace simall::multiphase
+} // namespace simall::multiphase

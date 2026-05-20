@@ -23,41 +23,44 @@
 #include <unordered_map>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct AmrProps {
-    int    maxLevel          = 4;
-    double refineThreshold   = 0.7;
-    double coarsenThreshold  = 0.2;
-    bool   balance21         = true;
+struct AmrProps
+{
+    int maxLevel = 4;
+    double refineThreshold = 0.7;
+    double coarsenThreshold = 0.2;
+    bool balance21 = true;
 };
 
-struct AmrReport {
-    std::size_t cellsRefined   = 0;
+struct AmrReport
+{
+    std::size_t cellsRefined = 0;
     std::size_t cellsCoarsened = 0;
-    std::size_t cellsBalanced  = 0;
+    std::size_t cellsBalanced = 0;
 };
 
-class AmrAdaptor {
+class AmrAdaptor
+{
 public:
     void initialize(Mesh& mesh, AmrProps props);
 
     /// Run one adaptation cycle.  `tagFieldName` is the name of a scalar
     /// field in `fields` whose magnitude is compared against refine /
     /// coarsen thresholds.
-    AmrReport adapt(solver::FieldRegistry& fields,
-                    const std::string& tagFieldName);
+    AmrReport adapt(solver::FieldRegistry& fields, const std::string& tagFieldName);
 
-    int      cell_level(CellId c) const;
+    int cell_level(CellId c) const;
     const AmrProps& props() const noexcept { return p_; }
 
 private:
     void enforce_balance(std::vector<int>& flag, AmrReport& rep);
 
-    Mesh*                                       mesh_ = nullptr;
-    AmrProps                                    p_{};
-    std::unordered_map<CellId, int>             level_;     // per-cell refinement level
-    std::unordered_map<CellId, CellId>          parent_;    // child → parent
+    Mesh* mesh_ = nullptr;
+    AmrProps p_{};
+    std::unordered_map<CellId, int> level_;     // per-cell refinement level
+    std::unordered_map<CellId, CellId> parent_; // child → parent
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

@@ -19,10 +19,11 @@
 #include "meshing/MeshStorage.hpp"
 #include "utilities/MathTypes.hpp"
 
-#include <QVTKOpenGLNativeWidget.h>
 #include <vtkSmartPointer.h>
 
 #include <unordered_map>
+
+#include <QVTKOpenGLNativeWidget.h>
 
 class vtkRenderer;
 class vtkRenderWindow;
@@ -33,19 +34,22 @@ class vtkScalarBarActor;
 class vtkLookupTable;
 class vtkOrientationMarkerWidget;
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-struct CameraState {
+struct CameraState
+{
     util::Vec3d position{0, 0, 10};
     util::Vec3d focalPoint{0, 0, 0};
     util::Vec3d upVector{0, 1, 0};
-    double      fieldOfView = 30.0;
-    double      nearPlane   = 0.1;
-    double      farPlane    = 1000.0;
-    bool        orthographic = false;
+    double fieldOfView = 30.0;
+    double nearPlane = 0.1;
+    double farPlane = 1000.0;
+    bool orthographic = false;
 };
 
-class Viewport : public QVTKOpenGLNativeWidget {
+class Viewport : public QVTKOpenGLNativeWidget
+{
     Q_OBJECT
 public:
     explicit Viewport(QWidget* parent = nullptr);
@@ -62,17 +66,18 @@ public:
     // Scalar visualisation
     void show_scalar_field(const std::string& name,
                            const std::vector<double>& cell_values,
-                           double clip_min, double clip_max);
+                           double clip_min,
+                           double clip_max);
 
     // Camera
-    void          set_camera(const CameraState&);
-    CameraState   camera() const;
-    void          fit_view();
-    void          set_orthographic(bool on);
+    void set_camera(const CameraState&);
+    CameraState camera() const;
+    void fit_view();
+    void set_orthographic(bool on);
 
     // Display toggles
-    void          set_edge_overlay(bool on);
-    void          set_transparency(double alpha);   // [0,1]
+    void set_edge_overlay(bool on);
+    void set_transparency(double alpha); // [0,1]
 
 signals:
     void selectionChanged(std::uint64_t topologyId);
@@ -85,18 +90,18 @@ private:
     void install_axes();
     void pick_at(int x, int y);
 
-    vtkSmartPointer<vtkRenderer>                renderer_;
-    vtkSmartPointer<vtkRenderWindow>            window_;
-    vtkSmartPointer<vtkActor>                   cad_actor_;
-    vtkSmartPointer<vtkActor>                   mesh_actor_;
-    vtkSmartPointer<vtkActor>                   scalar_actor_;
-    vtkSmartPointer<vtkScalarBarActor>          scalar_bar_;
-    vtkSmartPointer<vtkLookupTable>             lut_;
-    vtkSmartPointer<vtkCellPicker>              picker_;
+    vtkSmartPointer<vtkRenderer> renderer_;
+    vtkSmartPointer<vtkRenderWindow> window_;
+    vtkSmartPointer<vtkActor> cad_actor_;
+    vtkSmartPointer<vtkActor> mesh_actor_;
+    vtkSmartPointer<vtkActor> scalar_actor_;
+    vtkSmartPointer<vtkScalarBarActor> scalar_bar_;
+    vtkSmartPointer<vtkLookupTable> lut_;
+    vtkSmartPointer<vtkCellPicker> picker_;
     vtkSmartPointer<vtkOrientationMarkerWidget> axes_;
 
     // VTK triangle index → CAD persistent topology id (Phase 3.3)
     std::vector<util::PersistentId> tri_to_face_;
 };
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

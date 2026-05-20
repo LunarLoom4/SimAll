@@ -27,18 +27,21 @@
 
 #include "solver/SimpleAlgorithm.hpp"
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-struct PisoOptions {
-    int    nCorrectors  = 2;     // number of pressure correctors (≥1)
-    int    nNonOrthCorr = 0;     // extra non-orthogonal pressure passes per corrector
-    double rho          = 1.0;
-    double mu           = 1.0e-3;
-    double dt           = 1.0e-3;   // PISO assumes transient (dt > 0)
+struct PisoOptions
+{
+    int nCorrectors = 2;  // number of pressure correctors (≥1)
+    int nNonOrthCorr = 0; // extra non-orthogonal pressure passes per corrector
+    double rho = 1.0;
+    double mu = 1.0e-3;
+    double dt = 1.0e-3; // PISO assumes transient (dt > 0)
     TemporalScheme timeScheme = TemporalScheme::BDF2;
 };
 
-class PisoAlgorithm : public SimpleAlgorithm {
+class PisoAlgorithm : public SimpleAlgorithm
+{
 public:
     PisoAlgorithm(meshing::Mesh& mesh,
                   FieldRegistry& fields,
@@ -57,17 +60,18 @@ public:
 private:
     PisoOptions piso_;
 
-    static SimpleOptions to_simple_opts(const PisoOptions& p) {
+    static SimpleOptions to_simple_opts(const PisoOptions& p)
+    {
         SimpleOptions s;
-        s.urfU = 1.0;                 // PISO uses no momentum under-relaxation
-        s.urfP = 1.0;                 // … and no pressure under-relaxation
-        s.rho  = p.rho;
-        s.mu   = p.mu;
-        s.dt   = p.dt;
+        s.urfU = 1.0; // PISO uses no momentum under-relaxation
+        s.urfP = 1.0; // … and no pressure under-relaxation
+        s.rho = p.rho;
+        s.mu = p.mu;
+        s.dt = p.dt;
         s.timeScheme = p.timeScheme;
-        s.algorithm  = PvCouplingVariant::SIMPLE;  // standard p' denom = 1/aP
+        s.algorithm = PvCouplingVariant::SIMPLE; // standard p' denom = 1/aP
         return s;
     }
 };
 
-}  // namespace simall::solver
+} // namespace simall::solver

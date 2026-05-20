@@ -48,13 +48,15 @@
 
 #include <string>
 
-namespace simall::io {
+namespace simall::io
+{
 
-struct TetgenReadResult {
-    bool          ok        = false;
-    std::string   error;
-    ImportedMesh  mesh;
-    std::uint8_t  dimension = 3;   ///< TetGen is always 3D
+struct TetgenReadResult
+{
+    bool ok = false;
+    std::string error;
+    ImportedMesh mesh;
+    std::uint8_t dimension = 3; ///< TetGen is always 3D
 };
 
 /// Read a TetGen mesh by stem path.  Given `stem = "/path/to/mymesh"`,
@@ -65,10 +67,9 @@ struct TetgenReadResult {
 
 /// Test hook: parse from in-memory buffers.  `faceText` may be empty
 /// (no boundary information).  `sourceHint` is folded into error messages.
-[[nodiscard]] TetgenReadResult parse_tetgen_strings(
-    const std::string& nodeText,
-    const std::string& eleText,
-    const std::string& faceText  = {},
-    std::string        sourceHint = "<string>");
+[[nodiscard]] TetgenReadResult parse_tetgen_strings(const std::string& nodeText,
+                                                    const std::string& eleText,
+                                                    const std::string& faceText = {},
+                                                    std::string sourceHint = "<string>");
 
-}  // namespace simall::io
+} // namespace simall::io

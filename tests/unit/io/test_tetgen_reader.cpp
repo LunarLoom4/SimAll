@@ -7,10 +7,10 @@
 // All tests parse in-memory strings via parse_tetgen_strings() so the
 // suite has zero disk I/O.
 // =============================================================================
-#include <catch2/catch_test_macros.hpp>
-
 #include "io/MeshFormats.hpp"
 #include "io/TetgenReader.hpp"
+
+#include <catch2/catch_test_macros.hpp>
 
 #include <string>
 
@@ -18,7 +18,8 @@ using simall::io::ElementType;
 using simall::io::parse_tetgen_strings;
 using simall::io::TetgenReadResult;
 
-namespace {
+namespace
+{
 
 // Two-tet mesh sharing the (1,2,3) face.  Nodes are 1-based.
 //   Tet 1: 1,2,3,4   Tet 2: 1,2,3,5
@@ -52,9 +53,10 @@ constexpr const char* kFace2tet = R"FACE(
 7   1 2 3   1
 )FACE";
 
-}  // namespace
+} // namespace
 
-TEST_CASE("TetGen reader parses minimal 2-tet mesh", "[io][tetgen]") {
+TEST_CASE("TetGen reader parses minimal 2-tet mesh", "[io][tetgen]")
+{
     const auto r = parse_tetgen_strings(kNode2tet, kEle2tet, "", "two_tet");
     INFO(r.error);
     REQUIRE(r.ok);
@@ -72,12 +74,12 @@ TEST_CASE("TetGen reader parses minimal 2-tet mesh", "[io][tetgen]") {
     CHECK(z.sections[0].nodes.size() == 8);
     CHECK(z.boundaries.empty());
 
-    CHECK(r.mesh.total_nodes()    == 5);
+    CHECK(r.mesh.total_nodes() == 5);
     CHECK(r.mesh.total_elements() == 2);
 }
 
-TEST_CASE("TetGen reader splits elements per attribute into separate sections",
-          "[io][tetgen]") {
+TEST_CASE("TetGen reader splits elements per attribute into separate sections", "[io][tetgen]")
+{
     const char* node = R"NODE(
 4 3 0 0
 1  0 0 0
@@ -100,17 +102,18 @@ TEST_CASE("TetGen reader splits elements per attribute into separate sections",
     for (const auto& s : z.sections) {
         CHECK(s.type == ElementType::Tetra4);
         CHECK(s.element_count() == 1);
-        if (s.name == "region_10") sawR10 = true;
-        if (s.name == "region_20") sawR20 = true;
+        if (s.name == "region_10")
+            sawR10 = true;
+        if (s.name == "region_20")
+            sawR20 = true;
     }
     CHECK(sawR10);
     CHECK(sawR20);
 }
 
-TEST_CASE("TetGen reader groups face markers into separate boundary patches",
-          "[io][tetgen]") {
-    const auto r = parse_tetgen_strings(kNode2tet, kEle2tet,
-                                         kFace2tet, "two_tet");
+TEST_CASE("TetGen reader groups face markers into separate boundary patches", "[io][tetgen]")
+{
+    const auto r = parse_tetgen_strings(kNode2tet, kEle2tet, kFace2tet, "two_tet");
     INFO(r.error);
     REQUIRE(r.ok);
     const auto& z = r.mesh.zones[0];
@@ -150,7 +153,8 @@ TEST_CASE("TetGen reader groups face markers into separate boundary patches",
     }
 }
 
-TEST_CASE("TetGen reader handles 0-based node numbering", "[io][tetgen]") {
+TEST_CASE("TetGen reader handles 0-based node numbering", "[io][tetgen]")
+{
     const char* node = R"NODE(
 4 3 0 0
 0  0 0 0
@@ -175,8 +179,8 @@ TEST_CASE("TetGen reader handles 0-based node numbering", "[io][tetgen]") {
     CHECK(z.sections[0].nodes[3] == 3);
 }
 
-TEST_CASE("TetGen reader tolerates `#` comments and blank lines",
-          "[io][tetgen]") {
+TEST_CASE("TetGen reader tolerates `#` comments and blank lines", "[io][tetgen]")
+{
     const char* node = R"NODE(
 # leading comment
 
@@ -198,8 +202,8 @@ TEST_CASE("TetGen reader tolerates `#` comments and blank lines",
     CHECK(r.mesh.zones[0].sections[0].element_count() == 1);
 }
 
-TEST_CASE("TetGen reader handles attribute + marker columns in node file",
-          "[io][tetgen]") {
+TEST_CASE("TetGen reader handles attribute + marker columns in node file", "[io][tetgen]")
+{
     // 2 attributes and a boundary marker per node.  We don't surface them
     // in ImportedMesh but the parser must skip them without complaint.
     const char* node = R"NODE(
@@ -219,7 +223,8 @@ TEST_CASE("TetGen reader handles attribute + marker columns in node file",
     CHECK(r.mesh.zones[0].x.size() == 4);
 }
 
-TEST_CASE("TetGen reader rejects 10-node parabolic tets", "[io][tetgen][error]") {
+TEST_CASE("TetGen reader rejects 10-node parabolic tets", "[io][tetgen][error]")
+{
     const char* node = R"NODE(
 10 3 0 0
 1  0 0 0
@@ -242,8 +247,8 @@ TEST_CASE("TetGen reader rejects 10-node parabolic tets", "[io][tetgen][error]")
     CHECK(r.error.find("only linear") != std::string::npos);
 }
 
-TEST_CASE("TetGen reader rejects unknown node tags in elements",
-          "[io][tetgen][error]") {
+TEST_CASE("TetGen reader rejects unknown node tags in elements", "[io][tetgen][error]")
+{
     const char* node = R"NODE(
 4 3 0 0
 1  0 0 0
@@ -260,8 +265,8 @@ TEST_CASE("TetGen reader rejects unknown node tags in elements",
     CHECK(r.error.find("unknown node tag") != std::string::npos);
 }
 
-TEST_CASE("TetGen reader rejects duplicate node tags",
-          "[io][tetgen][error]") {
+TEST_CASE("TetGen reader rejects duplicate node tags", "[io][tetgen][error]")
+{
     const char* node = R"NODE(
 3 3 0 0
 1  0 0 0
@@ -276,7 +281,8 @@ TEST_CASE("TetGen reader rejects duplicate node tags",
     CHECK(r.error.find("duplicate node tag") != std::string::npos);
 }
 
-TEST_CASE("TetGen reader rejects truncated rows", "[io][tetgen][error]") {
+TEST_CASE("TetGen reader rejects truncated rows", "[io][tetgen][error]")
+{
     const char* node = R"NODE(
 4 3 0 0
 1  0 0 0
@@ -293,8 +299,8 @@ TEST_CASE("TetGen reader rejects truncated rows", "[io][tetgen][error]") {
     CHECK(r.error.find("row too short") != std::string::npos);
 }
 
-TEST_CASE("TetGen reader rejects malformed dimension in node header",
-          "[io][tetgen][error]") {
+TEST_CASE("TetGen reader rejects malformed dimension in node header", "[io][tetgen][error]")
+{
     const char* node = R"NODE(
 1 7 0 0
 1  0 0 0 0 0 0 0
@@ -307,8 +313,8 @@ TEST_CASE("TetGen reader rejects malformed dimension in node header",
     CHECK(r.error.find("dim must be 2 or 3") != std::string::npos);
 }
 
-TEST_CASE("TetGen reader emits a single anonymous patch when faces lack markers",
-          "[io][tetgen]") {
+TEST_CASE("TetGen reader emits a single anonymous patch when faces lack markers", "[io][tetgen]")
+{
     const char* face = R"FACE(
 2 0
 1   1 2 4

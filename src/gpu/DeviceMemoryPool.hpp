@@ -47,19 +47,22 @@
 #include <memory>
 #include <vector>
 
-namespace simall::gpu {
+namespace simall::gpu
+{
 
-struct DeviceMemoryStats {
-    std::size_t total_reserved_bytes    = 0;  ///< sum of all slabs ever allocated
-    std::size_t total_in_use_bytes      = 0;  ///< slabs handed out, not yet released
-    std::size_t total_in_freelist_bytes = 0;  ///< slabs cached in free-lists
-    std::size_t slab_count              = 0;
-    std::size_t allocation_calls        = 0;  ///< cumulative count
-    std::size_t freelist_hits           = 0;  ///< served from cache (no cudaMalloc)
-    std::size_t freelist_misses         = 0;  ///< required fresh allocation
+struct DeviceMemoryStats
+{
+    std::size_t total_reserved_bytes = 0;    ///< sum of all slabs ever allocated
+    std::size_t total_in_use_bytes = 0;      ///< slabs handed out, not yet released
+    std::size_t total_in_freelist_bytes = 0; ///< slabs cached in free-lists
+    std::size_t slab_count = 0;
+    std::size_t allocation_calls = 0; ///< cumulative count
+    std::size_t freelist_hits = 0;    ///< served from cache (no cudaMalloc)
+    std::size_t freelist_misses = 0;  ///< required fresh allocation
 };
 
-class DeviceMemoryPool {
+class DeviceMemoryPool
+{
 public:
     /// Minimum slab size = 2^kMinShift bytes (256 B = warp-friendly).
     static constexpr int kMinShift = 8;
@@ -92,7 +95,7 @@ public:
     static int bucket_for(std::size_t bytes) noexcept;
     static std::size_t bucket_size(int k) noexcept { return std::size_t(1) << k; }
 
-    DeviceMemoryPool(const DeviceMemoryPool&)            = delete;
+    DeviceMemoryPool(const DeviceMemoryPool&) = delete;
     DeviceMemoryPool& operator=(const DeviceMemoryPool&) = delete;
 
 private:
@@ -100,4 +103,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-}  // namespace simall::gpu
+} // namespace simall::gpu

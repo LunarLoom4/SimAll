@@ -5,20 +5,21 @@
 //
 // Coverage for the SDRC/I-DEAS Universal ".unv" ASCII reader.
 // =============================================================================
-#include <catch2/catch_test_macros.hpp>
-
 #include "io/MeshFormats.hpp"
 #include "io/UnvReader.hpp"
+
+#include <catch2/catch_test_macros.hpp>
 
 #include <string>
 
 using simall::io::ElementType;
-using simall::io::UnvReadResult;
 using simall::io::parse_unv_string;
 using simall::io::unv_element_type;
 using simall::io::unv_normalize_float_token;
+using simall::io::UnvReadResult;
 
-namespace {
+namespace
+{
 
 // Minimal valid UNV: 4 nodes, 1 tet, 4 surface tris, with three permanent
 // groups ("inlet", "outlet", "wall"). The "wall" group holds 2 element
@@ -67,32 +68,34 @@ wall
     -1
 )UNV";
 
-}  // namespace
+} // namespace
 
-TEST_CASE("unv_element_type translates supported descriptors", "[io][unv]") {
-    CHECK(unv_element_type(11)  == ElementType::Bar2);
-    CHECK(unv_element_type(21)  == ElementType::Bar2);
-    CHECK(unv_element_type(22)  == ElementType::Bar2);
-    CHECK(unv_element_type(41)  == ElementType::Tri3);
-    CHECK(unv_element_type(91)  == ElementType::Tri3);
-    CHECK(unv_element_type(44)  == ElementType::Quad4);
-    CHECK(unv_element_type(94)  == ElementType::Quad4);
+TEST_CASE("unv_element_type translates supported descriptors", "[io][unv]")
+{
+    CHECK(unv_element_type(11) == ElementType::Bar2);
+    CHECK(unv_element_type(21) == ElementType::Bar2);
+    CHECK(unv_element_type(22) == ElementType::Bar2);
+    CHECK(unv_element_type(41) == ElementType::Tri3);
+    CHECK(unv_element_type(91) == ElementType::Tri3);
+    CHECK(unv_element_type(44) == ElementType::Quad4);
+    CHECK(unv_element_type(94) == ElementType::Quad4);
     CHECK(unv_element_type(111) == ElementType::Tetra4);
     CHECK(unv_element_type(112) == ElementType::Penta6);
     CHECK(unv_element_type(115) == ElementType::Hexa8);
-    CHECK(unv_element_type(42)  == ElementType::Unknown);  // parabolic
-    CHECK(unv_element_type(118) == ElementType::Unknown);  // parabolic tet
+    CHECK(unv_element_type(42) == ElementType::Unknown);  // parabolic
+    CHECK(unv_element_type(118) == ElementType::Unknown); // parabolic tet
 }
 
-TEST_CASE("unv_normalize_float_token rewrites Fortran D-exponents",
-          "[io][unv]") {
-    CHECK(unv_normalize_float_token("1.5D+02")  == "1.5e+02");
+TEST_CASE("unv_normalize_float_token rewrites Fortran D-exponents", "[io][unv]")
+{
+    CHECK(unv_normalize_float_token("1.5D+02") == "1.5e+02");
     CHECK(unv_normalize_float_token("-3.0d-01") == "-3.0e-01");
-    CHECK(unv_normalize_float_token("1.0e+00")  == "1.0e+00");  // pass-through
-    CHECK(unv_normalize_float_token("0")         == "0");
+    CHECK(unv_normalize_float_token("1.0e+00") == "1.0e+00"); // pass-through
+    CHECK(unv_normalize_float_token("0") == "0");
 }
 
-TEST_CASE("UNV reader parses a minimal tetrahedron mesh", "[io][unv]") {
+TEST_CASE("UNV reader parses a minimal tetrahedron mesh", "[io][unv]")
+{
     const auto r = parse_unv_string(kSimpleTetUnv, "tet.unv");
     INFO(r.error);
     REQUIRE(r.ok);
@@ -121,13 +124,13 @@ TEST_CASE("UNV reader parses a minimal tetrahedron mesh", "[io][unv]") {
     CHECK(tetCount == 1);
     CHECK(triCount == 4);
 
-    CHECK(r.mesh.total_nodes()    == 4);
+    CHECK(r.mesh.total_nodes() == 4);
     CHECK(r.mesh.total_elements() == 5);
-    CHECK(r.mesh.sourceFormat     == "ideas_unv");
+    CHECK(r.mesh.sourceFormat == "ideas_unv");
 }
 
-TEST_CASE("UNV reader derives boundary patches from element groups",
-          "[io][unv]") {
+TEST_CASE("UNV reader derives boundary patches from element groups", "[io][unv]")
+{
     const auto r = parse_unv_string(kSimpleTetUnv, "tet.unv");
     REQUIRE(r.ok);
     const auto& z = r.mesh.zones[0];
@@ -146,7 +149,8 @@ TEST_CASE("UNV reader derives boundary patches from element groups",
     }
 }
 
-TEST_CASE("UNV reader skips unknown datasets (164 units)", "[io][unv]") {
+TEST_CASE("UNV reader skips unknown datasets (164 units)", "[io][unv]")
+{
     // The fixture above already includes a 164 units block; the reader
     // must process the file end-to-end without diagnostics. This test
     // additionally exercises a fictional dataset number 9999.
@@ -159,66 +163,65 @@ TEST_CASE("UNV reader skips unknown datasets (164 units)", "[io][unv]") {
     CHECK(r.mesh.zones.size() == 1);
 }
 
-TEST_CASE("UNV reader rejects parabolic FE descriptors", "[io][unv][error]") {
-    const std::string body =
-        "    -1\n  2411\n"
-        "         1         1         1         11\n"
-        "   0.0   0.0   0.0\n"
-        "         2         1         1         11\n"
-        "   1.0   0.0   0.0\n"
-        "         3         1         1         11\n"
-        "   0.0   1.0   0.0\n"
-        "         4         1         1         11\n"
-        "   0.5   0.0   0.0\n"
-        "         5         1         1         11\n"
-        "   0.5   0.5   0.0\n"
-        "         6         1         1         11\n"
-        "   0.0   0.5   0.0\n"
-        "    -1\n"
-        "    -1\n  2412\n"
-        "         1        42         1         1         7         6\n"
-        "         1         2         3         4         5         6\n"
-        "    -1\n";
+TEST_CASE("UNV reader rejects parabolic FE descriptors", "[io][unv][error]")
+{
+    const std::string body = "    -1\n  2411\n"
+                             "         1         1         1         11\n"
+                             "   0.0   0.0   0.0\n"
+                             "         2         1         1         11\n"
+                             "   1.0   0.0   0.0\n"
+                             "         3         1         1         11\n"
+                             "   0.0   1.0   0.0\n"
+                             "         4         1         1         11\n"
+                             "   0.5   0.0   0.0\n"
+                             "         5         1         1         11\n"
+                             "   0.5   0.5   0.0\n"
+                             "         6         1         1         11\n"
+                             "   0.0   0.5   0.0\n"
+                             "    -1\n"
+                             "    -1\n  2412\n"
+                             "         1        42         1         1         7         6\n"
+                             "         1         2         3         4         5         6\n"
+                             "    -1\n";
     const auto r = parse_unv_string(body, "parabolic.unv");
     CHECK_FALSE(r.ok);
     CHECK(r.error.find("unsupported FE descriptor") != std::string::npos);
 }
 
-TEST_CASE("UNV reader rejects unknown node labels in connectivity",
-          "[io][unv][error]") {
+TEST_CASE("UNV reader rejects unknown node labels in connectivity", "[io][unv][error]")
+{
     // 4 nodes defined but element references node 99.
-    const std::string body =
-        "    -1\n  2411\n"
-        "         1         1         1         11\n"
-        "   0.0   0.0   0.0\n"
-        "         2         1         1         11\n"
-        "   1.0   0.0   0.0\n"
-        "         3         1         1         11\n"
-        "   0.0   1.0   0.0\n"
-        "         4         1         1         11\n"
-        "   0.0   0.0   1.0\n"
-        "    -1\n"
-        "    -1\n  2412\n"
-        "         1       111         1         1         7         4\n"
-        "         1         2         3        99\n"
-        "    -1\n";
+    const std::string body = "    -1\n  2411\n"
+                             "         1         1         1         11\n"
+                             "   0.0   0.0   0.0\n"
+                             "         2         1         1         11\n"
+                             "   1.0   0.0   0.0\n"
+                             "         3         1         1         11\n"
+                             "   0.0   1.0   0.0\n"
+                             "         4         1         1         11\n"
+                             "   0.0   0.0   1.0\n"
+                             "    -1\n"
+                             "    -1\n  2412\n"
+                             "         1       111         1         1         7         4\n"
+                             "         1         2         3        99\n"
+                             "    -1\n";
     const auto r = parse_unv_string(body, "badnode.unv");
     CHECK_FALSE(r.ok);
     CHECK(r.error.find("unknown node label") != std::string::npos);
 }
 
-TEST_CASE("UNV reader rejects unterminated dataset", "[io][unv][error]") {
-    const std::string body =
-        "    -1\n  2411\n"
-        "         1         1         1         11\n"
-        "   0.0   0.0   0.0\n";  // missing trailing -1
+TEST_CASE("UNV reader rejects unterminated dataset", "[io][unv][error]")
+{
+    const std::string body = "    -1\n  2411\n"
+                             "         1         1         1         11\n"
+                             "   0.0   0.0   0.0\n"; // missing trailing -1
     const auto r = parse_unv_string(body, "trunc.unv");
     CHECK_FALSE(r.ok);
     CHECK(r.error.find("unterminated dataset") != std::string::npos);
 }
 
-TEST_CASE("UNV reader normalises Fortran D-format float coords",
-          "[io][unv]") {
+TEST_CASE("UNV reader normalises Fortran D-format float coords", "[io][unv]")
+{
     // Verify D-format coords are accepted by the inline parser (the fixture
     // already uses them, so this is an explicit positive assertion).
     const auto r = parse_unv_string(kSimpleTetUnv, "tet.unv");
@@ -229,23 +232,22 @@ TEST_CASE("UNV reader normalises Fortran D-format float coords",
     CHECK(z.z[3] == 1.0);
 }
 
-TEST_CASE("UNV reader handles a 2D quad-only mesh, reports dim==2",
-          "[io][unv]") {
-    const std::string body =
-        "    -1\n  2411\n"
-        "         1         1         1         11\n"
-        "   0.0   0.0   0.0\n"
-        "         2         1         1         11\n"
-        "   1.0   0.0   0.0\n"
-        "         3         1         1         11\n"
-        "   1.0   1.0   0.0\n"
-        "         4         1         1         11\n"
-        "   0.0   1.0   0.0\n"
-        "    -1\n"
-        "    -1\n  2412\n"
-        "         1        44         1         1         7         4\n"
-        "         1         2         3         4\n"
-        "    -1\n";
+TEST_CASE("UNV reader handles a 2D quad-only mesh, reports dim==2", "[io][unv]")
+{
+    const std::string body = "    -1\n  2411\n"
+                             "         1         1         1         11\n"
+                             "   0.0   0.0   0.0\n"
+                             "         2         1         1         11\n"
+                             "   1.0   0.0   0.0\n"
+                             "         3         1         1         11\n"
+                             "   1.0   1.0   0.0\n"
+                             "         4         1         1         11\n"
+                             "   0.0   1.0   0.0\n"
+                             "    -1\n"
+                             "    -1\n  2412\n"
+                             "         1        44         1         1         7         4\n"
+                             "         1         2         3         4\n"
+                             "    -1\n";
     const auto r = parse_unv_string(body, "quad.unv");
     INFO(r.error);
     REQUIRE(r.ok);
@@ -254,22 +256,21 @@ TEST_CASE("UNV reader handles a 2D quad-only mesh, reports dim==2",
     CHECK(r.mesh.zones[0].sections[0].type == ElementType::Quad4);
 }
 
-TEST_CASE("UNV reader handles a beam descriptor with orientation triple",
-          "[io][unv]") {
+TEST_CASE("UNV reader handles a beam descriptor with orientation triple", "[io][unv]")
+{
     // Descriptor 21 (linear beam) inserts a 3-int beam-orientation record
     // between the header and the connectivity.
-    const std::string body =
-        "    -1\n  2411\n"
-        "         1         1         1         11\n"
-        "   0.0   0.0   0.0\n"
-        "         2         1         1         11\n"
-        "   1.0   0.0   0.0\n"
-        "    -1\n"
-        "    -1\n  2412\n"
-        "         1        21         1         1         7         2\n"
-        "         0         0         0\n"
-        "         1         2\n"
-        "    -1\n";
+    const std::string body = "    -1\n  2411\n"
+                             "         1         1         1         11\n"
+                             "   0.0   0.0   0.0\n"
+                             "         2         1         1         11\n"
+                             "   1.0   0.0   0.0\n"
+                             "    -1\n"
+                             "    -1\n  2412\n"
+                             "         1        21         1         1         7         2\n"
+                             "         0         0         0\n"
+                             "         1         2\n"
+                             "    -1\n";
     const auto r = parse_unv_string(body, "beam.unv");
     INFO(r.error);
     REQUIRE(r.ok);

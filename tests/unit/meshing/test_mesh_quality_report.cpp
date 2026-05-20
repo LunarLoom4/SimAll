@@ -10,12 +10,12 @@
 //   - to_csv_cells() row count == nCells + 1 (header)
 //   - empty-mesh histogram path emits "(no samples)"
 // =============================================================================
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/catch_approx.hpp>
-
+#include "meshing/CartesianMesher.hpp"
 #include "meshing/MeshQuality.hpp"
 #include "meshing/MeshStorage.hpp"
-#include "meshing/CartesianMesher.hpp"
+
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <algorithm>
 #include <numeric>
@@ -23,40 +23,47 @@
 
 using namespace simall;
 
-namespace {
+namespace
+{
 
-std::size_t count_lines(const std::string& s) {
+std::size_t count_lines(const std::string& s)
+{
     return static_cast<std::size_t>(std::count(s.begin(), s.end(), '\n'));
 }
 
-meshing::Mesh build_brick(int Nx, int Ny, int Nz) {
+meshing::Mesh build_brick(int Nx, int Ny, int Nz)
+{
     meshing::CartesianGridSpec spec;
     spec.origin = {0, 0, 0};
     spec.extent = {1, 1, 1};
-    spec.Nx = Nx; spec.Ny = Ny; spec.Nz = Nz;
+    spec.Nx = Nx;
+    spec.Ny = Ny;
+    spec.Nz = Nz;
     meshing::Mesh m;
     meshing::CartesianMesher{spec}.generate(m);
     return m;
 }
 
-}  // namespace
+} // namespace
 
 // =============================================================================
 TEST_CASE("MeshQuality::format includes the three histogram sections",
-          "[meshing][quality][histogram]") {
+          "[meshing][quality][histogram]")
+{
     auto m = build_brick(3, 3, 3);
     const auto r = meshing::MeshQuality::evaluate(m);
     const auto text = meshing::MeshQuality::format(r);
 
-    REQUIRE(text.find("Mesh quality report")        != std::string::npos);
-    REQUIRE(text.find("histogram: skewness")        != std::string::npos);
+    REQUIRE(text.find("Mesh quality report") != std::string::npos);
+    REQUIRE(text.find("histogram: skewness") != std::string::npos);
     REQUIRE(text.find("histogram: non-orthogonality (deg)") != std::string::npos);
-    REQUIRE(text.find("histogram: aspect ratio")    != std::string::npos);
+    REQUIRE(text.find("histogram: aspect ratio") != std::string::npos);
 }
 
 // =============================================================================
 TEST_CASE("MeshQuality::format_histogram emits one line per bin plus header",
-          "[meshing][quality][histogram]") {
+          "[meshing][quality][histogram]")
+{
     auto m = build_brick(2, 2, 2);
     const auto r = meshing::MeshQuality::evaluate(m);
     const auto h = meshing::MeshQuality::format_histogram(r.histSkewness, "skew");
@@ -68,17 +75,19 @@ TEST_CASE("MeshQuality::format_histogram emits one line per bin plus header",
 
 // =============================================================================
 TEST_CASE("MeshQuality::format_histogram on empty bins reports (no samples)",
-          "[meshing][quality][histogram]") {
-    meshing::QualityHistogram empty;        // all bins zero
+          "[meshing][quality][histogram]")
+{
+    meshing::QualityHistogram empty; // all bins zero
     const auto h = meshing::MeshQuality::format_histogram(empty, "x");
     REQUIRE(h.find("(no samples)") != std::string::npos);
 }
 
 // =============================================================================
 TEST_CASE("MeshQuality::to_csv_faces yields nFaces+1 lines with correct header",
-          "[meshing][quality][csv]") {
+          "[meshing][quality][csv]")
+{
     auto m = build_brick(2, 2, 2);
-    const auto r   = meshing::MeshQuality::evaluate(m);
+    const auto r = meshing::MeshQuality::evaluate(m);
     const auto csv = meshing::MeshQuality::to_csv_faces(r);
 
     REQUIRE(csv.rfind("faceId,skewness,nonOrthoDeg", 0) == 0);
@@ -87,9 +96,10 @@ TEST_CASE("MeshQuality::to_csv_faces yields nFaces+1 lines with correct header",
 
 // =============================================================================
 TEST_CASE("MeshQuality::to_csv_cells yields nCells+1 lines with correct header",
-          "[meshing][quality][csv]") {
+          "[meshing][quality][csv]")
+{
     auto m = build_brick(2, 2, 2);
-    const auto r   = meshing::MeshQuality::evaluate(m);
+    const auto r = meshing::MeshQuality::evaluate(m);
     const auto csv = meshing::MeshQuality::to_csv_cells(r);
 
     REQUIRE(csv.rfind("cellId,aspectRatio,negativeVolume", 0) == 0);
@@ -97,9 +107,9 @@ TEST_CASE("MeshQuality::to_csv_cells yields nCells+1 lines with correct header",
 }
 
 // =============================================================================
-TEST_CASE("MeshQuality::per_zone_stats groups boundary faces by zone",
-          "[meshing][quality][zones]") {
-    auto m       = build_brick(2, 2, 2);
+TEST_CASE("MeshQuality::per_zone_stats groups boundary faces by zone", "[meshing][quality][zones]")
+{
+    auto m = build_brick(2, 2, 2);
     const auto r = meshing::MeshQuality::evaluate(m);
     const auto z = meshing::MeshQuality::per_zone_stats(m, r);
 
@@ -119,8 +129,9 @@ TEST_CASE("MeshQuality::per_zone_stats groups boundary faces by zone",
 
 // =============================================================================
 TEST_CASE("MeshQuality::format_per_zone emits header row + one row per zone",
-          "[meshing][quality][zones]") {
-    auto m       = build_brick(2, 2, 2);
+          "[meshing][quality][zones]")
+{
+    auto m = build_brick(2, 2, 2);
     const auto r = meshing::MeshQuality::evaluate(m);
     const auto z = meshing::MeshQuality::per_zone_stats(m, r);
     const auto t = meshing::MeshQuality::format_per_zone(z);
@@ -133,8 +144,8 @@ TEST_CASE("MeshQuality::format_per_zone emits header row + one row per zone",
 }
 
 // =============================================================================
-TEST_CASE("MeshQuality::format_per_zone empty list reports no zones",
-          "[meshing][quality][zones]") {
+TEST_CASE("MeshQuality::format_per_zone empty list reports no zones", "[meshing][quality][zones]")
+{
     std::vector<meshing::ZoneQualityStats> empty;
     const auto t = meshing::MeshQuality::format_per_zone(empty);
     REQUIRE(t.find("(no boundary zones)") != std::string::npos);
@@ -142,29 +153,30 @@ TEST_CASE("MeshQuality::format_per_zone empty list reports no zones",
 
 // =============================================================================
 TEST_CASE("MeshQuality::evaluate populates volume stats on a unit brick",
-          "[meshing][quality][volume]") {
-    auto m       = build_brick(2, 2, 2);   // 8 cells, each volume = 0.125
+          "[meshing][quality][volume]")
+{
+    auto m = build_brick(2, 2, 2); // 8 cells, each volume = 0.125
     const auto r = meshing::MeshQuality::evaluate(m);
 
     REQUIRE(r.nCells == 8);
     REQUIRE(r.totalVolume == Catch::Approx(1.0).margin(1e-12));
-    REQUIRE(r.minVolume   == Catch::Approx(0.125).margin(1e-12));
-    REQUIRE(r.maxVolume   == Catch::Approx(0.125).margin(1e-12));
-    REQUIRE(r.meanVolume  == Catch::Approx(0.125).margin(1e-12));
+    REQUIRE(r.minVolume == Catch::Approx(0.125).margin(1e-12));
+    REQUIRE(r.maxVolume == Catch::Approx(0.125).margin(1e-12));
+    REQUIRE(r.meanVolume == Catch::Approx(0.125).margin(1e-12));
     // Uniform cells → all samples collapse into bin 0 (vmin == vmax).
     const std::size_t total =
-        std::accumulate(r.histVolume.bins.begin(),
-                        r.histVolume.bins.end(), std::size_t{0});
+        std::accumulate(r.histVolume.bins.begin(), r.histVolume.bins.end(), std::size_t{0});
     REQUIRE(total == r.nCells);
 }
 
 // =============================================================================
 TEST_CASE("MeshQuality::format includes cell volume summary and histogram",
-          "[meshing][quality][volume]") {
-    auto m       = build_brick(2, 2, 2);
+          "[meshing][quality][volume]")
+{
+    auto m = build_brick(2, 2, 2);
     const auto r = meshing::MeshQuality::evaluate(m);
     const auto t = meshing::MeshQuality::format(r);
 
-    REQUIRE(t.find("cell volume: min=")     != std::string::npos);
+    REQUIRE(t.find("cell volume: min=") != std::string::npos);
     REQUIRE(t.find("histogram: cell volume") != std::string::npos);
 }

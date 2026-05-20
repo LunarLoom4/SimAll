@@ -11,22 +11,23 @@
 //   5. LoadBalancer          (balanced samples → no repart)
 //   6. NumaPinning           (discover non-zero core count)
 // =============================================================================
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/catch_approx.hpp>
-
-#include "parallel/MpiContext.hpp"
-#include "parallel/GhostExchange.hpp"
-#include "parallel/DomainPartition.hpp"
-#include "parallel/FieldReducer.hpp"
-#include "parallel/LoadBalancer.hpp"
-#include "parallel/NumaPinning.hpp"
 #include "meshing/CartesianMesher.hpp"
 #include "meshing/MeshStorage.hpp"
+#include "parallel/DomainPartition.hpp"
+#include "parallel/FieldReducer.hpp"
+#include "parallel/GhostExchange.hpp"
+#include "parallel/LoadBalancer.hpp"
+#include "parallel/MpiContext.hpp"
+#include "parallel/NumaPinning.hpp"
+
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 using namespace simall;
 using Catch::Approx;
 
-TEST_CASE("MpiContext::world has valid rank/size and serial collectives", "[parallel][mpi]") {
+TEST_CASE("MpiContext::world has valid rank/size and serial collectives", "[parallel][mpi]")
+{
     auto& ctx = parallel::MpiContext::world();
     REQUIRE(ctx.size() >= 1);
     REQUIRE(ctx.rank() >= 0);
@@ -35,7 +36,8 @@ TEST_CASE("MpiContext::world has valid rank/size and serial collectives", "[para
     ctx.barrier();
 }
 
-TEST_CASE("GhostExchange with no neighbours is a no-op", "[parallel][ghost]") {
+TEST_CASE("GhostExchange with no neighbours is a no-op", "[parallel][ghost]")
+{
     auto& ctx = parallel::MpiContext::world();
     parallel::GhostExchange gx(ctx);
     gx.set_layout(/*nOwned=*/10, /*nGhost=*/4);
@@ -48,10 +50,15 @@ TEST_CASE("GhostExchange with no neighbours is a no-op", "[parallel][ghost]") {
     REQUIRE(v[0] == Approx(1.0));
 }
 
-TEST_CASE("DomainPartition on one rank assigns all cells locally", "[parallel][partition]") {
+TEST_CASE("DomainPartition on one rank assigns all cells locally", "[parallel][partition]")
+{
     auto& ctx = parallel::MpiContext::world();
-    meshing::CartesianGridSpec spec{}; spec.Nx = 4; spec.Ny = 2; spec.Nz = 2;
-    spec.origin = {0,0,0}; spec.extent = {4,2,2};
+    meshing::CartesianGridSpec spec{};
+    spec.Nx = 4;
+    spec.Ny = 2;
+    spec.Nz = 2;
+    spec.origin = {0, 0, 0};
+    spec.extent = {4, 2, 2};
     meshing::CartesianMesher cm(spec);
     meshing::Mesh mesh;
     cm.generate(mesh);
@@ -75,10 +82,15 @@ TEST_CASE("DomainPartition on one rank assigns all cells locally", "[parallel][p
 }
 
 TEST_CASE("DomainPartition::extract_local_mesh wraps ops::extract_subdomain",
-          "[parallel][partition][decomposition]") {
+          "[parallel][partition][decomposition]")
+{
     auto& ctx = parallel::MpiContext::world();
-    meshing::CartesianGridSpec spec{}; spec.Nx = 4; spec.Ny = 2; spec.Nz = 2;
-    spec.origin = {0,0,0}; spec.extent = {4,2,2};
+    meshing::CartesianGridSpec spec{};
+    spec.Nx = 4;
+    spec.Ny = 2;
+    spec.Nz = 2;
+    spec.origin = {0, 0, 0};
+    spec.extent = {4, 2, 2};
     meshing::CartesianMesher cm(spec);
     meshing::Mesh mesh;
     cm.generate(mesh);
@@ -95,45 +107,50 @@ TEST_CASE("DomainPartition::extract_local_mesh wraps ops::extract_subdomain",
 
     REQUIRE(stats.ownedCells == plan.localCells.size());
     if (ctx.size() == 1) {
-        REQUIRE(stats.ghostCells     == 0);
+        REQUIRE(stats.ghostCells == 0);
         REQUIRE(stats.interfaceFaces == 0);
         REQUIRE(local.cells().size() == mesh.cells().size());
     } else {
-        REQUIRE(local.cells().size() ==
-                stats.ownedCells + stats.ghostCells);
+        REQUIRE(local.cells().size() == stats.ownedCells + stats.ghostCells);
     }
 }
 
-TEST_CASE("FieldReducer scalar reductions match serial values", "[parallel][reducer]") {
+TEST_CASE("FieldReducer scalar reductions match serial values", "[parallel][reducer]")
+{
     auto& ctx = parallel::MpiContext::world();
     parallel::FieldReducer red(ctx);
     util::aligned_vector<double> v{1.0, 2.0, 3.0, 4.0};
     const std::size_t n = v.size();
-    REQUIRE(red.sum (v, n) == Approx(10.0 * ctx.size()));
-    REQUIRE(red.l2  (v, n) == Approx(std::sqrt(30.0 * ctx.size())));
-    REQUIRE(red.min (v, n) == Approx(1.0));
-    REQUIRE(red.max (v, n) == Approx(4.0));
+    REQUIRE(red.sum(v, n) == Approx(10.0 * ctx.size()));
+    REQUIRE(red.l2(v, n) == Approx(std::sqrt(30.0 * ctx.size())));
+    REQUIRE(red.min(v, n) == Approx(1.0));
+    REQUIRE(red.max(v, n) == Approx(4.0));
     REQUIRE(red.mean(v, n) == Approx(2.5));
 }
 
-TEST_CASE("LoadBalancer with balanced samples does not request repartition", "[parallel][balance]") {
+TEST_CASE("LoadBalancer with balanced samples does not request repartition", "[parallel][balance]")
+{
     auto& ctx = parallel::MpiContext::world();
     parallel::LoadBalancer lb(ctx);
-    parallel::LoadBalancerProps p; p.repartThreshold = 0.50;
+    parallel::LoadBalancerProps p;
+    p.repartThreshold = 0.50;
     lb.initialize(p);
-    for (int i = 0; i < 3; ++i) lb.record_iteration(1.0, 100);
+    for (int i = 0; i < 3; ++i)
+        lb.record_iteration(1.0, 100);
     const auto stats = lb.evaluate();
     REQUIRE(stats.imbalance == Approx(0.0).margin(1e-9));
     REQUIRE_FALSE(stats.shouldRepart);
 }
 
-TEST_CASE("NumaPinning discovers at least one core", "[parallel][numa]") {
+TEST_CASE("NumaPinning discovers at least one core", "[parallel][numa]")
+{
     const auto topo = parallel::NumaPinning::discover();
     REQUIRE(topo.totalCores >= 1);
     REQUIRE(topo.numaNodes >= 1);
     const auto map = parallel::NumaPinning::compute_thread_to_core_map(4);
     REQUIRE(map.size() == 4);
-    for (auto c : map) REQUIRE(c >= 0);
+    for (auto c : map)
+        REQUIRE(c >= 0);
     // pin_thread_to_core may legitimately return false on unsupported
     // platforms; just verify the API can be called without crashing.
     parallel::NumaPinning::pin_thread_to_core(0);

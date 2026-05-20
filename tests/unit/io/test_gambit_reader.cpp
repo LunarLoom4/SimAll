@@ -7,20 +7,21 @@
 // in-memory strings via parse_gambit_neu_string() so the suite has zero
 // disk I/O.
 // =============================================================================
-#include <catch2/catch_test_macros.hpp>
-
 #include "io/GambitReader.hpp"
 #include "io/MeshFormats.hpp"
+
+#include <catch2/catch_test_macros.hpp>
 
 #include <string>
 
 using simall::io::ElementType;
-using simall::io::GambitReadResult;
 using simall::io::gambit_element_type;
+using simall::io::GambitReadResult;
 using simall::io::parse_gambit_neu_string;
 using simall::io::vertices_per_element;
 
-namespace {
+namespace
+{
 
 // Minimal 3D single-tet mesh: 4 nodes, 1 tet (group "fluid"), 3 BCs
 // inlet/outlet/wall covering all four faces (wall holds two).
@@ -66,10 +67,10 @@ ENDOFSECTION
 ENDOFSECTION
 )NEU";
 
-}  // namespace
+} // namespace
 
-TEST_CASE("gambit_element_type translates supported (code, ndp) pairs",
-          "[io][gambit]") {
+TEST_CASE("gambit_element_type translates supported (code, ndp) pairs", "[io][gambit]")
+{
     CHECK(gambit_element_type(1, 2) == ElementType::Bar2);
     CHECK(gambit_element_type(2, 4) == ElementType::Quad4);
     CHECK(gambit_element_type(3, 3) == ElementType::Tri3);
@@ -83,7 +84,8 @@ TEST_CASE("gambit_element_type translates supported (code, ndp) pairs",
     CHECK(gambit_element_type(99, 1) == ElementType::Unknown);
 }
 
-TEST_CASE("GAMBIT reader parses a minimal tet mesh", "[io][gambit]") {
+TEST_CASE("GAMBIT reader parses a minimal tet mesh", "[io][gambit]")
+{
     const auto r = parse_gambit_neu_string(kSimpleTet, "tet.neu");
     INFO(r.error);
     REQUIRE(r.ok);
@@ -114,17 +116,17 @@ TEST_CASE("GAMBIT reader parses a minimal tet mesh", "[io][gambit]") {
             CHECK(s.nodes.size() == s.element_count() * 4);
         }
     }
-    CHECK(triSecs == 3);     // inlet / outlet / wall face sections
+    CHECK(triSecs == 3); // inlet / outlet / wall face sections
     CHECK(tetSecs == 1);
-    CHECK(triElems == 4);    // 1 + 1 + 2
+    CHECK(triElems == 4); // 1 + 1 + 2
     CHECK(tetElems == 1);
 
-    CHECK(r.mesh.total_nodes()    == 4);
+    CHECK(r.mesh.total_nodes() == 4);
     CHECK(r.mesh.total_elements() == 5);
 }
 
-TEST_CASE("GAMBIT reader names volume section after element group",
-          "[io][gambit]") {
+TEST_CASE("GAMBIT reader names volume section after element group", "[io][gambit]")
+{
     const auto r = parse_gambit_neu_string(kSimpleTet, "tet.neu");
     REQUIRE(r.ok);
     const auto& z = r.mesh.zones[0];
@@ -139,7 +141,9 @@ TEST_CASE("GAMBIT reader names volume section after element group",
 }
 
 TEST_CASE("GAMBIT reader derives boundary patches sorted by name with "
-          "correct face connectivity", "[io][gambit]") {
+          "correct face connectivity",
+          "[io][gambit]")
+{
     const auto r = parse_gambit_neu_string(kSimpleTet, "tet.neu");
     REQUIRE(r.ok);
     const auto& z = r.mesh.zones[0];
@@ -181,7 +185,8 @@ TEST_CASE("GAMBIT reader derives boundary patches sorted by name with "
     }
 }
 
-TEST_CASE("GAMBIT reader handles 2D quad mesh (NDFCD=2)", "[io][gambit]") {
+TEST_CASE("GAMBIT reader handles 2D quad mesh (NDFCD=2)", "[io][gambit]")
+{
     const std::string txt = R"NEU(
         CONTROL INFO 2.4.6
 2D test
@@ -212,7 +217,9 @@ ENDOFSECTION
 }
 
 TEST_CASE("GAMBIT reader emits per-face-type sections for mixed-face BCs "
-          "on a single wedge", "[io][gambit]") {
+          "on a single wedge",
+          "[io][gambit]")
+{
     // Single wedge (Penta6) with one BC patch listing one quad face (F1)
     // and one tri face (F4) -> patch gets 2 face sections (Quad4 + Tri3).
     const std::string txt = R"NEU(
@@ -251,15 +258,21 @@ ENDOFSECTION
     for (auto si : bp.faceElementIndices) {
         REQUIRE(si < z.sections.size());
         const auto& sec = z.sections[si];
-        if (sec.type == ElementType::Tri3)  { sawTri  = true; CHECK(sec.element_count() == 1); }
-        if (sec.type == ElementType::Quad4) { sawQuad = true; CHECK(sec.element_count() == 1); }
+        if (sec.type == ElementType::Tri3) {
+            sawTri = true;
+            CHECK(sec.element_count() == 1);
+        }
+        if (sec.type == ElementType::Quad4) {
+            sawQuad = true;
+            CHECK(sec.element_count() == 1);
+        }
     }
     CHECK(sawTri);
     CHECK(sawQuad);
 }
 
-TEST_CASE("GAMBIT reader rejects unsupported element types",
-          "[io][gambit][error]") {
+TEST_CASE("GAMBIT reader rejects unsupported element types", "[io][gambit][error]")
+{
     // 10-node quadratic tetrahedron: type=6, ndp=10 (not supported).
     const std::string txt = R"NEU(
         CONTROL INFO 2.4.6
@@ -288,8 +301,8 @@ ENDOFSECTION
     CHECK(r.error.find("unsupported element") != std::string::npos);
 }
 
-TEST_CASE("GAMBIT reader rejects unknown node tags in elements",
-          "[io][gambit][error]") {
+TEST_CASE("GAMBIT reader rejects unknown node tags in elements", "[io][gambit][error]")
+{
     const std::string txt = R"NEU(
         CONTROL INFO 2.4.6
 bad
@@ -311,7 +324,8 @@ ENDOFSECTION
     CHECK(r.error.find("unknown") != std::string::npos);
 }
 
-TEST_CASE("GAMBIT reader rejects BC cell-type mismatch", "[io][gambit][error]") {
+TEST_CASE("GAMBIT reader rejects BC cell-type mismatch", "[io][gambit][error]")
+{
     // Cell 1 is a Tetra4 (type 6) but the BC entry claims type 4 (Hexa8).
     const std::string txt = R"NEU(
         CONTROL INFO 2.4.6
@@ -338,8 +352,8 @@ ENDOFSECTION
     CHECK(r.error.find("cell-type mismatch") != std::string::npos);
 }
 
-TEST_CASE("GAMBIT reader rejects out-of-range face id in BC",
-          "[io][gambit][error]") {
+TEST_CASE("GAMBIT reader rejects out-of-range face id in BC", "[io][gambit][error]")
+{
     const std::string txt = R"NEU(
         CONTROL INFO 2.4.6
 bad
@@ -365,19 +379,18 @@ ENDOFSECTION
     CHECK(r.error.find("invalid face id") != std::string::npos);
 }
 
-TEST_CASE("GAMBIT reader requires CONTROL INFO header first",
-          "[io][gambit][error]") {
-    const std::string txt =
-        "   NODAL COORDINATES 2.4.6\n"
-        "     1   0.0   0.0   0.0\n"
-        "ENDOFSECTION\n";
+TEST_CASE("GAMBIT reader requires CONTROL INFO header first", "[io][gambit][error]")
+{
+    const std::string txt = "   NODAL COORDINATES 2.4.6\n"
+                            "     1   0.0   0.0   0.0\n"
+                            "ENDOFSECTION\n";
     const auto r = parse_gambit_neu_string(txt);
     CHECK_FALSE(r.ok);
     CHECK(r.error.find("CONTROL INFO") != std::string::npos);
 }
 
-TEST_CASE("GAMBIT reader rejects file with no element section",
-          "[io][gambit][error]") {
+TEST_CASE("GAMBIT reader rejects file with no element section", "[io][gambit][error]")
+{
     const std::string txt = R"NEU(
         CONTROL INFO 2.4.6
 nodes-only

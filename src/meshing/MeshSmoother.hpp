@@ -17,23 +17,32 @@
 #pragma once
 
 #include "meshing/MeshStorage.hpp"
+
 #include <cstdint>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-enum class SmoothMode { Laplace, LengthWeighted, Optimization };
+enum class SmoothMode
+{
+    Laplace,
+    LengthWeighted,
+    Optimization
+};
 
-struct SmoothParams {
-    SmoothMode  mode      = SmoothMode::Laplace;
-    int         iterations = 5;
-    double      relax     = 0.5;          // 0..1 under-relaxation
+struct SmoothParams
+{
+    SmoothMode mode = SmoothMode::Laplace;
+    int iterations = 5;
+    double relax = 0.5; // 0..1 under-relaxation
     /// If set, only nodes whose every face stays in any of these zones
     /// (or interior) are moved — used to lock pre-defined wall patches.
     std::vector<ZoneId> pinnedBoundaryZones;
 };
 
-class MeshSmoother {
+class MeshSmoother
+{
 public:
     /// Smooth `mesh` nodes in place. Recomputes cell volumes & face areas
     /// at the end; returns true if all cells remain non-degenerate.
@@ -42,7 +51,7 @@ public:
 private:
     static void build_node_neighbours(const Mesh& m,
                                       std::vector<std::int32_t>& offsets,
-                                      std::vector<NodeId>&       indices);
+                                      std::vector<NodeId>& indices);
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

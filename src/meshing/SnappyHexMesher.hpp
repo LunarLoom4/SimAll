@@ -38,52 +38,56 @@
 
 #include <cstddef>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct SnappyHexOptions {
+struct SnappyHexOptions
+{
     // --- Castellation ------------------------------------------------------
-    int    maxDepth          = 6;     // forwarded to OctreeMeshOptions
-    int    minDepth          = 3;
+    int maxDepth = 6; // forwarded to OctreeMeshOptions
+    int minDepth = 3;
 
     // --- Snapping ----------------------------------------------------------
-    bool   enableSnapping    = true;
-    int    nSnapIters        = 5;
+    bool enableSnapping = true;
+    int nSnapIters = 5;
     /// Maximum distance a node may snap from its castellated position,
     /// expressed as a multiple of the finest cell edge length.  Nodes
     /// further than this from the STL are left alone (prevents wild
     /// projections through thin features).
-    double snapMaxDistFrac   = 2.0;
+    double snapMaxDistFrac = 2.0;
 
     // --- Layer addition ----------------------------------------------------
-    int    nLayers           = 0;     // 0 -> skip the layer-addition phase
-    double firstLayerHeight  = 1.0e-4;
-    double layerGrowthRatio  = 1.2;
+    int nLayers = 0; // 0 -> skip the layer-addition phase
+    double firstLayerHeight = 1.0e-4;
+    double layerGrowthRatio = 1.2;
 };
 
-struct SnappyHexStats {
-    std::size_t backgroundCells   = 0;
-    std::size_t backgroundNodes   = 0;
-    std::size_t boundaryNodes     = 0;   // candidate snap nodes
-    std::size_t snappedNodes      = 0;   // actually moved (within budget)
-    int         snapItersRun      = 0;
-    std::size_t prismLayerCells   = 0;
-    std::size_t prismLayerNodes   = 0;
+struct SnappyHexStats
+{
+    std::size_t backgroundCells = 0;
+    std::size_t backgroundNodes = 0;
+    std::size_t boundaryNodes = 0; // candidate snap nodes
+    std::size_t snappedNodes = 0;  // actually moved (within budget)
+    int snapItersRun = 0;
+    std::size_t prismLayerCells = 0;
+    std::size_t prismLayerNodes = 0;
 };
 
-class SnappyHexMesher {
+class SnappyHexMesher
+{
 public:
     /// Run the full pipeline.  `backgroundOut` receives the castellated +
     /// snapped hex mesh.  `prismLayerOut` receives the prism-layer mesh
     /// (empty if `opt.nLayers == 0`).  Returns per-stage statistics.
-    SnappyHexStats mesh(const StlSurface&  surface,
-                        SnappyHexOptions   opt,
-                        Mesh&              backgroundOut,
-                        Mesh&              prismLayerOut);
+    SnappyHexStats mesh(const StlSurface& surface,
+                        SnappyHexOptions opt,
+                        Mesh& backgroundOut,
+                        Mesh& prismLayerOut);
 
     /// Castellation-only convenience entry point (no snapping, no layers).
     SnappyHexStats mesh_background_only(const StlSurface& surface,
-                                         SnappyHexOptions  opt,
-                                         Mesh&             backgroundOut);
+                                        SnappyHexOptions opt,
+                                        Mesh& backgroundOut);
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

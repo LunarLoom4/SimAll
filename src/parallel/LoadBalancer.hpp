@@ -20,24 +20,28 @@
 #include <cstddef>
 #include <vector>
 
-namespace simall::parallel {
+namespace simall::parallel
+{
 
-struct LoadStats {
-    double imbalance      = 0.0;
-    double maxRankCost    = 0.0;
-    double meanRankCost   = 0.0;
-    int    worstRank      = 0;
-    int    bestRank       = 0;
-    bool   shouldRepart   = false;
+struct LoadStats
+{
+    double imbalance = 0.0;
+    double maxRankCost = 0.0;
+    double meanRankCost = 0.0;
+    int worstRank = 0;
+    int bestRank = 0;
+    bool shouldRepart = false;
 };
 
-struct LoadBalancerProps {
+struct LoadBalancerProps
+{
     double repartThreshold = 0.20;
-    double hysteresis      = 0.05;
-    int    sampleWindow    = 5;
+    double hysteresis = 0.05;
+    int sampleWindow = 5;
 };
 
-class LoadBalancer {
+class LoadBalancer
+{
 public:
     explicit LoadBalancer(MpiContext& ctx) : ctx_(ctx) {}
 
@@ -55,11 +59,11 @@ public:
     const LoadBalancerProps& props() const noexcept { return p_; }
 
 private:
-    MpiContext&        ctx_;
-    LoadBalancerProps  p_{};
+    MpiContext& ctx_;
+    LoadBalancerProps p_{};
     std::vector<double> samples_;
-    std::vector<double> normSamples_;   // per-iter cost / cells (μs per cell)
-    bool                lastRepartFlag_ = false;
+    std::vector<double> normSamples_; // per-iter cost / cells (μs per cell)
+    bool lastRepartFlag_ = false;
 };
 
-}  // namespace simall::parallel
+} // namespace simall::parallel

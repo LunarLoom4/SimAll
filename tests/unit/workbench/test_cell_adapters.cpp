@@ -7,14 +7,14 @@
 // registry-aware WorkflowEngine::refresh_one() overload that turns an
 // in-graph cell into a real back-end invocation.
 // =============================================================================
-#include <catch2/catch_test_macros.hpp>
-
 #include "workbench/Cell.hpp"
 #include "workbench/CellAdapter.hpp"
 #include "workbench/CellAdapterRegistry.hpp"
 #include "workbench/Schematic.hpp"
 #include "workbench/StateMachine.hpp"
 #include "workbench/WorkflowEngine.hpp"
+
+#include <catch2/catch_test_macros.hpp>
 
 #include <atomic>
 #include <memory>
@@ -23,30 +23,36 @@
 
 using namespace simall::workbench;
 
-namespace {
+namespace
+{
 
 // Minimal hand-rolled adapter that records every call so the tests can
 // inspect exactly what the engine handed it.  Uses a shared_ptr to a
 // recorder so multiple factory instantiations can converge on the same
 // log -- mimicking how a real adapter might capture a back-end singleton.
-struct Recorder {
-    int  calls = 0;
+struct Recorder
+{
+    int calls = 0;
     bool last_cancelled = false;
-    Cell* last_cell     = nullptr;
+    Cell* last_cell = nullptr;
 };
 
-class TestAdapter final : public ICellAdapter {
+class TestAdapter final : public ICellAdapter
+{
 public:
     TestAdapter(std::shared_ptr<Recorder> rec, bool succeed, std::string err)
-        : rec_(std::move(rec)), succeed_(succeed), err_(std::move(err)) {}
+        : rec_(std::move(rec)), succeed_(succeed), err_(std::move(err))
+    {
+    }
 
-    CellKind         kind()       const noexcept override { return CellKind::Custom; }
+    CellKind kind() const noexcept override { return CellKind::Custom; }
     std::string_view adapter_id() const noexcept override { return "test.adapter"; }
-    std::string_view last_error() const noexcept override { return err_;          }
+    std::string_view last_error() const noexcept override { return err_; }
 
-    bool execute(Cell& cell, ExecutionContext& ctx) override {
+    bool execute(Cell& cell, ExecutionContext& ctx) override
+    {
         rec_->calls++;
-        rec_->last_cell      = &cell;
+        rec_->last_cell = &cell;
         rec_->last_cancelled = ctx.is_cancelled();
         ctx.report_progress(0.5);
         ctx.info("test adapter running");
@@ -59,15 +65,16 @@ public:
 
 private:
     std::shared_ptr<Recorder> rec_;
-    bool                      succeed_;
-    std::string               err_;
+    bool succeed_;
+    std::string err_;
 };
 
-}  // namespace
+} // namespace
 
 
 TEST_CASE("CellAdapterRegistry: register/has/make/unregister/keys",
-          "[workbench][adapter][registry]") {
+          "[workbench][adapter][registry]")
+{
     CellAdapterRegistry reg;
     REQUIRE(reg.empty());
 
@@ -76,30 +83,36 @@ TEST_CASE("CellAdapterRegistry: register/has/make/unregister/keys",
         return std::make_unique<TestAdapter>(rec, true, "");
     };
 
-    SECTION("register new id returns true") {
+    SECTION("register new id returns true")
+    {
         REQUIRE(reg.register_factory("alpha", factory));
         REQUIRE(reg.has("alpha"));
         REQUIRE(reg.size() == 1);
     }
-    SECTION("re-register returns false but overwrites") {
+    SECTION("re-register returns false but overwrites")
+    {
         reg.register_factory("alpha", factory);
         REQUIRE_FALSE(reg.register_factory("alpha", factory));
     }
-    SECTION("make() returns null for unknown id") {
+    SECTION("make() returns null for unknown id")
+    {
         REQUIRE(reg.make("nope") == nullptr);
     }
-    SECTION("make() returns a fresh adapter") {
+    SECTION("make() returns a fresh adapter")
+    {
         reg.register_factory("alpha", factory);
         auto a = reg.make("alpha");
         REQUIRE(a != nullptr);
         REQUIRE(a->adapter_id() == "test.adapter");
     }
-    SECTION("unregister is idempotent + reports removal") {
+    SECTION("unregister is idempotent + reports removal")
+    {
         reg.register_factory("alpha", factory);
         REQUIRE(reg.unregister("alpha"));
         REQUIRE_FALSE(reg.unregister("alpha"));
     }
-    SECTION("keys() are sorted") {
+    SECTION("keys() are sorted")
+    {
         reg.register_factory("z", factory);
         reg.register_factory("a", factory);
         reg.register_factory("m", factory);
@@ -113,11 +126,12 @@ TEST_CASE("CellAdapterRegistry: register/has/make/unregister/keys",
 
 
 TEST_CASE("FunctionalCellAdapter: body invoked, exceptions captured",
-          "[workbench][adapter][functional]") {
-    SECTION("body returning true succeeds") {
+          "[workbench][adapter][functional]")
+{
+    SECTION("body returning true succeeds")
+    {
         FunctionalCellAdapter a{
-            CellKind::Geometry, "g.test",
-            [](Cell&, ExecutionContext& ctx, std::string&) {
+            CellKind::Geometry, "g.test", [](Cell&, ExecutionContext& ctx, std::string&) {
                 ctx.info("ok");
                 return true;
             }};
@@ -127,10 +141,10 @@ TEST_CASE("FunctionalCellAdapter: body invoked, exceptions captured",
         REQUIRE(a.execute(*s.cell(1), ctx));
         REQUIRE(a.last_error().empty());
     }
-    SECTION("body returning false propagates error string") {
+    SECTION("body returning false propagates error string")
+    {
         FunctionalCellAdapter a{
-            CellKind::Mesh, "m.test",
-            [](Cell&, ExecutionContext&, std::string& err) {
+            CellKind::Mesh, "m.test", [](Cell&, ExecutionContext&, std::string& err) {
                 err = "bad mesh";
                 return false;
             }};
@@ -140,10 +154,10 @@ TEST_CASE("FunctionalCellAdapter: body invoked, exceptions captured",
         REQUIRE_FALSE(a.execute(*s.cell(1), ctx));
         REQUIRE(a.last_error() == "bad mesh");
     }
-    SECTION("thrown std::exception is caught and reported") {
+    SECTION("thrown std::exception is caught and reported")
+    {
         FunctionalCellAdapter a{
-            CellKind::Custom, "boom",
-            [](Cell&, ExecutionContext&, std::string&) -> bool {
+            CellKind::Custom, "boom", [](Cell&, ExecutionContext&, std::string&) -> bool {
                 throw std::runtime_error("kaboom");
             }};
         Schematic s;
@@ -152,7 +166,8 @@ TEST_CASE("FunctionalCellAdapter: body invoked, exceptions captured",
         REQUIRE_FALSE(a.execute(*s.cell(1), ctx));
         REQUIRE(a.last_error().find("kaboom") != std::string_view::npos);
     }
-    SECTION("missing body fails safely") {
+    SECTION("missing body fails safely")
+    {
         FunctionalCellAdapter a{CellKind::Custom, "empty", {}};
         Schematic s;
         s.add_cell(CellKind::Custom, "X");
@@ -163,8 +178,8 @@ TEST_CASE("FunctionalCellAdapter: body invoked, exceptions captured",
 }
 
 
-TEST_CASE("ExecutionContext: cancel flag + sinks",
-          "[workbench][adapter][context]") {
+TEST_CASE("ExecutionContext: cancel flag + sinks", "[workbench][adapter][context]")
+{
     ExecutionContext ctx;
     auto flag = std::make_shared<std::atomic_bool>(false);
     ctx.set_cancel_flag(flag);
@@ -173,27 +188,27 @@ TEST_CASE("ExecutionContext: cancel flag + sinks",
     REQUIRE(ctx.is_cancelled());
 
     std::vector<double> prog;
-    ctx.set_progress_sink([&](double f){ prog.push_back(f); });
+    ctx.set_progress_sink([&](double f) { prog.push_back(f); });
     ctx.report_progress(0.25);
     ctx.report_progress(0.75);
     REQUIRE(prog.size() == 2);
     REQUIRE(prog[1] == 0.75);
 
     std::vector<std::pair<AdapterLogLevel, std::string>> logs;
-    ctx.set_log_sink([&](AdapterLogLevel l, std::string_view m){
-        logs.emplace_back(l, std::string(m));
-    });
+    ctx.set_log_sink(
+        [&](AdapterLogLevel l, std::string_view m) { logs.emplace_back(l, std::string(m)); });
     ctx.info("hello");
     ctx.warn("careful");
     ctx.error("boom");
     REQUIRE(logs.size() == 3);
-    REQUIRE(logs[0].first  == AdapterLogLevel::Info);
+    REQUIRE(logs[0].first == AdapterLogLevel::Info);
     REQUIRE(logs[2].second == "boom");
 }
 
 
 TEST_CASE("WorkflowEngine::refresh_one(registry) success + state propagation",
-          "[workbench][adapter][engine]") {
+          "[workbench][adapter][engine]")
+{
     Schematic s;
     StateMachine sm{s};
     WorkflowEngine eng{s, sm};
@@ -205,10 +220,10 @@ TEST_CASE("WorkflowEngine::refresh_one(registry) success + state propagation",
 
     auto rec = std::make_shared<Recorder>();
     reg.register_factory("cad.import.fake",
-        [rec]{ return std::make_unique<TestAdapter>(rec, true, ""); });
+                         [rec] { return std::make_unique<TestAdapter>(rec, true, ""); });
 
     sm.recompute_all();
-    REQUIRE(s.cell(g)->state() == CellState::UpToDate);  // no required inputs
+    REQUIRE(s.cell(g)->state() == CellState::UpToDate); // no required inputs
     sm.mark_modified(g);
     REQUIRE(s.cell(g)->state() == CellState::RefreshRequired);
 
@@ -220,7 +235,8 @@ TEST_CASE("WorkflowEngine::refresh_one(registry) success + state propagation",
 
 
 TEST_CASE("WorkflowEngine::refresh_one(registry) failure paths mark_failed",
-          "[workbench][adapter][engine]") {
+          "[workbench][adapter][engine]")
+{
     Schematic s;
     StateMachine sm{s};
     WorkflowEngine eng{s, sm};
@@ -228,38 +244,44 @@ TEST_CASE("WorkflowEngine::refresh_one(registry) failure paths mark_failed",
 
     const CellId c = s.add_cell(CellKind::Custom, "X");
 
-    SECTION("empty adapter_id -> mark_failed + error logged") {
+    SECTION("empty adapter_id -> mark_failed + error logged")
+    {
         std::vector<std::string> errs;
         ExecutionContext ctx;
-        ctx.set_log_sink([&](AdapterLogLevel l, std::string_view m){
-            if (l == AdapterLogLevel::Error) errs.emplace_back(m);
+        ctx.set_log_sink([&](AdapterLogLevel l, std::string_view m) {
+            if (l == AdapterLogLevel::Error)
+                errs.emplace_back(m);
         });
         REQUIRE_FALSE(eng.refresh_one(c, reg, ctx));
         REQUIRE(s.cell(c)->state() == CellState::Failed);
         REQUIRE_FALSE(errs.empty());
     }
-    SECTION("unknown adapter_id -> mark_failed") {
+    SECTION("unknown adapter_id -> mark_failed")
+    {
         s.cell(c)->set_adapter_id("never.registered");
         ExecutionContext ctx;
         REQUIRE_FALSE(eng.refresh_one(c, reg, ctx));
         REQUIRE(s.cell(c)->state() == CellState::Failed);
     }
-    SECTION("adapter returns false -> mark_failed + last_error propagated") {
+    SECTION("adapter returns false -> mark_failed + last_error propagated")
+    {
         s.cell(c)->set_adapter_id("fail");
         auto rec = std::make_shared<Recorder>();
         reg.register_factory("fail",
-            [rec]{ return std::make_unique<TestAdapter>(rec, false, "boom"); });
+                             [rec] { return std::make_unique<TestAdapter>(rec, false, "boom"); });
         std::vector<std::string> errs;
         ExecutionContext ctx;
-        ctx.set_log_sink([&](AdapterLogLevel l, std::string_view m){
-            if (l == AdapterLogLevel::Error) errs.emplace_back(m);
+        ctx.set_log_sink([&](AdapterLogLevel l, std::string_view m) {
+            if (l == AdapterLogLevel::Error)
+                errs.emplace_back(m);
         });
         REQUIRE_FALSE(eng.refresh_one(c, reg, ctx));
         REQUIRE(s.cell(c)->state() == CellState::Failed);
         REQUIRE_FALSE(errs.empty());
         REQUIRE(errs.front() == "boom");
     }
-    SECTION("unknown cell id -> false, no state change") {
+    SECTION("unknown cell id -> false, no state change")
+    {
         ExecutionContext ctx;
         REQUIRE_FALSE(eng.refresh_one(static_cast<CellId>(999), reg, ctx));
     }
@@ -267,7 +289,8 @@ TEST_CASE("WorkflowEngine::refresh_one(registry) failure paths mark_failed",
 
 
 TEST_CASE("Cell adapter_id round-trips through Set/SetCellAdapter command",
-          "[workbench][adapter][command]") {
+          "[workbench][adapter][command]")
+{
     Schematic s;
     const CellId c = s.add_cell(CellKind::Geometry, "G");
     REQUIRE(s.cell(c)->adapter_id().empty());

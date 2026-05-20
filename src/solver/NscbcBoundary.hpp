@@ -24,28 +24,34 @@
 
 #include <vector>
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-enum class NscbcType {
-    SubsonicOutflow,    ///< relax pressure to p∞
-    SubsonicInflow,     ///< prescribe T, u, v, w
-    NonReflectingWall,  ///< slip with characteristic update
+enum class NscbcType
+{
+    SubsonicOutflow,   ///< relax pressure to p∞
+    SubsonicInflow,    ///< prescribe T, u, v, w
+    NonReflectingWall, ///< slip with characteristic update
 };
 
-struct NscbcZoneSpec {
-    meshing::ZoneId zone   = 0;
-    NscbcType       type   = NscbcType::SubsonicOutflow;
-    double          pInf   = 101325.0;
-    double          TInf   = 300.0;
-    util::Vec3d     uInf{0, 0, 0};
-    double          sigma  = 0.25;   ///< relaxation factor (0.15-0.3 typical)
-    double          length = 1.0;    ///< reference domain length L
+struct NscbcZoneSpec
+{
+    meshing::ZoneId zone = 0;
+    NscbcType type = NscbcType::SubsonicOutflow;
+    double pInf = 101325.0;
+    double TInf = 300.0;
+    util::Vec3d uInf{0, 0, 0};
+    double sigma = 0.25; ///< relaxation factor (0.15-0.3 typical)
+    double length = 1.0; ///< reference domain length L
 };
 
-class NscbcBoundary {
+class NscbcBoundary
+{
 public:
-    void initialize(const meshing::Mesh& mesh, std::vector<NscbcZoneSpec> zones,
-                    double gamma = 1.4, double Rgas = 287.0);
+    void initialize(const meshing::Mesh& mesh,
+                    std::vector<NscbcZoneSpec> zones,
+                    double gamma = 1.4,
+                    double Rgas = 287.0);
 
     /// Apply LODI updates by writing time-derivative source contributions
     /// into the compressible solver's "rho", "rhoU", "rhoE" fields.
@@ -57,7 +63,7 @@ private:
     const meshing::Mesh* mesh_ = nullptr;
     std::vector<NscbcZoneSpec> zones_;
     double gamma_ = 1.4;
-    double Rgas_  = 287.0;
+    double Rgas_ = 287.0;
 };
 
-}  // namespace simall::solver
+} // namespace simall::solver

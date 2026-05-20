@@ -32,17 +32,20 @@
 
 #include <vector>
 
-namespace simall::multiphase {
+namespace simall::multiphase
+{
 
-struct IsoAdvectorParams {
-    double alpha_iso     = 0.5;       // iso-value for interface position
-    int    subSteps      = 1;         // sub-time-steps within each Δt
-    double tolBisection  = 1.0e-6;    // tolerance on plane-offset bisection
-    int    maxBisection  = 32;        // maximum iterations
-    bool   boundedness   = true;      // clip α ∈ [0,1] after update
+struct IsoAdvectorParams
+{
+    double alpha_iso = 0.5;       // iso-value for interface position
+    int subSteps = 1;             // sub-time-steps within each Δt
+    double tolBisection = 1.0e-6; // tolerance on plane-offset bisection
+    int maxBisection = 32;        // maximum iterations
+    bool boundedness = true;      // clip α ∈ [0,1] after update
 };
 
-class IsoAdvector {
+class IsoAdvector
+{
 public:
     void initialize(const meshing::Mesh& mesh, IsoAdvectorParams params = {});
 
@@ -60,8 +63,8 @@ private:
                            double massFlux) const;
 
     const meshing::Mesh* mesh_ = nullptr;
-    IsoAdvectorParams    p_{};
-    PlicReconstruction   plic_;
+    IsoAdvectorParams p_{};
+    PlicReconstruction plic_;
 };
 
-}  // namespace simall::multiphase
+} // namespace simall::multiphase

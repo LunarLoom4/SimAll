@@ -23,44 +23,44 @@
 #include <unordered_map>
 #include <vector>
 
-namespace simall::scripting {
+namespace simall::scripting
+{
 
-class ScriptContext {
+class ScriptContext
+{
 public:
     static ScriptContext& instance();
 
     // -- value bag ------------------------------------------------------------
-    void                          set(std::string key, std::string value);
+    void set(std::string key, std::string value);
     [[nodiscard]] std::optional<std::string> get(std::string_view key) const;
-    [[nodiscard]] std::string     get_or(std::string_view key,
-                                          std::string_view fallback) const;
-    bool                          erase(std::string_view key);
+    [[nodiscard]] std::string get_or(std::string_view key, std::string_view fallback) const;
+    bool erase(std::string_view key);
     [[nodiscard]] std::vector<std::string> keys() const;
-    void                          clear();
+    void clear();
 
     // -- working directory ----------------------------------------------------
-    void                          set_working_directory(std::string path);
-    [[nodiscard]] std::string     working_directory() const;
+    void set_working_directory(std::string path);
+    [[nodiscard]] std::string working_directory() const;
 
     // -- change subscription --------------------------------------------------
     // Subscribers receive (key, oldValue, newValue).  Used by the GUI to
     // refresh affected dialogs and by the macro recorder to log writes.
-    using Subscriber = std::function<void(const std::string&,
-                                          const std::string&,
-                                          const std::string&)>;
-    int                           subscribe(Subscriber s);
-    void                          unsubscribe(int id);
+    using Subscriber =
+        std::function<void(const std::string&, const std::string&, const std::string&)>;
+    int subscribe(Subscriber s);
+    void unsubscribe(int id);
 
     // -- snapshot (deterministic for hashing in tests) ------------------------
-    [[nodiscard]] std::string     deterministic_snapshot() const;
+    [[nodiscard]] std::string deterministic_snapshot() const;
 
 private:
     ScriptContext() = default;
-    mutable std::mutex                          mu_;
+    mutable std::mutex mu_;
     std::unordered_map<std::string, std::string> bag_;
-    std::string                                 cwd_;
-    std::unordered_map<int, Subscriber>          subs_;
-    int                                         nextSubId_ = 1;
+    std::string cwd_;
+    std::unordered_map<int, Subscriber> subs_;
+    int nextSubId_ = 1;
 };
 
-}  // namespace simall::scripting
+} // namespace simall::scripting

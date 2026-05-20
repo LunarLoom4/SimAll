@@ -12,9 +12,11 @@
 
 #include "visualization/VisualizationTypes.hpp"
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-class IsoSurface {
+class IsoSurface
+{
 public:
     /// Extract a triangulated iso-surface at `isovalue` from a tetrahedral
     /// volume mesh with per-vertex scalars.  The output is a SurfaceMesh
@@ -23,4 +25,4 @@ public:
     static SurfaceMesh extract(const VolumeMesh& volume, double isovalue);
 };
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

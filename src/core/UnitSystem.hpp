@@ -22,11 +22,18 @@
 #include <string_view>
 #include <vector>
 
-namespace simall::core::units {
+namespace simall::core::units
+{
 
-enum class UnitSystem : int { SI, USCS, CGS };
+enum class UnitSystem : int
+{
+    SI,
+    USCS,
+    CGS
+};
 
-enum class Quantity : int {
+enum class Quantity : int
+{
     Length,
     Mass,
     Time,
@@ -64,7 +71,8 @@ std::optional<double> toSI(Quantity q, double value, std::string_view fromLabel)
 std::optional<double> fromSI(Quantity q, double siValue, std::string_view toLabel);
 
 /// Convert between any two labels: a → SI → b.
-std::optional<double> convert(Quantity q, double value,
+std::optional<double> convert(Quantity q,
+                              double value,
                               std::string_view fromLabel,
                               std::string_view toLabel);
 
@@ -78,4 +86,4 @@ void registerUnit(Quantity q, std::string label, double scale, double offset = 0
 /// Enumerate every label currently registered for a quantity.
 std::vector<std::string> labelsFor(Quantity q);
 
-}  // namespace simall::core::units
+} // namespace simall::core::units

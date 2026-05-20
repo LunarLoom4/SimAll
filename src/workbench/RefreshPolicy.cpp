@@ -5,16 +5,22 @@
 // =============================================================================
 #include "workbench/RefreshPolicy.hpp"
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
-std::string_view to_string(RefreshPolicy p) noexcept {
+std::string_view to_string(RefreshPolicy p) noexcept
+{
     switch (p) {
-        case RefreshPolicy::ReadyOnly:     return "ReadyOnly";
-        case RefreshPolicy::IncludeStale:  return "IncludeStale";
-        case RefreshPolicy::StopOnFailed:  return "StopOnFailed";
-        case RefreshPolicy::UpdateProject: return "UpdateProject";
+    case RefreshPolicy::ReadyOnly:
+        return "ReadyOnly";
+    case RefreshPolicy::IncludeStale:
+        return "IncludeStale";
+    case RefreshPolicy::StopOnFailed:
+        return "StopOnFailed";
+    case RefreshPolicy::UpdateProject:
+        return "UpdateProject";
     }
     return "<custom RefreshPolicy>";
 }
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

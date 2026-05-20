@@ -18,33 +18,35 @@
 #include <memory>
 #include <string>
 
-namespace simall::core {
+namespace simall::core
+{
 
-class Application {
+class Application
+{
 public:
     Application();
     ~Application();
 
-    Application(const Application&)            = delete;
+    Application(const Application&) = delete;
     Application& operator=(const Application&) = delete;
 
-    void           bootstrap();
-    void           shutdown();
+    void bootstrap();
+    void shutdown();
 
-    CommandHistory& history()  noexcept { return history_; }
-    IProject*       project()  noexcept { return project_.get(); }
+    CommandHistory& history() noexcept { return history_; }
+    IProject* project() noexcept { return project_.get(); }
 
     void new_project();
     void open_project(const std::string& path);
     void save_project(const std::string& path);
 
 private:
-    CommandHistory            history_;
+    CommandHistory history_;
     std::unique_ptr<IProject> project_;
-    bool                      booted_ = false;
+    bool booted_ = false;
 };
 
 /// Installed by the io subsystem (or any module that owns the project format).
 void register_project_factory(ProjectFactory f);
 
-}  // namespace simall::core
+} // namespace simall::core

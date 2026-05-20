@@ -22,23 +22,27 @@
 #include <unordered_map>
 #include <vector>
 
-namespace simall::cad {
+namespace simall::cad
+{
 
-struct PersistentFingerprint {
+struct PersistentFingerprint
+{
     util::PersistentId id;
-    TopologyType       type;
-    util::Vec3d        centroid;
-    util::BoundingBox  bbox;
-    double             measure = 0.0;  // length for edges, area for faces, volume for solids
+    TopologyType type;
+    util::Vec3d centroid;
+    util::BoundingBox bbox;
+    double measure = 0.0; // length for edges, area for faces, volume for solids
 };
 
-struct RemapResult {
+struct RemapResult
+{
     std::unordered_map<util::PersistentId, util::PersistentId> oldToNew;
     std::vector<util::PersistentId> unmatchedOld;
     std::vector<util::PersistentId> freshlyAllocated;
 };
 
-class PersistentIdManager {
+class PersistentIdManager
+{
 public:
     /// Capture a fingerprint of every face / edge / vertex / solid in shape.
     /// Call BEFORE the edit. Replaces any previously stored snapshot.
@@ -46,7 +50,8 @@ public:
 
     /// After the edit, attempt to transfer ids from the snapshot onto
     /// `newShape`. Returns the mapping and a list of orphaned old ids.
-    RemapResult remapTo(ShapeHandle& newShape, double positionTol = 1e-4,
+    RemapResult remapTo(ShapeHandle& newShape,
+                        double positionTol = 1e-4,
                         double measureRelTol = 0.05);
 
     std::size_t snapshotSize() const noexcept { return prints_.size(); }
@@ -55,4 +60,4 @@ private:
     std::vector<PersistentFingerprint> prints_;
 };
 
-}  // namespace simall::cad
+} // namespace simall::cad

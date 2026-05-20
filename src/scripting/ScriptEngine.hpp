@@ -4,12 +4,14 @@
 #pragma once
 #include <functional>
 #include <string>
-namespace simall::scripting {
-class IScriptEngine {
+namespace simall::scripting
+{
+class IScriptEngine
+{
 public:
     virtual ~IScriptEngine() = default;
-    virtual void execute(const std::string& src)       = 0;
-    virtual std::string repl(const std::string& line)  = 0;
+    virtual void execute(const std::string& src) = 0;
+    virtual std::string repl(const std::string& line) = 0;
 };
-IScriptEngine& engine();   // installed by scripting module on bootstrap
-}
+IScriptEngine& engine(); // installed by scripting module on bootstrap
+} // namespace simall::scripting

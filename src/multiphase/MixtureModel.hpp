@@ -28,20 +28,25 @@
 #include <string>
 #include <vector>
 
-namespace simall::multiphase {
+namespace simall::multiphase
+{
 
-struct MixturePhase {
+struct MixturePhase
+{
     std::string name;
-    double      rho;          // kg/m³
-    double      mu;           // Pa·s
-    double      diameter;     // m   (representative particle/bubble dia)
+    double rho;      // kg/m³
+    double mu;       // Pa·s
+    double diameter; // m   (representative particle/bubble dia)
 };
 
-class MixtureModel {
+class MixtureModel
+{
 public:
     void initialize(const meshing::Mesh& mesh,
                     std::vector<MixturePhase> phases,
-                    double gx = 0.0, double gy = 0.0, double gz = -9.81);
+                    double gx = 0.0,
+                    double gy = 0.0,
+                    double gz = -9.81);
 
     /// One outer iteration of mixture-property update + algebraic-slip
     /// velocity reconstruction.  Returns max |U_kr| observed (diagnostic).
@@ -51,9 +56,9 @@ public:
     const std::vector<MixturePhase>& phases() const noexcept { return phases_; }
 
 private:
-    const meshing::Mesh*       mesh_ = nullptr;
-    std::vector<MixturePhase>  phases_;
-    double                     g_[3]{0,0,-9.81};
+    const meshing::Mesh* mesh_ = nullptr;
+    std::vector<MixturePhase> phases_;
+    double g_[3]{0, 0, -9.81};
 };
 
-}  // namespace simall::multiphase
+} // namespace simall::multiphase

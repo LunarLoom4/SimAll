@@ -21,16 +21,19 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct ScotchProps {
-    int    nParts        = 4;
-    int    fmPasses      = 4;
-    double imbalanceTol  = 1.05;
-    std::uint64_t rngSeed= 0x5C07'C0DEULL;
+struct ScotchProps
+{
+    int nParts = 4;
+    int fmPasses = 4;
+    double imbalanceTol = 1.05;
+    std::uint64_t rngSeed = 0x5C07'C0DEULL;
 };
 
-class PartitionerScotch {
+class PartitionerScotch
+{
 public:
     void initialize(ScotchProps props);
 
@@ -45,12 +48,13 @@ public:
 private:
     void bisect(const std::vector<std::int32_t>& xadj,
                 const std::vector<std::int32_t>& adjncy,
-                const std::vector<std::int32_t>& vmap,    // sub-vertex → global
+                const std::vector<std::int32_t>& vmap, // sub-vertex → global
                 std::vector<std::int32_t>& partOut,
-                std::int32_t partA, std::int32_t partB,
+                std::int32_t partA,
+                std::int32_t partB,
                 std::uint64_t seed);
 
     ScotchProps p_{};
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

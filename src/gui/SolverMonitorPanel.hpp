@@ -13,8 +13,8 @@
 // =============================================================================
 #pragma once
 
-#include <QWidget>
 #include <deque>
+#include <QWidget>
 #include <unordered_map>
 #include <vector>
 
@@ -23,9 +23,11 @@ class QPushButton;
 class QLabel;
 class QSplitter;
 
-namespace simall::gui {
+namespace simall::gui
+{
 
-class SolverMonitorPanel : public QWidget {
+class SolverMonitorPanel : public QWidget
+{
     Q_OBJECT
 public:
     explicit SolverMonitorPanel(QWidget* parent = nullptr);
@@ -33,7 +35,7 @@ public:
     void register_variable(const QString& name, const QColor& colour);
     void append_residual(const QString& name, int iteration, double residual);
     void append_imbalance(const QString& kind, double percent);
-    void set_run_state(const QString& state);       // "Running", "Paused", "Idle"
+    void set_run_state(const QString& state); // "Running", "Paused", "Idle"
     void set_eta(double secondsRemaining);
     void set_iteration(int iter, double simTimeSec, double wallTimeSec);
     void clear_history();
@@ -49,27 +51,28 @@ protected:
 private:
     void rebuild_summary();
 
-    struct Series {
-        QColor              colour;
-        std::deque<QPointF> samples;     // {iteration, log10(residual)}
+    struct Series
+    {
+        QColor colour;
+        std::deque<QPointF> samples; // {iteration, log10(residual)}
     };
-    std::unordered_map<QString, Series>   residuals_;
-    std::unordered_map<QString, double>   imbalances_;
-    std::vector<QString>                  ordering_;     // insertion order
-    QString                               state_   = "Idle";
-    int                                   iter_    = 0;
-    double                                simTime_ = 0.0;
-    double                                wallTime_= 0.0;
-    double                                eta_     = -1.0;
+    std::unordered_map<QString, Series> residuals_;
+    std::unordered_map<QString, double> imbalances_;
+    std::vector<QString> ordering_; // insertion order
+    QString state_ = "Idle";
+    int iter_ = 0;
+    double simTime_ = 0.0;
+    double wallTime_ = 0.0;
+    double eta_ = -1.0;
 
-    QTableWidget*                         summary_ = nullptr;
-    QPushButton*                          btnPause_= nullptr;
-    QPushButton*                          btnStop_ = nullptr;
-    QPushButton*                          btnSnap_ = nullptr;
-    QLabel*                               stateLbl_= nullptr;
-    QLabel*                               etaLbl_  = nullptr;
+    QTableWidget* summary_ = nullptr;
+    QPushButton* btnPause_ = nullptr;
+    QPushButton* btnStop_ = nullptr;
+    QPushButton* btnSnap_ = nullptr;
+    QLabel* stateLbl_ = nullptr;
+    QLabel* etaLbl_ = nullptr;
 
     static constexpr int kMaxSamples = 8192;
 };
 
-}  // namespace simall::gui
+} // namespace simall::gui

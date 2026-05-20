@@ -11,16 +11,19 @@
 
 #include "../RegressionFramework.hpp"
 
-namespace simall::regression::tgv {
+namespace simall::regression::tgv
+{
 
-[[nodiscard]] inline double analytic_kinetic_energy_2d(double t, double nu,
-                                                          double k = std::sqrt(2.0),
-                                                          double E0 = 1.0) {
+[[nodiscard]] inline double analytic_kinetic_energy_2d(double t,
+                                                       double nu,
+                                                       double k = std::sqrt(2.0),
+                                                       double E0 = 1.0)
+{
     return E0 * std::exp(-2.0 * nu * k * k * t);
 }
 
 // Brachet 1983 peak dissipation rate for the 3-D inviscid-limit TGV.
 inline constexpr double kBrachetPeakDissipation = 0.0123;
-inline constexpr double kBrachetPeakTime        = 9.0;
+inline constexpr double kBrachetPeakTime = 9.0;
 
-}  // namespace simall::regression::tgv
+} // namespace simall::regression::tgv

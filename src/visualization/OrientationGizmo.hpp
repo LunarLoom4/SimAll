@@ -15,17 +15,28 @@
 #include <optional>
 #include <utility>
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-enum class Axis : std::uint8_t { PosX, NegX, PosY, NegY, PosZ, NegZ };
-
-struct GizmoLayout {
-    double cornerX = 0.85;    // [0..1] normalized viewport
-    double cornerY = 0.85;
-    double sizePx  = 80.0;
+enum class Axis : std::uint8_t
+{
+    PosX,
+    NegX,
+    PosY,
+    NegY,
+    PosZ,
+    NegZ
 };
 
-class OrientationGizmo {
+struct GizmoLayout
+{
+    double cornerX = 0.85; // [0..1] normalized viewport
+    double cornerY = 0.85;
+    double sizePx = 80.0;
+};
+
+class OrientationGizmo
+{
 public:
     /// Convert an Axis into its world-space unit vector.
     static util::Vec3d direction(Axis a) noexcept;
@@ -37,11 +48,12 @@ public:
     /// configured corner of the viewport.  Returns nullopt when the click
     /// missed.  The hit zone is a circle of `sizePx` diameter.
     static std::optional<Axis> hit_test(const Camera& cam,
-                                         const GizmoLayout& layout,
-                                         double pxX, double pxY);
+                                        const GizmoLayout& layout,
+                                        double pxX,
+                                        double pxY);
 
     /// Snap the controller to the chosen axis using up_for(axis).
     static void snap(CameraController& controller, Axis axis);
 };
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

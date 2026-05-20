@@ -23,24 +23,26 @@
 #include "solver/FieldRegistry.hpp"
 #include "utilities/MathTypes.hpp"
 
-namespace simall::particles {
+namespace simall::particles
+{
 
-struct ChargedParticleProps {
-    double      charge_per_parcel = 1.0e-12;  // [C]
-    util::Vec3d E_uniform{0,0,0};             // V/m, used when useFieldRegistry==false
-    util::Vec3d B_uniform{0,0,0};             // T,    Lorentz magnetic
-    bool        useFieldRegistry = false;     // if true, read "E_x/y/z"
-    bool        includeMagnetic  = false;
+struct ChargedParticleProps
+{
+    double charge_per_parcel = 1.0e-12; // [C]
+    util::Vec3d E_uniform{0, 0, 0};     // V/m, used when useFieldRegistry==false
+    util::Vec3d B_uniform{0, 0, 0};     // T,    Lorentz magnetic
+    bool useFieldRegistry = false;      // if true, read "E_x/y/z"
+    bool includeMagnetic = false;
 };
 
-class ChargedParticleField {
+class ChargedParticleField
+{
 public:
     void initialize(const meshing::Mesh& mesh, ChargedParticleProps props);
 
     /// Integrates ∆v = (q/m)(E + v × B) · dt for every active parcel.
     /// Returns the maximum |Δv| applied this step.
-    double apply(double dt, LagrangianTracker& tracker,
-                 solver::FieldRegistry& fields);
+    double apply(double dt, LagrangianTracker& tracker, solver::FieldRegistry& fields);
 
     const ChargedParticleProps& props() const noexcept { return p_; }
 
@@ -49,4 +51,4 @@ private:
     ChargedParticleProps p_{};
 };
 
-}  // namespace simall::particles
+} // namespace simall::particles

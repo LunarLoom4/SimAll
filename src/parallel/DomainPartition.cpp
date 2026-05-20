@@ -3,6 +3,7 @@
 // File   : src/parallel/DomainPartition.cpp
 // =============================================================================
 #include "parallel/DomainPartition.hpp"
+
 #include "core/Logger.hpp"
 #include "meshing/PartitionerMetis.hpp"
 #include "meshing/PartitionerScotch.hpp"
@@ -11,21 +12,25 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace simall::parallel {
+namespace simall::parallel
+{
 
 DomainPartition::DomainPartition(MpiContext& ctx) : ctx_(ctx) {}
 
-void DomainPartition::initialize(DomainPartitionProps props) {
+void DomainPartition::initialize(DomainPartitionProps props)
+{
     p_ = props;
-    if (p_.nParts <= 0) p_.nParts = ctx_.size();
+    if (p_.nParts <= 0)
+        p_.nParts = ctx_.size();
     SIMALL_LOG_INFO("Parallel",
-        "DomainPartition init: kind=",
-        (p_.kind == PartitionerKind::Metis ? "metis" : "scotch"),
-        " nParts=", p_.nParts);
+                    "DomainPartition init: kind=",
+                    (p_.kind == PartitionerKind::Metis ? "metis" : "scotch"),
+                    " nParts=",
+                    p_.nParts);
 }
 
-std::size_t DomainPartition::partition(const meshing::Mesh& mesh,
-                                       DomainPlan& plan) {
+std::size_t DomainPartition::partition(const meshing::Mesh& mesh, DomainPlan& plan)
+{
     const auto& Ff = mesh.faces();
     plan.cellRank.clear();
     plan.localCells.clear();
@@ -74,73 +79,91 @@ std::size_t DomainPartition::partition(const meshing::Mesh& mesh,
     for (std::size_t f = 0; f < Ff.size(); ++f) {
         const auto o = static_cast<std::int32_t>(Ff.owner[f]);
         const auto n = Ff.neighbor[f];
-        if (n == meshing::kBoundaryCell) continue;
+        if (n == meshing::kBoundaryCell)
+            continue;
         const auto ni = static_cast<std::int32_t>(n);
         const auto ro = plan.cellRank[o];
         const auto rn = plan.cellRank[ni];
-        if (ro == rn) continue;
+        if (ro == rn)
+            continue;
         // Owner is local → its value is needed by rn's rank; we own o.
         if (ro == myRank) {
             const auto k = pair_key(rn, o);
-            if (sentPair.insert(k).second) sendByRank[rn].push_back(o);
+            if (sentPair.insert(k).second)
+                sendByRank[rn].push_back(o);
             const auto kr = pair_key(rn, ni);
-            if (recvPair.insert(kr).second) recvByRank[rn].push_back(ni);
+            if (recvPair.insert(kr).second)
+                recvByRank[rn].push_back(ni);
         } else if (rn == myRank) {
             const auto k = pair_key(ro, ni);
-            if (sentPair.insert(k).second) sendByRank[ro].push_back(ni);
+            if (sentPair.insert(k).second)
+                sendByRank[ro].push_back(ni);
             const auto kr = pair_key(ro, o);
-            if (recvPair.insert(kr).second) recvByRank[ro].push_back(o);
+            if (recvPair.insert(kr).second)
+                recvByRank[ro].push_back(o);
         }
     }
 
     // 3) Append ghost cells to the local layout and translate global→local.
     for (auto& [remote, recvGlobals] : recvByRank) {
         for (auto gc : recvGlobals) {
-            if (g2local.find(gc) != g2local.end()) continue;
-            g2local[gc] = static_cast<std::int32_t>(plan.localCells.size()
-                                                  + plan.ghostCells.size());
+            if (g2local.find(gc) != g2local.end())
+                continue;
+            g2local[gc] =
+                static_cast<std::int32_t>(plan.localCells.size() + plan.ghostCells.size());
             plan.ghostCells.push_back(gc);
         }
     }
 
     // 4) Materialise NeighbourComm specs.
     std::unordered_set<std::int32_t> ranks;
-    for (auto& [r, _] : sendByRank) ranks.insert(r);
-    for (auto& [r, _] : recvByRank) ranks.insert(r);
+    for (auto& [r, _] : sendByRank)
+        ranks.insert(r);
+    for (auto& [r, _] : recvByRank)
+        ranks.insert(r);
     for (auto r : ranks) {
         NeighbourComm nc{};
         nc.rank = r;
-        for (auto gc : sendByRank[r]) nc.sendCells.push_back(g2local[gc]);
-        for (auto gc : recvByRank[r]) nc.recvCells.push_back(g2local[gc]);
+        for (auto gc : sendByRank[r])
+            nc.sendCells.push_back(g2local[gc]);
+        for (auto gc : recvByRank[r])
+            nc.recvCells.push_back(g2local[gc]);
         std::sort(nc.sendCells.begin(), nc.sendCells.end());
         std::sort(nc.recvCells.begin(), nc.recvCells.end());
         plan.neighbours.push_back(std::move(nc));
     }
 
     SIMALL_LOG_INFO("Parallel",
-        "DomainPartition rank=", myRank,
-        " owned=", plan.localCells.size(),
-        " ghost=", plan.ghostCells.size(),
-        " neighbours=", plan.neighbours.size(),
-        " edgeCut=", plan.edgeCut);
+                    "DomainPartition rank=",
+                    myRank,
+                    " owned=",
+                    plan.localCells.size(),
+                    " ghost=",
+                    plan.ghostCells.size(),
+                    " neighbours=",
+                    plan.neighbours.size(),
+                    " edgeCut=",
+                    plan.edgeCut);
     return plan.localCells.size();
 }
 
-void DomainPartition::install_into(GhostExchange& gx,
-                                   const DomainPlan& plan) const {
+void DomainPartition::install_into(GhostExchange& gx, const DomainPlan& plan) const
+{
     gx.clear_neighbours();
     gx.set_layout(plan.localCells.size(), plan.ghostCells.size());
-    for (const auto& nc : plan.neighbours) gx.add_neighbour(nc);
+    for (const auto& nc : plan.neighbours)
+        gx.add_neighbour(nc);
 }
 
-meshing::ops::SubdomainStats DomainPartition::extract_local_mesh(
-    const meshing::Mesh& globalMesh,
-    const DomainPlan&    plan,
-    meshing::Mesh&       outMesh) const
+meshing::ops::SubdomainStats DomainPartition::extract_local_mesh(const meshing::Mesh& globalMesh,
+                                                                 const DomainPlan& plan,
+                                                                 meshing::Mesh& outMesh) const
 {
-    return meshing::ops::extract_subdomain(
-        globalMesh, plan.cellRank, ctx_.rank(),
-        /*includeGhostLayer=*/true, outMesh);
+    return meshing::ops::extract_subdomain(globalMesh,
+                                           plan.cellRank,
+                                           ctx_.rank(),
+                                           /*includeGhostLayer=*/true,
+                                           outMesh);
 }
 
-}  // namespace simall::parallel
+} // namespace simall::parallel

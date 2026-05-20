@@ -17,25 +17,35 @@
 // =============================================================================
 #pragma once
 
-#include "meshing/MeshStorage.hpp"
 #include "FieldRegistry.hpp"
 
-namespace simall::solver {
+#include "meshing/MeshStorage.hpp"
 
-enum class LimiterKind { None, BarthJespersen, Venkatakrishnan };
+namespace simall::solver
+{
 
-class GradientLimiter {
+enum class LimiterKind
+{
+    None,
+    BarthJespersen,
+    Venkatakrishnan
+};
+
+class GradientLimiter
+{
 public:
     explicit GradientLimiter(const meshing::Mesh& mesh);
 
     /// Compute ψ_c for every cell from the cell-centred field φ and its
     /// (unlimited) gradient ∇φ. The result is written into psi.
-    void evaluate(const ScalarField& phi, const VectorField& grad,
-                  ScalarField& psi, LimiterKind kind,
+    void evaluate(const ScalarField& phi,
+                  const VectorField& grad,
+                  ScalarField& psi,
+                  LimiterKind kind,
                   double venkatK = 5.0) const;
 
 private:
     const meshing::Mesh& mesh_;
 };
 
-}  // namespace simall::solver
+} // namespace simall::solver

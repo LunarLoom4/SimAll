@@ -14,20 +14,22 @@
 
 #include <vector>
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-class ContourFilter {
+class ContourFilter
+{
 public:
     /// Extract isolines at the supplied scalar levels.  The output LineSet
     /// stores 2-vertex polylines (one CSR group per intersection segment).
     /// pointScalars MUST have size == points.size().
-    static LineSet extract(const SurfaceMesh& surface,
-                           const std::vector<double>& isovalues);
+    static LineSet extract(const SurfaceMesh& surface, const std::vector<double>& isovalues);
 
     /// Convenience: extract N uniformly-spaced isovalues between min..max.
     static LineSet extract_uniform(const SurfaceMesh& surface,
-                                   double sMin, double sMax,
+                                   double sMin,
+                                   double sMax,
                                    std::size_t count);
 };
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

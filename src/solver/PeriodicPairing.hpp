@@ -23,16 +23,18 @@
 
 #include <vector>
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-struct PeriodicTransform {
+struct PeriodicTransform
+{
     meshing::ZoneId zoneA = 0;
     meshing::ZoneId zoneB = 0;
-    util::Vec3d     rotationAxis      {0,0,1};
-    double          rotationAngleRad  = 0.0;
-    util::Vec3d     rotationCentre    {0,0,0};
-    util::Vec3d     translation       {0,0,0};
-    double          tolerance         = 1e-6;
+    util::Vec3d rotationAxis{0, 0, 1};
+    double rotationAngleRad = 0.0;
+    util::Vec3d rotationCentre{0, 0, 0};
+    util::Vec3d translation{0, 0, 0};
+    double tolerance = 1e-6;
 };
 
 /// Build a face-twin array of size mesh.faces().size(). Interior face entries
@@ -40,4 +42,4 @@ struct PeriodicTransform {
 std::vector<int> build_periodic_pairs(const meshing::Mesh& mesh,
                                       const std::vector<PeriodicTransform>& transforms);
 
-}  // namespace simall::solver
+} // namespace simall::solver

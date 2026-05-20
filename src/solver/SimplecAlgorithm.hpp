@@ -21,18 +21,21 @@
 
 #include "solver/SimpleAlgorithm.hpp"
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-struct SimplecOptions {
-    double urfU       = 0.9;     // can be much closer to 1 than SIMPLE
-    double urfP       = 1.0;     // SIMPLEC's whole point
-    double rho        = 1.0;
-    double mu         = 1.0e-3;
-    double dt         = 0.0;
-    TemporalScheme    timeScheme = TemporalScheme::ImplicitEuler;
+struct SimplecOptions
+{
+    double urfU = 0.9; // can be much closer to 1 than SIMPLE
+    double urfP = 1.0; // SIMPLEC's whole point
+    double rho = 1.0;
+    double mu = 1.0e-3;
+    double dt = 0.0;
+    TemporalScheme timeScheme = TemporalScheme::ImplicitEuler;
 };
 
-class SimplecAlgorithm : public SimpleAlgorithm {
+class SimplecAlgorithm : public SimpleAlgorithm
+{
 public:
     SimplecAlgorithm(meshing::Mesh& mesh,
                      FieldRegistry& fields,
@@ -40,22 +43,24 @@ public:
                      ILinearSolver& momentumSolver,
                      ILinearSolver& pressureSolver,
                      SimplecOptions opts)
-        : SimpleAlgorithm(mesh, fields, boundaries,
-                          momentumSolver, pressureSolver,
-                          to_simple_opts(opts)) {}
+        : SimpleAlgorithm(
+              mesh, fields, boundaries, momentumSolver, pressureSolver, to_simple_opts(opts))
+    {
+    }
 
 private:
-    static SimpleOptions to_simple_opts(const SimplecOptions& s) {
+    static SimpleOptions to_simple_opts(const SimplecOptions& s)
+    {
         SimpleOptions o;
         o.urfU = s.urfU;
         o.urfP = s.urfP;
-        o.rho  = s.rho;
-        o.mu   = s.mu;
-        o.dt   = s.dt;
+        o.rho = s.rho;
+        o.mu = s.mu;
+        o.dt = s.dt;
         o.timeScheme = s.timeScheme;
-        o.algorithm  = PvCouplingVariant::SIMPLEC;
+        o.algorithm = PvCouplingVariant::SIMPLEC;
         return o;
     }
 };
 
-}  // namespace simall::solver
+} // namespace simall::solver

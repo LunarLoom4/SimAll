@@ -20,18 +20,21 @@
 #pragma once
 
 #include "io/MeshFormats.hpp"
+
 #include <string>
 
-namespace simall::io {
+namespace simall::io
+{
 
-struct CgnsReadResult {
-    bool          ok = false;
-    std::string   error;
-    std::string   backend;             // "libcgns" or "cgns_native"
-    ImportedMesh  mesh;
+struct CgnsReadResult
+{
+    bool ok = false;
+    std::string error;
+    std::string backend; // "libcgns" or "cgns_native"
+    ImportedMesh mesh;
 };
 
-[[nodiscard]] bool           cgns_libcgns_available() noexcept;
+[[nodiscard]] bool cgns_libcgns_available() noexcept;
 [[nodiscard]] CgnsReadResult read_cgns(const std::string& path);
 
-}  // namespace simall::io
+} // namespace simall::io

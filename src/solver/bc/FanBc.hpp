@@ -10,22 +10,26 @@
 // =============================================================================
 #pragma once
 
-#include "solver/bc/Bc.hpp"
 #include "materials/PolynomialFit.hpp"
+#include "solver/bc/Bc.hpp"
 
-namespace simall::solver::bc {
+namespace simall::solver::bc
+{
 
-class FanBc : public IBoundaryCondition {
+class FanBc : public IBoundaryCondition
+{
 public:
-    explicit FanBc(materials::PolynomialFit curve)
-        : curve_(std::move(curve)) {}
+    explicit FanBc(materials::PolynomialFit curve) : curve_(std::move(curve)) {}
 
     BcKind kind() const noexcept override { return BcKind::Fan; }
     const char* name() const noexcept override { return "Fan"; }
 
     std::size_t apply(BcContext& ctx) override;
-    std::unique_ptr<IBoundaryCondition> clone() const override {
-        auto c = std::make_unique<FanBc>(curve_); c->setZone(zone()); return c;
+    std::unique_ptr<IBoundaryCondition> clone() const override
+    {
+        auto c = std::make_unique<FanBc>(curve_);
+        c->setZone(zone());
+        return c;
     }
 
     const materials::PolynomialFit& curve() const noexcept { return curve_; }
@@ -34,4 +38,4 @@ private:
     materials::PolynomialFit curve_;
 };
 
-}  // namespace simall::solver::bc
+} // namespace simall::solver::bc

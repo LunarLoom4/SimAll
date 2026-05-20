@@ -17,17 +17,30 @@
 #pragma once
 
 #include "utilities/MathTypes.hpp"
+
 #include <array>
 #include <cstdint>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct ParamPoint    { double u, v; };
-struct ParamTriangle { std::array<std::uint32_t, 3> v; };
-struct ParamEdge     { std::uint32_t a, b; bool operator==(const ParamEdge&) const = default; };
+struct ParamPoint
+{
+    double u, v;
+};
+struct ParamTriangle
+{
+    std::array<std::uint32_t, 3> v;
+};
+struct ParamEdge
+{
+    std::uint32_t a, b;
+    bool operator==(const ParamEdge&) const = default;
+};
 
-class ParametricSurfaceDelaunay {
+class ParametricSurfaceDelaunay
+{
 public:
     /// Triangulate the input parameter-space point cloud.
     /// `constraints` are oriented edges from CAD trimming loops that MUST
@@ -36,17 +49,16 @@ public:
                      const std::vector<ParamEdge>& constraints = {});
 
     const std::vector<ParamTriangle>& triangles() const noexcept { return tris_; }
-    const std::vector<ParamPoint>&    points()    const noexcept { return pts_; }
+    const std::vector<ParamPoint>& points() const noexcept { return pts_; }
 
 private:
-    std::vector<ParamPoint>    pts_;
+    std::vector<ParamPoint> pts_;
     std::vector<ParamTriangle> tris_;
 
-    void   insert_point(std::uint32_t p);
-    bool   in_circle(std::uint32_t a, std::uint32_t b, std::uint32_t c,
-                     std::uint32_t d) const;
+    void insert_point(std::uint32_t p);
+    bool in_circle(std::uint32_t a, std::uint32_t b, std::uint32_t c, std::uint32_t d) const;
     double orient2d(std::uint32_t a, std::uint32_t b, std::uint32_t c) const;
-    void   recover_edges(const std::vector<ParamEdge>& constraints);
+    void recover_edges(const std::vector<ParamEdge>& constraints);
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

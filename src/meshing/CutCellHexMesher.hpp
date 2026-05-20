@@ -28,13 +28,16 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct CutTriangle {
+struct CutTriangle
+{
     std::array<util::Vec3d, 3> v;
 };
 
-struct CutCellParams {
+struct CutCellParams
+{
     util::Vec3d bboxMin{0, 0, 0};
     util::Vec3d bboxMax{1, 1, 1};
     int nx = 16, ny = 16, nz = 16;
@@ -43,7 +46,8 @@ struct CutCellParams {
     double skinThickness = 0.0;
 };
 
-class CutCellHexMesher {
+class CutCellHexMesher
+{
 public:
     /// Build the cut-cell mesh. Returns false on degenerate input.
     bool build(const CutCellParams& params,
@@ -52,20 +56,24 @@ public:
                solver::FieldRegistry& outFields);
 
 private:
-    struct BvhNode {
+    struct BvhNode
+    {
         util::BoundingBox aabb;
-        int               left  = -1;
-        int               right = -1;
-        int               triFirst = -1;
-        int               triCount = 0;
+        int left = -1;
+        int right = -1;
+        int triFirst = -1;
+        int triCount = 0;
     };
     static int build_bvh(std::vector<BvhNode>& nodes,
                          std::vector<int>& triIdx,
                          const std::vector<CutTriangle>& tris,
-                         int first, int count);
+                         int first,
+                         int count);
     static double point_tri_dist_sq(const util::Vec3d& p, const CutTriangle& t);
-    static bool ray_tri_intersect(const util::Vec3d& o, const util::Vec3d& d,
-                                  const CutTriangle& t, double& tOut);
+    static bool ray_tri_intersect(const util::Vec3d& o,
+                                  const util::Vec3d& d,
+                                  const CutTriangle& t,
+                                  double& tOut);
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

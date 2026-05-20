@@ -24,19 +24,22 @@
 #include <unordered_map>
 #include <vector>
 
-namespace simall::core {
+namespace simall::core
+{
 
-class ServiceLocator {
+class ServiceLocator
+{
 public:
-    static ServiceLocator& instance() {
+    static ServiceLocator& instance()
+    {
         static ServiceLocator inst;
         return inst;
     }
 
     template <typename Interface, typename Impl, typename... Args>
-    Interface& provide(Args&&... args) {
-        static_assert(std::is_base_of_v<Interface, Impl>,
-                      "Impl must inherit from Interface");
+    Interface& provide(Args&&... args)
+    {
+        static_assert(std::is_base_of_v<Interface, Impl>, "Impl must inherit from Interface");
         std::lock_guard lk(mtx_);
         auto idx = std::type_index(typeid(Interface));
         if (services_.count(idx))
@@ -51,8 +54,8 @@ public:
         return *raw;
     }
 
-    template <typename Interface>
-    Interface& get() const {
+    template <typename Interface> Interface& get() const
+    {
         std::lock_guard lk(mtx_);
         auto it = services_.find(std::type_index(typeid(Interface)));
         if (it == services_.end())
@@ -60,15 +63,15 @@ public:
         return *static_cast<Interface*>(it->second.ptr);
     }
 
-    template <typename Interface>
-    Interface* try_get() const noexcept {
+    template <typename Interface> Interface* try_get() const noexcept
+    {
         std::lock_guard lk(mtx_);
         auto it = services_.find(std::type_index(typeid(Interface)));
-        return it == services_.end() ? nullptr
-                                     : static_cast<Interface*>(it->second.ptr);
+        return it == services_.end() ? nullptr : static_cast<Interface*>(it->second.ptr);
     }
 
-    void shutdown() {
+    void shutdown()
+    {
         std::lock_guard lk(mtx_);
         // Reverse-order destruction: GUI dies before solver dies before CAD.
         for (auto it = order_.rbegin(); it != order_.rend(); ++it) {
@@ -83,17 +86,18 @@ public:
 
 private:
     ServiceLocator() = default;
-    ServiceLocator(const ServiceLocator&)            = delete;
+    ServiceLocator(const ServiceLocator&) = delete;
     ServiceLocator& operator=(const ServiceLocator&) = delete;
 
-    struct Slot {
+    struct Slot
+    {
         void* ptr;
         std::function<void(void*)> deleter;
     };
 
-    mutable std::mutex                                mtx_;
-    std::unordered_map<std::type_index, Slot>         services_;
-    std::vector<std::type_index>                      order_;
+    mutable std::mutex mtx_;
+    std::unordered_map<std::type_index, Slot> services_;
+    std::vector<std::type_index> order_;
 };
 
-}  // namespace simall::core
+} // namespace simall::core

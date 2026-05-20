@@ -25,40 +25,40 @@
 #include <string>
 #include <vector>
 
-namespace simall::adjoint {
+namespace simall::adjoint
+{
 
 using NodeIdx = std::uint32_t;
 
-struct SurfaceFace {
-    std::array<NodeIdx, 4>    nodes;              // tri uses [0..2], quad uses [0..3]
-    std::uint8_t              nNodes = 3;
-    std::array<double, 3>     normal{0,0,1};      // outward unit normal
-    double                    area   = 0.0;
+struct SurfaceFace
+{
+    std::array<NodeIdx, 4> nodes; // tri uses [0..2], quad uses [0..3]
+    std::uint8_t nNodes = 3;
+    std::array<double, 3> normal{0, 0, 1}; // outward unit normal
+    double area = 0.0;
 };
 
-struct AdjointFlowSample {
-    std::array<double, 3> uPsi{};                  // adjoint velocity
-    double                pPsi = 0.0;              // adjoint pressure
-    double                mu   = 0.0;              // dynamic viscosity at face
+struct AdjointFlowSample
+{
+    std::array<double, 3> uPsi{}; // adjoint velocity
+    double pPsi = 0.0;            // adjoint pressure
+    double mu = 0.0;              // dynamic viscosity at face
 };
 
 /// Per-face shape sensitivity (scalar: dJ/dx_n along the local normal).
 [[nodiscard]] std::vector<double> assemble_shape_sensitivity(
-        const std::vector<SurfaceFace>&        faces,
-        const std::vector<AdjointFlowSample>&  perFace);
+    const std::vector<SurfaceFace>& faces, const std::vector<AdjointFlowSample>& perFace);
 
 /// Volume kernel for topology optimisation density α(x):  s(x) = -ψ_p · ∇p
 /// approximated by face-pressure jumps over a control volume.
 [[nodiscard]] std::vector<double> assemble_volume_sensitivity(
-        const std::vector<double>& pressureCell,
-        const std::vector<double>& adjointPressureCell);
+    const std::vector<double>& pressureCell, const std::vector<double>& adjointPressureCell);
 
 /// Scatter face sensitivities onto vertex/node sensitivities, weighting by
 /// face area so the resulting per-node gradient is suitable for an
 /// FFD / morpher step.
-[[nodiscard]] std::vector<double> accumulate_node_sensitivity(
-        std::size_t                            nNodes,
-        const std::vector<SurfaceFace>&        faces,
-        const std::vector<double>&             faceSens);
+[[nodiscard]] std::vector<double> accumulate_node_sensitivity(std::size_t nNodes,
+                                                              const std::vector<SurfaceFace>& faces,
+                                                              const std::vector<double>& faceSens);
 
-}  // namespace simall::adjoint
+} // namespace simall::adjoint

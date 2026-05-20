@@ -22,9 +22,11 @@
 #include <cstddef>
 #include <vector>
 
-namespace simall::rom {
+namespace simall::rom
+{
 
-class SnapshotMatrix {
+class SnapshotMatrix
+{
 public:
     explicit SnapshotMatrix(std::size_t N = 0) : N_(N) {}
 
@@ -34,7 +36,7 @@ public:
 
     std::size_t rows() const noexcept { return N_; }
     std::size_t cols() const noexcept { return cols_.size(); }
-    double      at(std::size_t i, std::size_t j) const { return cols_[j][i]; }
+    double at(std::size_t i, std::size_t j) const { return cols_[j][i]; }
     const std::vector<double>& column(std::size_t j) const { return cols_[j]; }
 
 private:
@@ -42,16 +44,18 @@ private:
     std::vector<std::vector<double>> cols_;
 };
 
-struct PodResult {
-    std::vector<std::vector<double>> modes;          // N × r
-    std::vector<double>              singularValues; // length r
-    std::vector<std::vector<double>> coefficients;   // r × M  (a(t))
+struct PodResult
+{
+    std::vector<std::vector<double>> modes;        // N × r
+    std::vector<double> singularValues;            // length r
+    std::vector<std::vector<double>> coefficients; // r × M  (a(t))
 };
 
-struct DmdResult {
-    std::vector<std::vector<std::complex<double>>> modes;        // N × r
-    std::vector<std::complex<double>>              eigenvalues;  // discrete-time
-    std::vector<std::complex<double>>              amplitudes;   // initial fit
+struct DmdResult
+{
+    std::vector<std::vector<std::complex<double>>> modes; // N × r
+    std::vector<std::complex<double>> eigenvalues;        // discrete-time
+    std::vector<std::complex<double>> amplitudes;         // initial fit
 };
 
 /// Compute POD using the method of snapshots. r is the truncation rank
@@ -62,4 +66,4 @@ PodResult compute_pod(const SnapshotMatrix& X, std::size_t r = 0);
 /// X must have at least 2 columns.
 DmdResult compute_dmd(const SnapshotMatrix& X, std::size_t r = 0);
 
-}  // namespace simall::rom
+} // namespace simall::rom

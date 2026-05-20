@@ -9,20 +9,21 @@
 
 #include <iostream>
 
-namespace {
+namespace
+{
 
-class CsvWriterPlugin final : public simall::plugins::CategorisedPlugin {
+class CsvWriterPlugin final : public simall::plugins::CategorisedPlugin
+{
 public:
-    CsvWriterPlugin()
-        : CategorisedPlugin(simall::plugins::PluginCategory::Writer) {}
+    CsvWriterPlugin() : CategorisedPlugin(simall::plugins::PluginCategory::Writer) {}
 
-    std::string name()    const override { return "simall_csv_writer"; }
+    std::string name() const override { return "simall_csv_writer"; }
     std::string version() const override { return "1.0.0"; }
 
-    void on_load()    override { std::clog << "[plugin] " << name() << " loaded\n"; }
-    void on_unload()  override { std::clog << "[plugin] " << name() << " unloaded\n"; }
+    void on_load() override { std::clog << "[plugin] " << name() << " loaded\n"; }
+    void on_unload() override { std::clog << "[plugin] " << name() << " unloaded\n"; }
 };
 
-}  // namespace
+} // namespace
 
 SIMALL_DECLARE_PLUGIN(CsvWriterPlugin)

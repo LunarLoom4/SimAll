@@ -26,55 +26,65 @@
 // =============================================================================
 #pragma once
 
+#include "meshing/MeshStorage.hpp"
 #include "solver/FieldRegistry.hpp"
 #include "solver/Solver.hpp"
-#include "meshing/MeshStorage.hpp"
 #include "utilities/AlignedAllocator.hpp"
 
 #include <array>
 #include <vector>
 
-namespace simall::radiation {
+namespace simall::radiation
+{
 
-enum class QuadratureOrder { S4 = 4, S6 = 6 };
-
-struct WallEmission {
-    meshing::ZoneId zone;
-    double          emissivity = 1.0;
-    double          temperature = 300.0;
+enum class QuadratureOrder
+{
+    S4 = 4,
+    S6 = 6
 };
 
-class DiscreteOrdinates {
+struct WallEmission
+{
+    meshing::ZoneId zone;
+    double emissivity = 1.0;
+    double temperature = 300.0;
+};
+
+class DiscreteOrdinates
+{
 public:
     DiscreteOrdinates(meshing::Mesh& mesh,
                       solver::FieldRegistry& fields,
                       QuadratureOrder order = QuadratureOrder::S4);
 
-    void set_absorption(double kappa)    { kappa_ = kappa; }
-    void set_scattering(double sigmaS)   { sigmaS_ = sigmaS; }
-    void set_refractive_index(double n)  { nRef_  = n; }
-    void add_wall(WallEmission w)        { walls_.push_back(w); }
+    void set_absorption(double kappa) { kappa_ = kappa; }
+    void set_scattering(double sigmaS) { sigmaS_ = sigmaS; }
+    void set_refractive_index(double n) { nRef_ = n; }
+    void add_wall(WallEmission w) { walls_.push_back(w); }
 
     /// One DOM sweep over all ordinates. Returns max change in I.
     double sweep();
 
     /// Compute radiative source term S_rad per cell (J/m³/s).
-    void   compute_source(util::aligned_vector<double>& Srad) const;
+    void compute_source(util::aligned_vector<double>& Srad) const;
 
     int num_ordinates() const { return static_cast<int>(omega_.size()); }
 
 private:
-    meshing::Mesh&             mesh_;
-    solver::FieldRegistry&     F_;
-    QuadratureOrder            order_;
-    double kappa_  = 0.0;
+    meshing::Mesh& mesh_;
+    solver::FieldRegistry& F_;
+    QuadratureOrder order_;
+    double kappa_ = 0.0;
     double sigmaS_ = 0.0;
-    double nRef_   = 1.0;
-    std::vector<WallEmission>  walls_;
+    double nRef_ = 1.0;
+    std::vector<WallEmission> walls_;
 
     // Ordinate directions and weights.
-    struct Ordinate { double sx, sy, sz, w; };
-    std::vector<Ordinate>      omega_;
+    struct Ordinate
+    {
+        double sx, sy, sz, w;
+    };
+    std::vector<Ordinate> omega_;
     // I[m * nCells + c]  — intensity for ordinate m at cell c
     std::vector<util::aligned_vector<double>> I_;
 
@@ -83,4 +93,4 @@ private:
     void sweep_ordinate(int m, double& maxDelta);
 };
 
-}  // namespace simall::radiation
+} // namespace simall::radiation

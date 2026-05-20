@@ -26,41 +26,42 @@
 #include <unordered_set>
 #include <vector>
 
-namespace simall::core {
+namespace simall::core
+{
 
 class TaskGraph;
 
-class TaskHandle {
+class TaskHandle
+{
 public:
     TaskHandle() = default;
 
     /// Convenience: schedule a continuation that runs after this task.
-    template <class F>
-    TaskHandle then(F&& f) const;
+    template <class F> TaskHandle then(F&& f) const;
 
     std::size_t id() const noexcept { return id_; }
-    bool        valid() const noexcept { return graph_ != nullptr; }
+    bool valid() const noexcept { return graph_ != nullptr; }
 
 private:
     friend class TaskGraph;
     TaskHandle(TaskGraph* g, std::size_t i) : graph_(g), id_(i) {}
-    TaskGraph*  graph_ = nullptr;
-    std::size_t id_    = 0;
+    TaskGraph* graph_ = nullptr;
+    std::size_t id_ = 0;
 };
 
-class TaskGraph {
+class TaskGraph
+{
 public:
     explicit TaskGraph(ThreadPool& pool = ThreadPool::global()) : pool_(&pool) {}
     ~TaskGraph() = default;
 
-    TaskGraph(const TaskGraph&)            = delete;
+    TaskGraph(const TaskGraph&) = delete;
     TaskGraph& operator=(const TaskGraph&) = delete;
-    TaskGraph(TaskGraph&&)                 = default;
-    TaskGraph& operator=(TaskGraph&&)      = default;
+    TaskGraph(TaskGraph&&) = default;
+    TaskGraph& operator=(TaskGraph&&) = default;
 
     /// Add a task with no dependencies.
-    template <class F>
-    TaskHandle add(F&& f, std::string label = {});
+    template <class F> TaskHandle add(F&& f, std::string label = {});
 
     /// Declare `dep` must complete before `child`.
     void dependOn(TaskHandle child, TaskHandle dep);
@@ -76,33 +77,39 @@ public:
     std::size_t size() const noexcept { return nodes_.size(); }
 
 private:
-    struct Node {
-        std::function<void()>          fn;
-        std::vector<std::size_t>       successors;
-        std::atomic<std::size_t>       remaining{0};   // unmet predecessors
-        std::size_t                    predecessorCount = 0;
-        std::string                    label;
+    struct Node
+    {
+        std::function<void()> fn;
+        std::vector<std::size_t> successors;
+        std::atomic<std::size_t> remaining{0}; // unmet predecessors
+        std::size_t predecessorCount = 0;
+        std::string label;
         std::shared_ptr<std::promise<void>> done = std::make_shared<std::promise<void>>();
     };
 
     void schedule(std::size_t id);
     void detectCycles() const;
 
-    ThreadPool*                          pool_;
-    std::vector<std::unique_ptr<Node>>   nodes_;
-    std::atomic<std::size_t>             outstanding_{0};
-    std::promise<void>                   complete_;
-    std::shared_future<void>             completeFut_ = complete_.get_future().share();
-    bool                                 started_ = false;
+    ThreadPool* pool_;
+    std::vector<std::unique_ptr<Node>> nodes_;
+    std::atomic<std::size_t> outstanding_{0};
+    std::promise<void> complete_;
+    std::shared_future<void> completeFut_ = complete_.get_future().share();
+    bool started_ = false;
 };
 
-template <class F>
-TaskHandle TaskGraph::add(F&& f, std::string label) {
-    if (started_) throw std::runtime_error("TaskGraph: add() after run()");
+template <class F> TaskHandle TaskGraph::add(F&& f, std::string label)
+{
+    if (started_)
+        throw std::runtime_error("TaskGraph: add() after run()");
     auto node = std::make_unique<Node>();
     node->fn = [fn = std::forward<F>(f), p = node->done]() mutable {
-        try { fn(); p->set_value(); }
-        catch (...)  { p->set_exception(std::current_exception()); }
+        try {
+            fn();
+            p->set_value();
+        } catch (...) {
+            p->set_exception(std::current_exception());
+        }
     };
     node->label = std::move(label);
     std::size_t id = nodes_.size();
@@ -110,12 +117,13 @@ TaskHandle TaskGraph::add(F&& f, std::string label) {
     return TaskHandle{this, id};
 }
 
-template <class F>
-TaskHandle TaskHandle::then(F&& f) const {
-    if (!graph_) throw std::runtime_error("TaskHandle::then on invalid handle");
+template <class F> TaskHandle TaskHandle::then(F&& f) const
+{
+    if (!graph_)
+        throw std::runtime_error("TaskHandle::then on invalid handle");
     TaskHandle next = graph_->add(std::forward<F>(f));
     graph_->dependOn(next, *this);
     return next;
 }
 
-}  // namespace simall::core
+} // namespace simall::core

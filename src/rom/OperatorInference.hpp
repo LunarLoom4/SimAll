@@ -30,32 +30,35 @@
 #include <cstddef>
 #include <vector>
 
-namespace simall::rom {
+namespace simall::rom
+{
 
-struct OperatorInferenceOptions {
-    std::size_t reducedDim = 0;          // 0 → choose by 99% energy
-    double      energyThreshold = 0.99;
-    double      regularization  = 1e-8;
-    bool        includeQuadratic = false;
+struct OperatorInferenceOptions
+{
+    std::size_t reducedDim = 0; // 0 → choose by 99% energy
+    double energyThreshold = 0.99;
+    double regularization = 1e-8;
+    bool includeQuadratic = false;
 };
 
-struct InferredOperators {
-    std::size_t                r = 0;
-    std::vector<std::vector<double>> V;            // basis (n_x × r)
-    std::vector<std::vector<double>> A_hat;        // r × r
-    std::vector<std::vector<double>> B_hat;        // r × n_u
-    std::vector<std::vector<double>> H_hat;        // r × r² (row-major Kron)
+struct InferredOperators
+{
+    std::size_t r = 0;
+    std::vector<std::vector<double>> V;     // basis (n_x × r)
+    std::vector<std::vector<double>> A_hat; // r × r
+    std::vector<std::vector<double>> B_hat; // r × n_u
+    std::vector<std::vector<double>> H_hat; // r × r² (row-major Kron)
 };
 
 [[nodiscard]] InferredOperators fit_operator_inference(
-        const std::vector<std::vector<double>>& X,           // n_x × n_t
-        const std::vector<std::vector<double>>& dXdt,        // n_x × n_t
-        const std::vector<std::vector<double>>& U,           // n_u × n_t (may be empty)
-        OperatorInferenceOptions                opt);
+    const std::vector<std::vector<double>>& X,    // n_x × n_t
+    const std::vector<std::vector<double>>& dXdt, // n_x × n_t
+    const std::vector<std::vector<double>>& U,    // n_u × n_t (may be empty)
+    OperatorInferenceOptions opt);
 
 /// Evaluate dx̂/dt = Â x̂ + B̂ u + Ĥ (x̂ ⊗ x̂)
 [[nodiscard]] std::vector<double> rom_rhs(const InferredOperators& op,
-                                            const std::vector<double>& xHat,
-                                            const std::vector<double>& u);
+                                          const std::vector<double>& xHat,
+                                          const std::vector<double>& u);
 
-}  // namespace simall::rom
+} // namespace simall::rom

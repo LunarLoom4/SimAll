@@ -13,18 +13,20 @@
 #include <cstddef>
 #include <string>
 
-namespace simall::gpu {
+namespace simall::gpu
+{
 
-struct DeviceInfo {
+struct DeviceInfo
+{
     std::string name;
     std::size_t total_memory_bytes;
-    int         compute_capability_major;
-    int         compute_capability_minor;
+    int compute_capability_major;
+    int compute_capability_minor;
 };
 
-bool        is_available()    noexcept;
-int         device_count()    noexcept;
-DeviceInfo  query(int device) noexcept;
-void        synchronize()     noexcept;
+bool is_available() noexcept;
+int device_count() noexcept;
+DeviceInfo query(int device) noexcept;
+void synchronize() noexcept;
 
-}  // namespace simall::gpu
+} // namespace simall::gpu

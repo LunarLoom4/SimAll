@@ -47,14 +47,15 @@
 #include <optional>
 #include <vector>
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
 class CellAdapterRegistry;
 
-class WorkflowEngine {
+class WorkflowEngine
+{
 public:
-    WorkflowEngine(Schematic& s, StateMachine& sm) noexcept
-        : schematic_(&s), state_(&sm) {}
+    WorkflowEngine(Schematic& s, StateMachine& sm) noexcept : schematic_(&s), state_(&sm) {}
 
     // -- edge insertion -------------------------------------------------
     // Returns whatever Schematic::add_link() returned.  On success, the
@@ -66,11 +67,11 @@ public:
     bool disconnect(const CellLink& link);
 
     // -- refresh policy -------------------------------------------------
-    [[nodiscard]] std::vector<CellId>
-    refresh_plan(RefreshPolicy policy = RefreshPolicy::ReadyOnly) const;
+    [[nodiscard]] std::vector<CellId> refresh_plan(
+        RefreshPolicy policy = RefreshPolicy::ReadyOnly) const;
 
-    [[nodiscard]] std::optional<CellId>
-    next_refreshable(RefreshPolicy policy = RefreshPolicy::ReadyOnly) const;
+    [[nodiscard]] std::optional<CellId> next_refreshable(
+        RefreshPolicy policy = RefreshPolicy::ReadyOnly) const;
 
     // Convenience driver.  `runner` is a caller-provided callable
     // (CellId) -> bool, where `true` means "I solved it" and `false`
@@ -88,9 +89,7 @@ public:
     // The adapter pointer escapes only through the engine; callers do
     // NOT own it.  `last_error()` from the adapter is forwarded into
     // `ctx.error()` so the GUI gets a single canonical place to read.
-    bool refresh_one(CellId id,
-                     const CellAdapterRegistry& registry,
-                     ExecutionContext&          ctx);
+    bool refresh_one(CellId id, const CellAdapterRegistry& registry, ExecutionContext& ctx);
 
     // -- deterministic order -------------------------------------------
     [[nodiscard]] std::vector<CellId> evaluation_order() const;
@@ -99,8 +98,8 @@ public:
     // Read-only views of the underlying objects.  Useful for command
     // implementations that need to format human-readable labels without
     // re-plumbing a Schematic pointer through their constructors.
-    [[nodiscard]] const Schematic&    schematic() const noexcept { return *schematic_; }
-    [[nodiscard]] const StateMachine& state()     const noexcept { return *state_; }
+    [[nodiscard]] const Schematic& schematic() const noexcept { return *schematic_; }
+    [[nodiscard]] const StateMachine& state() const noexcept { return *state_; }
 
 private:
     // A cell is "ready" under ReadyOnly iff its required inputs are wired
@@ -111,8 +110,8 @@ private:
     // A cell has a Failed transitive ancestor.  Used for StopOnFailed.
     [[nodiscard]] bool has_failed_ancestor(CellId) const;
 
-    Schematic*    schematic_;
+    Schematic* schematic_;
     StateMachine* state_;
 };
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

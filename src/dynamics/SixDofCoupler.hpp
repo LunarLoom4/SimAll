@@ -25,29 +25,41 @@
 #include <cstdint>
 #include <string>
 
-namespace simall::dynamics {
+namespace simall::dynamics
+{
 
-struct Vec3 { double x = 0.0, y = 0.0, z = 0.0; };
-
-enum class SixDofCouplingMode : std::uint8_t { Explicit, LooseImplicit, UnderRelaxed };
-
-struct RigidBodyState {
-    double  mass        = 1.0;
-    Vec3    inertiaDiag { 1.0, 1.0, 1.0 };
-    Vec3    position;
-    Vec3    velocity;
-    Vec3    angularVelocity;             // body frame, rad/s
-    std::array<double, 9> rotation{ 1,0,0,  0,1,0,  0,0,1 };  // row-major R
+struct Vec3
+{
+    double x = 0.0, y = 0.0, z = 0.0;
 };
 
-struct CouplingOptions {
-    SixDofCouplingMode mode      = SixDofCouplingMode::Explicit;
-    std::size_t        nMaxSub   = 5;
-    double             relax     = 0.7;     // 0..1
-    double             tolPos    = 1e-6;
+enum class SixDofCouplingMode : std::uint8_t
+{
+    Explicit,
+    LooseImplicit,
+    UnderRelaxed
 };
 
-class SixDofCoupler {
+struct RigidBodyState
+{
+    double mass = 1.0;
+    Vec3 inertiaDiag{1.0, 1.0, 1.0};
+    Vec3 position;
+    Vec3 velocity;
+    Vec3 angularVelocity;                                      // body frame, rad/s
+    std::array<double, 9> rotation{1, 0, 0, 0, 1, 0, 0, 0, 1}; // row-major R
+};
+
+struct CouplingOptions
+{
+    SixDofCouplingMode mode = SixDofCouplingMode::Explicit;
+    std::size_t nMaxSub = 5;
+    double relax = 0.7; // 0..1
+    double tolPos = 1e-6;
+};
+
+class SixDofCoupler
+{
 public:
     explicit SixDofCoupler(CouplingOptions opt = {}) : opt_(opt) {}
 
@@ -55,19 +67,22 @@ public:
     /// `solverReevaluate` is invoked once per sub-iteration in loose-implicit
     /// and under-relaxed modes; it returns the *new* fluid (F,M) sampled
     /// at the *predicted* body pose.  Skipped entirely in Explicit mode.
-    void advance(RigidBodyState&       state,
-                  Vec3                   F,
-                  Vec3                   M,
-                  double                 dt,
-                  void (*solverReevaluate)(const RigidBodyState&, Vec3&, Vec3&) = nullptr);
+    void advance(RigidBodyState& state,
+                 Vec3 F,
+                 Vec3 M,
+                 double dt,
+                 void (*solverReevaluate)(const RigidBodyState&, Vec3&, Vec3&) = nullptr);
 
     [[nodiscard]] std::size_t last_subiterations() const noexcept { return lastSub_; }
 
 private:
     CouplingOptions opt_;
-    std::size_t     lastSub_ = 0;
+    std::size_t lastSub_ = 0;
 
-    static RigidBodyState explicit_step(const RigidBodyState& s, const Vec3& F, const Vec3& M, double dt);
+    static RigidBodyState explicit_step(const RigidBodyState& s,
+                                        const Vec3& F,
+                                        const Vec3& M,
+                                        double dt);
 };
 
-}  // namespace simall::dynamics
+} // namespace simall::dynamics

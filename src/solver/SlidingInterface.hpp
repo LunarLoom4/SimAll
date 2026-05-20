@@ -33,30 +33,35 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-struct SlidingPatch {
-    meshing::ZoneId boundaryZone = 0;   // face zone forming this side
+struct SlidingPatch
+{
+    meshing::ZoneId boundaryZone = 0; // face zone forming this side
     // Rigid transform applied to take this patch into the COMMON frame.
-    util::Vec3d rotAxis  {0, 0, 1};
+    util::Vec3d rotAxis{0, 0, 1};
     util::Vec3d rotOrigin{0, 0, 0};
-    double      rotAngle = 0.0;          // [rad]
+    double rotAngle = 0.0; // [rad]
     util::Vec3d translation{0, 0, 0};
 };
 
-struct SlidingWeight {
+struct SlidingWeight
+{
     meshing::FaceId sourceFace;
-    double          w;
+    double w;
 };
 
-struct SlidingPairTable {
+struct SlidingPairTable
+{
     // For each target face, an offset-range into entries[].
-    std::vector<meshing::FaceId>  targetFaces;
-    std::vector<int>              offsets;        // size = targetFaces.size()+1
-    std::vector<SlidingWeight>    entries;
+    std::vector<meshing::FaceId> targetFaces;
+    std::vector<int> offsets; // size = targetFaces.size()+1
+    std::vector<SlidingWeight> entries;
 };
 
-class SlidingInterface {
+class SlidingInterface
+{
 public:
     /// Build the interpolation table between two non-conformal patches.
     /// `tolerance` is in mesh length units; intersections below it are
@@ -74,4 +79,4 @@ public:
                                      const std::vector<double>& cellPhi);
 };
 
-}  // namespace simall::solver
+} // namespace simall::solver

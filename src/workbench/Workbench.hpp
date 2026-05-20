@@ -17,7 +17,8 @@
 #include <limits>
 #include <string_view>
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
 // ---------------------------------------------------------------------------
 // Identifier types.  IDs are local to a Schematic instance and are minted by
@@ -34,7 +35,8 @@ inline constexpr PortId kInvalidPortId = std::numeric_limits<PortId>::max();
 // CellKind -- the canonical Workbench-style project steps, plus a Custom
 // escape hatch for plugin-defined cells.
 // ---------------------------------------------------------------------------
-enum class CellKind : std::uint8_t {
+enum class CellKind : std::uint8_t
+{
     Geometry,
     Mesh,
     Setup,
@@ -59,11 +61,12 @@ enum class CellKind : std::uint8_t {
 //   Failed          : last run errored.  Treated as a hard-stop for
 //                     downstream cells (they fall back to Unfulfilled).
 // ---------------------------------------------------------------------------
-enum class CellState : std::uint8_t {
-    UpToDate        = 0,
+enum class CellState : std::uint8_t
+{
+    UpToDate = 0,
     RefreshRequired = 1,
-    Unfulfilled     = 2,
-    Failed          = 3,
+    Unfulfilled = 2,
+    Failed = 3,
 };
 
 
@@ -71,7 +74,8 @@ enum class CellState : std::uint8_t {
 // PortDirection -- self-explanatory.  An "Input" port is wired by exactly
 // one upstream output (no fan-in); an "Output" port may feed many inputs.
 // ---------------------------------------------------------------------------
-enum class PortDirection : std::uint8_t {
+enum class PortDirection : std::uint8_t
+{
     Input,
     Output,
 };
@@ -81,8 +85,8 @@ enum class PortDirection : std::uint8_t {
 // Diagnostic stringification.  Kept noexcept + string_view so it is safe in
 // logger hot paths and gtest/Catch2 assertion messages.
 // ---------------------------------------------------------------------------
-[[nodiscard]] std::string_view to_string(CellKind)      noexcept;
-[[nodiscard]] std::string_view to_string(CellState)     noexcept;
+[[nodiscard]] std::string_view to_string(CellKind) noexcept;
+[[nodiscard]] std::string_view to_string(CellState) noexcept;
 [[nodiscard]] std::string_view to_string(PortDirection) noexcept;
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

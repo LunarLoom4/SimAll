@@ -59,26 +59,30 @@
 #include <string_view>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct BlockMeshBlock {
-    std::array<std::uint32_t, 8> vertices{};   // indices into BlockMeshDict::vertices
+struct BlockMeshBlock
+{
+    std::array<std::uint32_t, 8> vertices{}; // indices into BlockMeshDict::vertices
     std::array<std::uint32_t, 3> divisions{1, 1, 1};
-    std::array<double, 3>        grading{1.0, 1.0, 1.0};  // simpleGrading (last/first)
-    std::string                  name;                    // optional inline block name
+    std::array<double, 3> grading{1.0, 1.0, 1.0}; // simpleGrading (last/first)
+    std::string name;                             // optional inline block name
 };
 
-struct BlockMeshPatch {
-    std::string                                    name;
-    std::string                                    type;   // patch/wall/inlet/...
-    std::vector<std::array<std::uint32_t, 4>>     faces;
+struct BlockMeshPatch
+{
+    std::string name;
+    std::string type; // patch/wall/inlet/...
+    std::vector<std::array<std::uint32_t, 4>> faces;
 };
 
-struct BlockMeshDict {
-    double                       convertToMeters = 1.0;
-    std::vector<util::Vec3d>     vertices;
-    std::vector<BlockMeshBlock>  blocks;
-    std::vector<BlockMeshPatch>  patches;
+struct BlockMeshDict
+{
+    double convertToMeters = 1.0;
+    std::vector<util::Vec3d> vertices;
+    std::vector<BlockMeshBlock> blocks;
+    std::vector<BlockMeshPatch> patches;
 };
 
 /// Parse a blockMeshDict-format string.  Throws std::runtime_error with a
@@ -97,11 +101,12 @@ std::string write_block_mesh_dict(const BlockMeshDict& dict);
 /// Convenience wrapper that writes write_block_mesh_dict() output to @p path.
 void save_block_mesh_dict(const BlockMeshDict& dict, const std::string& path);
 
-struct BlockMeshBuildStats {
-    std::size_t blocks       = 0;
-    std::size_t patches      = 0;
-    std::size_t patchFaces   = 0;
-    std::size_t orphanFaces  = 0;   // patch faces that did not match any block face
+struct BlockMeshBuildStats
+{
+    std::size_t blocks = 0;
+    std::size_t patches = 0;
+    std::size_t patchFaces = 0;
+    std::size_t orphanFaces = 0; // patch faces that did not match any block face
 };
 
 /// Populate a MultiblockHex from a parsed dictionary.  Vertices are scaled
@@ -110,7 +115,6 @@ struct BlockMeshBuildStats {
 /// and patches are mapped to per-block faceZone tags (1-based, the zone id
 /// equals 1 + patchIndex).  Patch faces are matched to block faces by
 /// 4-vertex set equality.
-BlockMeshBuildStats build_multiblock(const BlockMeshDict& dict,
-                                     MultiblockHex&       out);
+BlockMeshBuildStats build_multiblock(const BlockMeshDict& dict, MultiblockHex& out);
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

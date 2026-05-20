@@ -9,16 +9,19 @@
 
 #include "../RegressionFramework.hpp"
 
-namespace simall::regression::bfs {
+namespace simall::regression::bfs
+{
 
 // Armaly correlation fit:  X_r / h = 0.05 + 0.0175 · Re  for Re ≤ 400.
-[[nodiscard]] inline double armaly_reattachment(double Re) {
+[[nodiscard]] inline double armaly_reattachment(double Re)
+{
     return 0.05 + 0.0175 * Re;
 }
 
-[[nodiscard]] inline double error_against_experiment(double Re, double predicted) {
+[[nodiscard]] inline double error_against_experiment(double Re, double predicted)
+{
     const double ref = armaly_reattachment(Re);
     return relative_error(predicted, ref);
 }
 
-}  // namespace simall::regression::bfs
+} // namespace simall::regression::bfs

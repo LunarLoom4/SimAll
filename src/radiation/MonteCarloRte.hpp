@@ -30,24 +30,28 @@
 #include <random>
 #include <vector>
 
-namespace simall::radiation {
+namespace simall::radiation
+{
 
-struct McWallSpec {
+struct McWallSpec
+{
     meshing::ZoneId zone;
-    double          emissivity  = 1.0;
-    double          temperature = 300.0;
+    double emissivity = 1.0;
+    double temperature = 300.0;
 };
 
-struct MonteCarloProps {
-    double        absorption = 0.5;     // κ
-    double        scattering = 0.0;     // σ_s
-    double        refractiveN= 1.0;
-    std::size_t   nPhotonsPerCell = 200;
-    std::size_t   maxSegments     = 64;
-    std::uint64_t rngSeed     = 0xCAFEFEED'BABE5EE5ULL;
+struct MonteCarloProps
+{
+    double absorption = 0.5; // κ
+    double scattering = 0.0; // σ_s
+    double refractiveN = 1.0;
+    std::size_t nPhotonsPerCell = 200;
+    std::size_t maxSegments = 64;
+    std::uint64_t rngSeed = 0xCAFEFEED'BABE5EE5ULL;
 };
 
-class MonteCarloRte {
+class MonteCarloRte
+{
 public:
     bool initialize(const meshing::Mesh& mesh,
                     solver::FieldRegistry& fields,
@@ -68,12 +72,12 @@ public:
 private:
     const McWallSpec* find_wall(meshing::ZoneId z) const;
 
-    const meshing::Mesh*   mesh_  = nullptr;
-    solver::FieldRegistry* F_     = nullptr;
-    MonteCarloProps        p_{};
+    const meshing::Mesh* mesh_ = nullptr;
+    solver::FieldRegistry* F_ = nullptr;
+    MonteCarloProps p_{};
     std::vector<McWallSpec> walls_;
-    std::vector<double>     q_wall_;
-    std::mt19937_64         rng_;
+    std::vector<double> q_wall_;
+    std::mt19937_64 rng_;
 };
 
-}  // namespace simall::radiation
+} // namespace simall::radiation

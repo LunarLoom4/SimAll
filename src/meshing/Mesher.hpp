@@ -15,61 +15,74 @@
 #pragma once
 
 #include "MeshStorage.hpp"
+
 #include "cad/CadKernel.hpp"
 
 #include <memory>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct SurfaceMeshParams {
+struct SurfaceMeshParams
+{
     double targetEdgeLength = 1.0e-2;
-    double curvatureFactor  = 0.1;       // refine when h > κ·R
-    double minAngleDeg      = 20.0;      // reject triangles below
-    double maxAspectRatio   = 5.0;
+    double curvatureFactor = 0.1; // refine when h > κ·R
+    double minAngleDeg = 20.0;    // reject triangles below
+    double maxAspectRatio = 5.0;
 };
 
-struct VolumeMeshParams {
+struct VolumeMeshParams
+{
     double targetEdgeLength = 1.0e-2;
-    double growthRate       = 1.2;
-    bool   suppressSlivers  = true;
+    double growthRate = 1.2;
+    bool suppressSlivers = true;
 };
 
-struct BoundaryLayerParams {
-    double firstLayerHeight = 1.0e-5;    // m (use y+ targeting in helper)
-    double growthRate       = 1.2;
-    int    numLayers        = 10;
-    double totalThickness   = 0.0;       // auto if 0
+struct BoundaryLayerParams
+{
+    double firstLayerHeight = 1.0e-5; // m (use y+ targeting in helper)
+    double growthRate = 1.2;
+    int numLayers = 10;
+    double totalThickness = 0.0; // auto if 0
 };
 
-struct QualityReport {
+struct QualityReport
+{
     double minSkewness, maxSkewness, avgSkewness;
     double minOrthogonality, maxAspectRatio, minJacobian;
     std::size_t badCells;
 };
 
-class IMesher {
+class IMesher
+{
 public:
     virtual ~IMesher() = default;
     virtual void execute(Mesh& output) = 0;
 };
 
-class SurfaceMesher : public IMesher {
+class SurfaceMesher : public IMesher
+{
 public:
     SurfaceMesher(const cad::ShapeHandle&, SurfaceMeshParams);
     void execute(Mesh&) override;
+
 private:
-    const cad::ShapeHandle& shape_; SurfaceMeshParams p_;
+    const cad::ShapeHandle& shape_;
+    SurfaceMeshParams p_;
 };
 
-class TetMesher : public IMesher {
+class TetMesher : public IMesher
+{
 public:
     explicit TetMesher(VolumeMeshParams p) : p_(p) {}
     void execute(Mesh&) override;
+
 private:
     VolumeMeshParams p_;
 };
 
-class PrismExtruder {
+class PrismExtruder
+{
 public:
     explicit PrismExtruder(BoundaryLayerParams p) : p_(p) {}
     void extrude(Mesh& surface_mesh, Mesh& output_with_prisms);
@@ -77,13 +90,15 @@ public:
     /// First-cell estimation from y+ target.
     /// Δy = y+ * ν / uτ ; here uτ from skin-friction estimate Cf*0.5*ρU²/ρ.
     static double first_layer_from_yplus(double yPlusTarget, double nu, double uTau);
+
 private:
     BoundaryLayerParams p_;
 };
 
-class QualityAnalyzer {
+class QualityAnalyzer
+{
 public:
     static QualityReport analyze(const Mesh&);
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

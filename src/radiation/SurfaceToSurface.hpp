@@ -31,21 +31,25 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::radiation {
+namespace simall::radiation
+{
 
-struct S2SFaceSpec {
+struct S2SFaceSpec
+{
     meshing::ZoneId zone;
-    double emissivity  = 0.9;
+    double emissivity = 0.9;
     double temperature = 300.0;
 };
 
-struct S2SProps {
+struct S2SProps
+{
     std::size_t nRaysPerFace = 256;
-    bool        checkOcclusion = false;
-    std::uint64_t rngSeed     = 0xD15E'A5E5ULL;
+    bool checkOcclusion = false;
+    std::uint64_t rngSeed = 0xD15E'A5E5ULL;
 };
 
-class SurfaceToSurface {
+class SurfaceToSurface
+{
 public:
     bool initialize(const meshing::Mesh& mesh, const S2SProps& props);
 
@@ -68,12 +72,12 @@ public:
 private:
     const S2SFaceSpec* spec_for_zone(meshing::ZoneId z) const;
 
-    const meshing::Mesh*     mesh_ = nullptr;
-    S2SProps                 p_{};
+    const meshing::Mesh* mesh_ = nullptr;
+    S2SProps p_{};
     std::vector<S2SFaceSpec> zones_;
-    std::vector<std::size_t> faceList_;     // index → mesh-face id
-    std::vector<double>      F_;            // row-major nF·nF view factor
-    std::vector<double>      q_;            // per face (W/m²)
+    std::vector<std::size_t> faceList_; // index → mesh-face id
+    std::vector<double> F_;             // row-major nF·nF view factor
+    std::vector<double> q_;             // per face (W/m²)
 };
 
-}  // namespace simall::radiation
+} // namespace simall::radiation

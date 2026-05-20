@@ -8,10 +8,10 @@
 #include <sstream>
 #include <system_error>
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-AnimationRecorder::AnimationRecorder(AnimationConfig cfg)
-    : cfg_(std::move(cfg))
+AnimationRecorder::AnimationRecorder(AnimationConfig cfg) : cfg_(std::move(cfg))
 {
     if (!cfg_.outputDir.empty()) {
         std::error_code ec;
@@ -20,7 +20,8 @@ AnimationRecorder::AnimationRecorder(AnimationConfig cfg)
     nextDueTime_ = cfg_.startTime;
 }
 
-bool AnimationRecorder::submit(double simTime, Image image) {
+bool AnimationRecorder::submit(double simTime, Image image)
+{
     std::lock_guard lock(mu_);
     if (simTime < cfg_.startTime || simTime > cfg_.endTime) {
         ++stats_.framesDropped;
@@ -40,38 +41,43 @@ bool AnimationRecorder::submit(double simTime, Image image) {
     return true;
 }
 
-FrameIdx AnimationRecorder::flush() {
+FrameIdx AnimationRecorder::flush()
+{
     std::lock_guard lock(mu_);
     FrameIdx written = 0;
     for (auto& p : queue_) {
         const auto path = frame_path(p.index);
-        const bool ok = cfg_.rgbaRaw
-            ? ScreenshotRecorder::save_rgba_raw(p.img, path)
-            : ScreenshotRecorder::save_ppm     (p.img, path);
-        if (ok) { ++written; ++stats_.framesWritten; }
+        const bool ok = cfg_.rgbaRaw ? ScreenshotRecorder::save_rgba_raw(p.img, path)
+                                     : ScreenshotRecorder::save_ppm(p.img, path);
+        if (ok) {
+            ++written;
+            ++stats_.framesWritten;
+        }
     }
     queue_.clear();
     return written;
 }
 
-AnimationStats AnimationRecorder::stats() const {
+AnimationStats AnimationRecorder::stats() const
+{
     std::lock_guard lock(mu_);
     return stats_;
 }
 
-void AnimationRecorder::reset() {
+void AnimationRecorder::reset()
+{
     std::lock_guard lock(mu_);
     stats_ = {};
     queue_.clear();
     nextDueTime_ = cfg_.startTime;
 }
 
-std::filesystem::path AnimationRecorder::frame_path(FrameIdx idx) const {
+std::filesystem::path AnimationRecorder::frame_path(FrameIdx idx) const
+{
     std::ostringstream oss;
-    oss << cfg_.filenameStem << '_'
-        << std::setfill('0') << std::setw(cfg_.filenameDigits) << idx
+    oss << cfg_.filenameStem << '_' << std::setfill('0') << std::setw(cfg_.filenameDigits) << idx
         << (cfg_.rgbaRaw ? ".rgba" : ".ppm");
     return cfg_.outputDir / oss.str();
 }
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

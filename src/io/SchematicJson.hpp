@@ -31,9 +31,14 @@
 
 #include <string>
 
-namespace simall::workbench { class Schematic; class StateMachine; }
+namespace simall::workbench
+{
+class Schematic;
+class StateMachine;
+}
 
-namespace simall::io {
+namespace simall::io
+{
 
 // In-memory string round trip.
 [[nodiscard]] std::string schematic_to_json(const workbench::Schematic& s,
@@ -56,4 +61,4 @@ namespace simall::io {
                                        workbench::Schematic& out,
                                        workbench::StateMachine* sm = nullptr);
 
-}  // namespace simall::io
+} // namespace simall::io

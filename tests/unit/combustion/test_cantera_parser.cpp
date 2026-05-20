@@ -3,14 +3,15 @@
 // File   : tests/unit/combustion/test_cantera_parser.cpp
 // Phase  : 11 — sanity round-trip for the in-tree Cantera YAML reader.
 // =============================================================================
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/catch_approx.hpp>
-
 #include "combustion/CanteraParser.hpp"
+
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 using namespace simall::combustion;
 
-namespace {
+namespace
+{
 
 constexpr const char* kTinyMech = R"YAML(
 elements:
@@ -38,15 +39,15 @@ reactions:
     rate-constant: {A: 3.5e+13, b: 0.0, Ea: 7.1e+04}
 )YAML";
 
-}  // namespace
+} // namespace
 
-TEST_CASE("CanteraParser parses a minimal H2/O2 YAML mechanism",
-          "[combustion][cantera]") {
+TEST_CASE("CanteraParser parses a minimal H2/O2 YAML mechanism", "[combustion][cantera]")
+{
     CanteraParser parser;
     auto mech = parser.parseString(kTinyMech, CanteraFormat::Yaml);
 
     REQUIRE(mech.elements.size() == 2);
-    REQUIRE(mech.species.size()  == 3);
+    REQUIRE(mech.species.size() == 3);
     REQUIRE(mech.reactions.size() == 2);
 
     // Species composition was decoded.
@@ -70,7 +71,7 @@ TEST_CASE("CanteraParser parses a minimal H2/O2 YAML mechanism",
     REQUIRE(mech.reactions[0].products.at("H2O") == Catch::Approx(2.0));
 
     // Arrhenius coefficients survived the JSON-style inline parser.
-    REQUIRE(mech.reactions[1].fwd.A    == Catch::Approx(3.5e13));
+    REQUIRE(mech.reactions[1].fwd.A == Catch::Approx(3.5e13));
     REQUIRE(mech.reactions[1].fwd.beta == Catch::Approx(0.0));
-    REQUIRE(mech.reactions[1].fwd.Ea   == Catch::Approx(7.1e4));
+    REQUIRE(mech.reactions[1].fwd.Ea == Catch::Approx(7.1e4));
 }

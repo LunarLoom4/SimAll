@@ -29,16 +29,19 @@
 #include <cstdint>
 #include <random>
 
-namespace simall::particles {
+namespace simall::particles
+{
 
-struct CoalescenceProps {
-    double sigma   = 0.072;     // [N/m] liquid surface tension
-    double rho_l   = 998.2;
+struct CoalescenceProps
+{
+    double sigma = 0.072; // [N/m] liquid surface tension
+    double rho_l = 998.2;
     double We_crit = 5.0;
     std::uint64_t rngSeed = 0xC0AE'CE99;
 };
 
-class ParcelCoalescence {
+class ParcelCoalescence
+{
 public:
     void initialize(const meshing::Mesh& mesh, CoalescenceProps props);
 
@@ -50,8 +53,8 @@ public:
 
 private:
     const meshing::Mesh* mesh_ = nullptr;
-    CoalescenceProps     p_{};
-    std::mt19937_64      rng_;
+    CoalescenceProps p_{};
+    std::mt19937_64 rng_;
 };
 
-}  // namespace simall::particles
+} // namespace simall::particles

@@ -47,42 +47,48 @@
 #include <vector>
 
 #ifdef SIMALL_HAVE_CUDA
-    #include <cuda_runtime.h>
+#include <cuda_runtime.h>
 #endif
 
-namespace simall::gpu {
+namespace simall::gpu
+{
 
-template <typename T>
-class HostDeviceMirror {
+template <typename T> class HostDeviceMirror
+{
     static_assert(std::is_trivially_copyable_v<T>,
-        "HostDeviceMirror<T> requires a trivially-copyable element type "
-        "(POD numerics or aggregates).");
+                  "HostDeviceMirror<T> requires a trivially-copyable element type "
+                  "(POD numerics or aggregates).");
 
 public:
     HostDeviceMirror() = default;
 
     explicit HostDeviceMirror(std::size_t n) { resize(n); }
 
-    HostDeviceMirror(const HostDeviceMirror&)            = delete;
+    HostDeviceMirror(const HostDeviceMirror&) = delete;
     HostDeviceMirror& operator=(const HostDeviceMirror&) = delete;
 
     HostDeviceMirror(HostDeviceMirror&& o) noexcept
-        : host_(std::move(o.host_)), device_(o.device_),
-          deviceBytes_(o.deviceBytes_), ownsDevice_(o.ownsDevice_)
+        : host_(std::move(o.host_))
+        , device_(o.device_)
+        , deviceBytes_(o.deviceBytes_)
+        , ownsDevice_(o.ownsDevice_)
     {
-        o.device_      = nullptr;
+        o.device_ = nullptr;
         o.deviceBytes_ = 0;
-        o.ownsDevice_  = false;
+        o.ownsDevice_ = false;
     }
 
-    HostDeviceMirror& operator=(HostDeviceMirror&& o) noexcept {
+    HostDeviceMirror& operator=(HostDeviceMirror&& o) noexcept
+    {
         if (this != &o) {
             free_device();
-            host_        = std::move(o.host_);
-            device_      = o.device_;
+            host_ = std::move(o.host_);
+            device_ = o.device_;
             deviceBytes_ = o.deviceBytes_;
-            ownsDevice_  = o.ownsDevice_;
-            o.device_ = nullptr; o.deviceBytes_ = 0; o.ownsDevice_ = false;
+            ownsDevice_ = o.ownsDevice_;
+            o.device_ = nullptr;
+            o.deviceBytes_ = 0;
+            o.ownsDevice_ = false;
         }
         return *this;
     }
@@ -91,27 +97,29 @@ public:
 
     /// Resize host + device storage to ``n`` elements.  Existing contents
     /// are NOT preserved across resizes (mirrors std::vector::clear()).
-    void resize(std::size_t n) {
+    void resize(std::size_t n)
+    {
         host_.assign(n, T{});
         const std::size_t bytes = n * sizeof(T);
 #ifdef SIMALL_HAVE_CUDA
         if (is_cuda_available() && n > 0) {
             free_device();
-            device_      = DeviceMemoryPool::instance().allocate(bytes);
+            device_ = DeviceMemoryPool::instance().allocate(bytes);
             deviceBytes_ = bytes;
-            ownsDevice_  = true;
+            ownsDevice_ = true;
             return;
         }
 #endif
         // Serial fall-back: device pointer aliases host data.
         free_device();
-        device_      = host_.data();
+        device_ = host_.data();
         deviceBytes_ = bytes;
-        ownsDevice_  = false;
+        ownsDevice_ = false;
     }
 
     /// Host→device copy.  No-op on non-CUDA builds.
-    void to_device() {
+    void to_device()
+    {
 #ifdef SIMALL_HAVE_CUDA
         if (ownsDevice_ && device_ && !host_.empty())
             cudaMemcpy(device_, host_.data(), deviceBytes_, cudaMemcpyHostToDevice);
@@ -119,65 +127,79 @@ public:
     }
 
     /// Asynchronous host→device on a specific stream.
-    void to_device_async(void* stream) {
+    void to_device_async(void* stream)
+    {
 #ifdef SIMALL_HAVE_CUDA
         if (ownsDevice_ && device_ && !host_.empty())
-            cudaMemcpyAsync(device_, host_.data(), deviceBytes_,
-                cudaMemcpyHostToDevice, static_cast<cudaStream_t>(stream));
+            cudaMemcpyAsync(device_,
+                            host_.data(),
+                            deviceBytes_,
+                            cudaMemcpyHostToDevice,
+                            static_cast<cudaStream_t>(stream));
 #else
-        (void)stream;
+        (void) stream;
 #endif
     }
 
     /// Device→host copy.  No-op on non-CUDA builds.
-    void to_host() {
+    void to_host()
+    {
 #ifdef SIMALL_HAVE_CUDA
         if (ownsDevice_ && device_ && !host_.empty())
             cudaMemcpy(host_.data(), device_, deviceBytes_, cudaMemcpyDeviceToHost);
 #endif
     }
 
-    void to_host_async(void* stream) {
+    void to_host_async(void* stream)
+    {
 #ifdef SIMALL_HAVE_CUDA
         if (ownsDevice_ && device_ && !host_.empty())
-            cudaMemcpyAsync(host_.data(), device_, deviceBytes_,
-                cudaMemcpyDeviceToHost, static_cast<cudaStream_t>(stream));
+            cudaMemcpyAsync(host_.data(),
+                            device_,
+                            deviceBytes_,
+                            cudaMemcpyDeviceToHost,
+                            static_cast<cudaStream_t>(stream));
 #else
-        (void)stream;
+        (void) stream;
 #endif
     }
 
     /// Memset device storage to zero.
-    void zero_device() {
+    void zero_device()
+    {
 #ifdef SIMALL_HAVE_CUDA
-        if (ownsDevice_ && device_) cudaMemset(device_, 0, deviceBytes_);
-        else if (!host_.empty()) std::memset(host_.data(), 0, deviceBytes_);
+        if (ownsDevice_ && device_)
+            cudaMemset(device_, 0, deviceBytes_);
+        else if (!host_.empty())
+            std::memset(host_.data(), 0, deviceBytes_);
 #else
-        if (!host_.empty()) std::memset(host_.data(), 0, deviceBytes_);
+        if (!host_.empty())
+            std::memset(host_.data(), 0, deviceBytes_);
 #endif
     }
 
-    std::size_t size()           const noexcept { return host_.size(); }
-    std::size_t size_in_bytes()  const noexcept { return deviceBytes_; }
-    bool        empty()          const noexcept { return host_.empty(); }
-    bool        owns_device()    const noexcept { return ownsDevice_;   }
+    std::size_t size() const noexcept { return host_.size(); }
+    std::size_t size_in_bytes() const noexcept { return deviceBytes_; }
+    bool empty() const noexcept { return host_.empty(); }
+    bool owns_device() const noexcept { return ownsDevice_; }
 
-    T*         host_ptr()        noexcept { return host_.data(); }
-    const T*   host_ptr()  const noexcept { return host_.data(); }
-    void*      device_ptr()      noexcept { return device_;      }
-    const void*device_ptr()const noexcept { return device_;      }
+    T* host_ptr() noexcept { return host_.data(); }
+    const T* host_ptr() const noexcept { return host_.data(); }
+    void* device_ptr() noexcept { return device_; }
+    const void* device_ptr() const noexcept { return device_; }
 
-    T*         host_begin()        noexcept { return host_.data(); }
-    T*         host_end()          noexcept { return host_.data() + host_.size(); }
-    const T*   host_begin()  const noexcept { return host_.data(); }
-    const T*   host_end()    const noexcept { return host_.data() + host_.size(); }
+    T* host_begin() noexcept { return host_.data(); }
+    T* host_end() noexcept { return host_.data() + host_.size(); }
+    const T* host_begin() const noexcept { return host_.data(); }
+    const T* host_end() const noexcept { return host_.data() + host_.size(); }
 
     /// std::vector reference for ergonomic algorithms.
-    std::vector<T>&       host_view()       noexcept { return host_; }
+    std::vector<T>& host_view() noexcept { return host_; }
     const std::vector<T>& host_view() const noexcept { return host_; }
 
     /// Deep copy (host + device).  Useful for back-up / restart vectors.
-    HostDeviceMirror clone() const {
+    HostDeviceMirror clone() const
+    {
         HostDeviceMirror out(host_.size());
         std::copy(host_.begin(), host_.end(), out.host_.begin());
         out.to_device();
@@ -185,20 +207,21 @@ public:
     }
 
 private:
-    void free_device() noexcept {
+    void free_device() noexcept
+    {
 #ifdef SIMALL_HAVE_CUDA
         if (ownsDevice_ && device_)
             DeviceMemoryPool::instance().release(device_, deviceBytes_);
 #endif
-        device_      = nullptr;
+        device_ = nullptr;
         deviceBytes_ = 0;
-        ownsDevice_  = false;
+        ownsDevice_ = false;
     }
 
     std::vector<T> host_;
-    void*          device_      = nullptr;
-    std::size_t    deviceBytes_ = 0;
-    bool           ownsDevice_  = false;
+    void* device_ = nullptr;
+    std::size_t deviceBytes_ = 0;
+    bool ownsDevice_ = false;
 };
 
-}  // namespace simall::gpu
+} // namespace simall::gpu

@@ -24,7 +24,8 @@
 #include <unordered_map>
 #include <vector>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
 using CellId = std::uint64_t;
 using FaceId = std::uint64_t;
@@ -33,53 +34,63 @@ using ZoneId = std::uint32_t;
 
 inline constexpr CellId kBoundaryCell = static_cast<CellId>(-1);
 
-struct NodeStorage {
+struct NodeStorage
+{
     util::aligned_vector<double> x, y, z;
     std::size_t size() const noexcept { return x.size(); }
-    void reserve(std::size_t n) { x.reserve(n); y.reserve(n); z.reserve(n); }
+    void reserve(std::size_t n)
+    {
+        x.reserve(n);
+        y.reserve(n);
+        z.reserve(n);
+    }
 };
 
-struct FaceStorage {
+struct FaceStorage
+{
     util::aligned_vector<CellId> owner;
-    util::aligned_vector<CellId> neighbor;        // kBoundaryCell if boundary
+    util::aligned_vector<CellId> neighbor; // kBoundaryCell if boundary
     util::aligned_vector<double> areaX, areaY, areaZ;
     util::aligned_vector<double> centroidX, centroidY, centroidZ;
-    util::aligned_vector<ZoneId> boundaryZone;    // 0 = interior
+    util::aligned_vector<ZoneId> boundaryZone; // 0 = interior
 
     // Variable-stride node connectivity in CSR.
-    util::aligned_vector<std::int32_t> nodeOffsets;   // size = nFaces+1
-    util::aligned_vector<NodeId>       nodeIndices;
+    util::aligned_vector<std::int32_t> nodeOffsets; // size = nFaces+1
+    util::aligned_vector<NodeId> nodeIndices;
 
     std::size_t size() const noexcept { return owner.size(); }
 };
 
-struct CellStorage {
+struct CellStorage
+{
     util::aligned_vector<double> volume;
     util::aligned_vector<double> centroidX, centroidY, centroidZ;
 
     // CSR face connectivity per cell.
-    util::aligned_vector<std::int32_t> faceOffsets;   // size = nCells+1
-    util::aligned_vector<FaceId>       faceIndices;
+    util::aligned_vector<std::int32_t> faceOffsets; // size = nCells+1
+    util::aligned_vector<FaceId> faceIndices;
 
     std::size_t size() const noexcept { return volume.size(); }
 };
 
-struct ZoneInfo {
-    ZoneId      id;
+struct ZoneInfo
+{
+    ZoneId id;
     std::string name;
-    bool        isBoundary;
+    bool isBoundary;
 };
 
-class Mesh {
+class Mesh
+{
 public:
-    NodeStorage&       nodes()       noexcept { return nodes_; }
+    NodeStorage& nodes() noexcept { return nodes_; }
     const NodeStorage& nodes() const noexcept { return nodes_; }
-    FaceStorage&       faces()       noexcept { return faces_; }
+    FaceStorage& faces() noexcept { return faces_; }
     const FaceStorage& faces() const noexcept { return faces_; }
-    CellStorage&       cells()       noexcept { return cells_; }
+    CellStorage& cells() noexcept { return cells_; }
     const CellStorage& cells() const noexcept { return cells_; }
 
-    ZoneId    add_zone(std::string name, bool isBoundary);
+    ZoneId add_zone(std::string name, bool isBoundary);
     ZoneInfo* find_zone(ZoneId id);
 
     /// Recompute face areas, centroids, and cell volumes from node coords.
@@ -90,7 +101,7 @@ private:
     FaceStorage faces_;
     CellStorage cells_;
     std::unordered_map<ZoneId, ZoneInfo> zones_;
-    ZoneId      next_zone_ = 1;
+    ZoneId next_zone_ = 1;
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

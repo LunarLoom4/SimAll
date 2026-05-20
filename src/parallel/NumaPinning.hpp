@@ -25,15 +25,18 @@
 #include <string>
 #include <vector>
 
-namespace simall::parallel {
+namespace simall::parallel
+{
 
-struct NumaTopology {
-    int  totalCores      = 0;
-    int  numaNodes       = 0;
-    std::vector<int> coresPerNode;     // size = numaNodes
+struct NumaTopology
+{
+    int totalCores = 0;
+    int numaNodes = 0;
+    std::vector<int> coresPerNode; // size = numaNodes
 };
 
-class NumaPinning {
+class NumaPinning
+{
 public:
     /// Discover the host's NUMA layout.  Returns a best-effort estimate
     /// (one node + all cores) when no NUMA back-end is available.
@@ -55,4 +58,4 @@ public:
     static std::string summarise(const NumaTopology& topo);
 };
 
-}  // namespace simall::parallel
+} // namespace simall::parallel

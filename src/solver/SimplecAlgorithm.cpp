@@ -10,6 +10,7 @@
 // =============================================================================
 #include "solver/SimplecAlgorithm.hpp"
 
-namespace simall::solver {
+namespace simall::solver
+{
 // (currently no SIMPLEC-only out-of-line members)
-}  // namespace simall::solver
+} // namespace simall::solver

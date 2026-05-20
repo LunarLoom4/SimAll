@@ -13,21 +13,22 @@
 
 #include "visualization/VisualizationTypes.hpp"
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-struct Plane {
-    util::Vec3d point;        // any point on the plane
-    util::Vec3d normal;       // points to the "above" half-space
+struct Plane
+{
+    util::Vec3d point;  // any point on the plane
+    util::Vec3d normal; // points to the "above" half-space
 };
 
-class ClippingPlane {
+class ClippingPlane
+{
 public:
     /// Clip `surface`.  When `keepBelow` is true the half-space test is
     /// inverted (handy for showing both halves side-by-side).  pointScalars
     /// are interpolated when present.
-    static SurfaceMesh clip(const SurfaceMesh& surface,
-                            const Plane& plane,
-                            bool keepBelow = false);
+    static SurfaceMesh clip(const SurfaceMesh& surface, const Plane& plane, bool keepBelow = false);
 };
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

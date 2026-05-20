@@ -29,21 +29,24 @@
 #include "meshing/MeshStorage.hpp"
 #include "solver/FieldRegistry.hpp"
 
-namespace simall::combustion {
+namespace simall::combustion
+{
 
-struct MossBrookesProps {
-    double C_alpha       = 54.0;     // nucleation pre-exp     [1/s]
-    double T_alpha       = 21000.0;  // nucleation activation T [K]
-    double C_beta        = 1.0e-15;  // coagulation
-    double C_gamma       = 11700.0;  // surface growth pre-exp
-    double T_gamma       = 12100.0;  // surface growth Ea/R
-    double C_oxid        = 0.015;    // OH-oxidation collision
-    double rho_soot      = 1800.0;   // soot density [kg/m³]
-    double Mw_fuel       = 16.04e-3; // CH4 default
-    double C_atoms_per_p = 12.0 * 60.0;   // PAH-style nucleation cluster
+struct MossBrookesProps
+{
+    double C_alpha = 54.0;              // nucleation pre-exp     [1/s]
+    double T_alpha = 21000.0;           // nucleation activation T [K]
+    double C_beta = 1.0e-15;            // coagulation
+    double C_gamma = 11700.0;           // surface growth pre-exp
+    double T_gamma = 12100.0;           // surface growth Ea/R
+    double C_oxid = 0.015;              // OH-oxidation collision
+    double rho_soot = 1800.0;           // soot density [kg/m³]
+    double Mw_fuel = 16.04e-3;          // CH4 default
+    double C_atoms_per_p = 12.0 * 60.0; // PAH-style nucleation cluster
 };
 
-class SootMossBrookes {
+class SootMossBrookes
+{
 public:
     void initialize(const meshing::Mesh& mesh, MossBrookesProps props = {});
 
@@ -57,7 +60,7 @@ public:
 
 private:
     const meshing::Mesh* mesh_ = nullptr;
-    MossBrookesProps     p_{};
+    MossBrookesProps p_{};
 };
 
-}  // namespace simall::combustion
+} // namespace simall::combustion

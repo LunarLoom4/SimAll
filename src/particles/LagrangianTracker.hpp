@@ -29,37 +29,40 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::particles {
+namespace simall::particles
+{
 
-struct ParticleSpec {
-    double diameter = 1e-5;     // m
-    double density  = 2500.0;   // kg/m³ (e.g. silica)
+struct ParticleSpec
+{
+    double diameter = 1e-5;  // m
+    double density = 2500.0; // kg/m³ (e.g. silica)
     util::Vec3d gravity{0, 0, -9.81};
-    bool   trackRotation = false;
-    bool   saffmanLift   = false;   ///< Saffman shear-induced lift (Mei 1992)
-    bool   magnusLift    = false;   ///< Magnus rotation-induced lift
+    bool trackRotation = false;
+    bool saffmanLift = false; ///< Saffman shear-induced lift (Mei 1992)
+    bool magnusLift = false;  ///< Magnus rotation-induced lift
 };
 
-struct ParticleState {
-    util::Vec3d x{0,0,0};
-    util::Vec3d v{0,0,0};
-    util::Vec3d omega{0,0,0};   ///< particle angular velocity (if trackRotation)
-    double      mass     = 0.0;
-    double      inertia  = 0.0; ///< moment of inertia = (1/10) m d_p²
+struct ParticleState
+{
+    util::Vec3d x{0, 0, 0};
+    util::Vec3d v{0, 0, 0};
+    util::Vec3d omega{0, 0, 0}; ///< particle angular velocity (if trackRotation)
+    double mass = 0.0;
+    double inertia = 0.0; ///< moment of inertia = (1/10) m d_p²
     meshing::CellId cell = static_cast<meshing::CellId>(-1);
-    bool        active   = true;
+    bool active = true;
 };
 
-class LagrangianTracker {
+class LagrangianTracker
+{
 public:
     void initialize(const meshing::Mesh& mesh,
-                    double fluidDensity, double fluidViscosity,
+                    double fluidDensity,
+                    double fluidViscosity,
                     const ParticleSpec& spec);
 
     /// Inject N particles uniformly from a point with a velocity.
-    void inject_point(const util::Vec3d& location,
-                      const util::Vec3d& velocity,
-                      std::size_t count);
+    void inject_point(const util::Vec3d& location, const util::Vec3d& velocity, std::size_t count);
 
     /// Advance all particles by dt using fluid cell-centred velocity field
     /// "U". Updates positions, velocities, and current host cell.
@@ -71,7 +74,7 @@ public:
 
     std::size_t live() const noexcept;
     const std::vector<ParticleState>& particles() const noexcept { return parts_; }
-    std::vector<ParticleState>&       mutable_particles()       noexcept { return parts_; }
+    std::vector<ParticleState>& mutable_particles() noexcept { return parts_; }
 
 private:
     /// Locate cell containing point p starting from cell hint. Returns -1 if
@@ -87,4 +90,4 @@ private:
     util::aligned_vector<double> srcX_, srcY_, srcZ_;
 };
 
-}  // namespace simall::particles
+} // namespace simall::particles

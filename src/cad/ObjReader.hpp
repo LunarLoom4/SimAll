@@ -21,16 +21,19 @@
 
 #include <string>
 
-namespace simall::cad {
+namespace simall::cad
+{
 
-struct ObjReadOptions {
-    bool   mergeCoincidentVertices = true;
-    double mergeTolerance          = 1.0e-6;
-    bool   triangulateNGons        = true;
-    bool   recomputeNormals        = true;
+struct ObjReadOptions
+{
+    bool mergeCoincidentVertices = true;
+    double mergeTolerance = 1.0e-6;
+    bool triangulateNGons = true;
+    bool recomputeNormals = true;
 };
 
-class ObjReader {
+class ObjReader
+{
 public:
     /// Read an OBJ file and return a ShapeHandle whose TopoDS_Shape is a
     /// compound of triangular faces.  Throws on IO or parse failure.
@@ -38,8 +41,7 @@ public:
 
     /// Fast path that bypasses TopoDS construction and returns the raw
     /// TriangleMesh suitable for direct visualization / regression.
-    TriangleMesh readTriangles(const std::string& path,
-                               const ObjReadOptions& opts = {});
+    TriangleMesh readTriangles(const std::string& path, const ObjReadOptions& opts = {});
 };
 
-}  // namespace simall::cad
+} // namespace simall::cad

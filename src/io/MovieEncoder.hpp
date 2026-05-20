@@ -28,22 +28,31 @@
 #include <string>
 #include <vector>
 
-namespace simall::io {
+namespace simall::io
+{
 
-enum class MovieCodec : std::uint8_t { Auto, Apng, PpmSequence, FfmpegMp4 };
-
-struct MovieOptions {
-    MovieCodec    codec      = MovieCodec::Auto;
-    std::uint32_t fps        = 30;
-    bool          loop       = true;        // APNG only; 0 == infinite
-    std::string   ffmpegPath = "ffmpeg";    // looked up on $PATH if unqualified
+enum class MovieCodec : std::uint8_t
+{
+    Auto,
+    Apng,
+    PpmSequence,
+    FfmpegMp4
 };
 
-class MovieEncoder {
+struct MovieOptions
+{
+    MovieCodec codec = MovieCodec::Auto;
+    std::uint32_t fps = 30;
+    bool loop = true;                  // APNG only; 0 == infinite
+    std::string ffmpegPath = "ffmpeg"; // looked up on $PATH if unqualified
+};
+
+class MovieEncoder
+{
 public:
     MovieEncoder();
     ~MovieEncoder();
-    MovieEncoder(const MovieEncoder&)            = delete;
+    MovieEncoder(const MovieEncoder&) = delete;
     MovieEncoder& operator=(const MovieEncoder&) = delete;
 
     bool begin(const std::string& path,
@@ -55,7 +64,7 @@ public:
 
     bool end();
 
-    [[nodiscard]] MovieCodec  active_codec() const noexcept;
+    [[nodiscard]] MovieCodec active_codec() const noexcept;
     [[nodiscard]] std::uint32_t frame_count() const noexcept;
     [[nodiscard]] const std::string& error() const noexcept;
 
@@ -66,7 +75,10 @@ private:
 
 // Internal helpers exposed for unit testing.
 [[nodiscard]] std::vector<std::uint8_t> apng_encode(
-    std::uint32_t w, std::uint32_t h, std::uint32_t fps,
-    bool loop, const std::vector<std::vector<std::uint8_t>>& framesRgb8);
+    std::uint32_t w,
+    std::uint32_t h,
+    std::uint32_t fps,
+    bool loop,
+    const std::vector<std::vector<std::uint8_t>>& framesRgb8);
 
-}  // namespace simall::io
+} // namespace simall::io

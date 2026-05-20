@@ -24,11 +24,10 @@
 #include "workbench/CellLink.hpp"
 #include "workbench/Workbench.hpp"
 
+#include <optional>
 #include <QGraphicsView>
 #include <QPointer>
 #include <QString>
-
-#include <optional>
 #include <unordered_map>
 
 class QGraphicsScene;
@@ -36,15 +35,21 @@ class QMouseEvent;
 class QContextMenuEvent;
 class QGraphicsLineItem;
 
-namespace simall::workbench { class Schematic; class StateMachine;
-                              class WorkflowEngine; }
+namespace simall::workbench
+{
+class Schematic;
+class StateMachine;
+class WorkflowEngine;
+} // namespace simall::workbench
 
-namespace simall::gui::workbench {
+namespace simall::gui::workbench
+{
 
 class CellNodeItem;
 class LinkEdgeItem;
 
-class WorkbenchSchematicView : public QGraphicsView {
+class WorkbenchSchematicView : public QGraphicsView
+{
     Q_OBJECT
 public:
     explicit WorkbenchSchematicView(QWidget* parent = nullptr);
@@ -52,8 +57,8 @@ public:
 
     // Non-owning bind.  All three pointers must outlive this widget; pass
     // `nullptr` for any of them to clear and stop rendering.
-    void set_sources(simall::workbench::Schematic*     s,
-                     simall::workbench::StateMachine*  sm,
+    void set_sources(simall::workbench::Schematic* s,
+                     simall::workbench::StateMachine* sm,
                      simall::workbench::WorkflowEngine* eng);
 
     // Rebuild scene from the bound schematic.  Cheap enough to call on
@@ -92,37 +97,38 @@ signals:
     void cellBindAdapterRequested(simall::workbench::CellId id);
 
 protected:
-    void mousePressEvent  (QMouseEvent*) override;
-    void mouseMoveEvent   (QMouseEvent*) override;
+    void mousePressEvent(QMouseEvent*) override;
+    void mouseMoveEvent(QMouseEvent*) override;
     void mouseReleaseEvent(QMouseEvent*) override;
-    void contextMenuEvent (QContextMenuEvent*) override;
-    void keyPressEvent    (QKeyEvent*) override;
+    void contextMenuEvent(QContextMenuEvent*) override;
+    void keyPressEvent(QKeyEvent*) override;
 
 private:
-    struct PortHit {
-        simall::workbench::CellId   cell{};
-        simall::workbench::PortId   port{};
+    struct PortHit
+    {
+        simall::workbench::CellId cell{};
+        simall::workbench::PortId port{};
         simall::workbench::PortDirection direction{};
-        QPointF                    scene_pos;
+        QPointF scene_pos;
     };
 
     [[nodiscard]] std::optional<PortHit> hit_port(const QPointF& scenePos) const;
-    [[nodiscard]] CellNodeItem*          hit_cell(const QPointF& scenePos) const;
+    [[nodiscard]] CellNodeItem* hit_cell(const QPointF& scenePos) const;
 
     void rebuild_scene();
     void layout_cells();
 
     // Drag-link transient state.
-    bool                       dragging_link_{false};
-    PortHit                    drag_origin_{};
-    QGraphicsLineItem*         drag_preview_{nullptr};
+    bool dragging_link_{false};
+    PortHit drag_origin_{};
+    QGraphicsLineItem* drag_preview_{nullptr};
 
-    QGraphicsScene*            scene_{nullptr};
-    simall::workbench::Schematic*     schematic_{nullptr};
-    simall::workbench::StateMachine*  state_{nullptr};
+    QGraphicsScene* scene_{nullptr};
+    simall::workbench::Schematic* schematic_{nullptr};
+    simall::workbench::StateMachine* state_{nullptr};
     simall::workbench::WorkflowEngine* engine_{nullptr};
 
     std::unordered_map<simall::workbench::CellId, CellNodeItem*> cell_items_;
 };
 
-}  // namespace simall::gui::workbench
+} // namespace simall::gui::workbench

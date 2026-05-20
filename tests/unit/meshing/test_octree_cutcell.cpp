@@ -11,35 +11,45 @@
 //     boundary leaves are clipped rather than kept whole).
 //   - Cut-cell volume converges towards the true cube volume (1.0).
 // =============================================================================
-#include <catch2/catch_test_macros.hpp>
-#include <catch2/catch_approx.hpp>
-
-#include "meshing/OctreeMesher.hpp"
 #include "meshing/MeshStorage.hpp"
+#include "meshing/OctreeMesher.hpp"
 #include "meshing/StlImporter.hpp"
 #include "utilities/MathTypes.hpp"
+
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <numeric>
 
 using namespace simall;
 using Catch::Approx;
 
-namespace {
+namespace
+{
 
-meshing::StlSurface make_unit_cube() {
+meshing::StlSurface make_unit_cube()
+{
     meshing::StlSurface s;
-    s.vertices = {
-        {0.0, 0.0, 0.0}, {1.0, 0.0, 0.0}, {1.0, 1.0, 0.0}, {0.0, 1.0, 0.0},
-        {0.0, 0.0, 1.0}, {1.0, 0.0, 1.0}, {1.0, 1.0, 1.0}, {0.0, 1.0, 1.0}
-    };
-    s.triangles = {
-        {0, 3, 2}, {0, 2, 1},
-        {4, 5, 6}, {4, 6, 7},
-        {0, 1, 5}, {0, 5, 4},
-        {3, 7, 6}, {3, 6, 2},
-        {0, 4, 7}, {0, 7, 3},
-        {1, 2, 6}, {1, 6, 5}
-    };
+    s.vertices = {{0.0, 0.0, 0.0},
+                  {1.0, 0.0, 0.0},
+                  {1.0, 1.0, 0.0},
+                  {0.0, 1.0, 0.0},
+                  {0.0, 0.0, 1.0},
+                  {1.0, 0.0, 1.0},
+                  {1.0, 1.0, 1.0},
+                  {0.0, 1.0, 1.0}};
+    s.triangles = {{0, 3, 2},
+                   {0, 2, 1},
+                   {4, 5, 6},
+                   {4, 6, 7},
+                   {0, 1, 5},
+                   {0, 5, 4},
+                   {3, 7, 6},
+                   {3, 6, 2},
+                   {0, 4, 7},
+                   {0, 7, 3},
+                   {1, 2, 6},
+                   {1, 6, 5}};
     s.normals.reserve(s.triangles.size());
     for (const auto& t : s.triangles) {
         const auto& a = s.vertices[t[0]];
@@ -50,36 +60,39 @@ meshing::StlSurface make_unit_cube() {
     return s;
 }
 
-double total_volume(const meshing::Mesh& m) {
-    return std::accumulate(m.cells().volume.begin(),
-                            m.cells().volume.end(), 0.0);
+double total_volume(const meshing::Mesh& m)
+{
+    return std::accumulate(m.cells().volume.begin(), m.cells().volume.end(), 0.0);
 }
 
-}  // namespace
+} // namespace
 
 // =============================================================================
 TEST_CASE("OctreeMesher legacy stepped path still produces a valid mesh",
-          "[meshing][octree][cutcell]") {
+          "[meshing][octree][cutcell]")
+{
     auto stl = make_unit_cube();
     meshing::OctreeMeshOptions opt;
-    opt.maxDepth        = 3;
-    opt.minDepthGlobal  = 2;
-    opt.enableCutCells  = false;
+    opt.maxDepth = 3;
+    opt.minDepthGlobal = 2;
+    opt.enableCutCells = false;
 
     meshing::Mesh m;
     meshing::OctreeMesher{}.mesh(stl, opt, m);
     REQUIRE(m.cells().size() > 0);
-    for (auto v : m.cells().volume) REQUIRE(v > 0.0);
+    for (auto v : m.cells().volume)
+        REQUIRE(v > 0.0);
 }
 
 // =============================================================================
 TEST_CASE("OctreeMesher cut-cell path yields a non-empty watertight mesh",
-          "[meshing][octree][cutcell]") {
+          "[meshing][octree][cutcell]")
+{
     auto stl = make_unit_cube();
     meshing::OctreeMeshOptions opt;
-    opt.maxDepth        = 3;
-    opt.minDepthGlobal  = 2;
-    opt.enableCutCells  = true;
+    opt.maxDepth = 3;
+    opt.minDepthGlobal = 2;
+    opt.enableCutCells = true;
     opt.edgeBisectIters = 10;
 
     meshing::Mesh m;
@@ -87,7 +100,8 @@ TEST_CASE("OctreeMesher cut-cell path yields a non-empty watertight mesh",
     REQUIRE(m.cells().size() > 0);
 
     // Every cell volume strictly positive.
-    for (auto v : m.cells().volume) REQUIRE(v > 0.0);
+    for (auto v : m.cells().volume)
+        REQUIRE(v > 0.0);
 
     // Every face is either interior or boundary; nothing dangling.
     for (std::size_t f = 0; f < m.faces().size(); ++f) {
@@ -98,25 +112,25 @@ TEST_CASE("OctreeMesher cut-cell path yields a non-empty watertight mesh",
 }
 
 // =============================================================================
-TEST_CASE("OctreeMesher cut-cell volume is <= stepped volume (cube)",
-          "[meshing][octree][cutcell]") {
+TEST_CASE("OctreeMesher cut-cell volume is <= stepped volume (cube)", "[meshing][octree][cutcell]")
+{
     auto stl = make_unit_cube();
 
     meshing::OctreeMeshOptions optStepped;
-    optStepped.maxDepth       = 3;
+    optStepped.maxDepth = 3;
     optStepped.minDepthGlobal = 2;
     optStepped.enableCutCells = false;
     meshing::Mesh mStepped;
     meshing::OctreeMesher{}.mesh(stl, optStepped, mStepped);
 
     meshing::OctreeMeshOptions optCut = optStepped;
-    optCut.enableCutCells  = true;
+    optCut.enableCutCells = true;
     optCut.edgeBisectIters = 12;
     meshing::Mesh mCut;
     meshing::OctreeMesher{}.mesh(stl, optCut, mCut);
 
     const double vStepped = total_volume(mStepped);
-    const double vCut     = total_volume(mCut);
+    const double vCut = total_volume(mCut);
 
     // Stepped path always over-estimates (full hex per BOUNDARY leaf).
     // Cut-cell clips those leaves and so must report less-or-equal volume.
@@ -126,7 +140,7 @@ TEST_CASE("OctreeMesher cut-cell volume is <= stepped volume (cube)",
     // total (roughly 1.02^3 = 1.061) - i.e. they shouldn't overrun the
     // padded domain. This is mostly a sanity ceiling.
     REQUIRE(vStepped <= 1.10);
-    REQUIRE(vCut     <= 1.10);
+    REQUIRE(vCut <= 1.10);
 
     // Cut-cell volume should be measurably closer to the true cube than
     // stepped at this depth (cube is not exactly grid-aligned because of

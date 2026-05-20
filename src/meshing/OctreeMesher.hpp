@@ -22,12 +22,14 @@
 
 #include <array>
 
-namespace simall::meshing {
+namespace simall::meshing
+{
 
-struct OctreeMeshOptions {
-    int    maxDepth          = 6;
-    int    minDepthGlobal    = 3;
-    double targetEdgeLength  = 0.0;   // 0 = auto from bbox / 2^maxDepth
+struct OctreeMeshOptions
+{
+    int maxDepth = 6;
+    int minDepthGlobal = 3;
+    double targetEdgeLength = 0.0; // 0 = auto from bbox / 2^maxDepth
 
     /// (Pass 13) True cut-cell extraction.  When false (legacy default),
     /// every boundary leaf is emitted as a full hex (stepped staircase
@@ -45,16 +47,15 @@ struct OctreeMeshOptions {
     ///      cap polygon glued around the cut.
     /// All-outside leaves are dropped; all-inside boundary leaves degrade
     /// to a plain hex (no extra cost).
-    bool enableCutCells   = false;
-    int  edgeBisectIters  = 12;   ///< Edge-intersection precision (>=4).
+    bool enableCutCells = false;
+    int edgeBisectIters = 12; ///< Edge-intersection precision (>=4).
 };
 
-class OctreeMesher {
+class OctreeMesher
+{
 public:
     /// Generate volumetric hex mesh from a closed STL surface.
-    void mesh(const StlSurface& surface,
-              OctreeMeshOptions opt,
-              Mesh& out);
+    void mesh(const StlSurface& surface, OctreeMeshOptions opt, Mesh& out);
 };
 
-}  // namespace simall::meshing
+} // namespace simall::meshing

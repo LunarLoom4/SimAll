@@ -27,25 +27,33 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::parallel {
+namespace simall::parallel
+{
 
-enum class PartitionerKind { Metis, Scotch };
-
-struct DomainPartitionProps {
-    PartitionerKind kind     = PartitionerKind::Metis;
-    int             nParts   = 0;        // 0 → use ctx.size()
-    double          imbalanceTol = 1.05;
+enum class PartitionerKind
+{
+    Metis,
+    Scotch
 };
 
-struct DomainPlan {
-    std::vector<std::int32_t>  cellRank;      // size = nGlobalCells
-    std::vector<std::int32_t>  localCells;    // global cell ids owned by myRank
-    std::vector<std::int32_t>  ghostCells;    // global cell ids in halo
-    std::vector<NeighbourComm> neighbours;    // communication plan
-    std::size_t                edgeCut = 0;
+struct DomainPartitionProps
+{
+    PartitionerKind kind = PartitionerKind::Metis;
+    int nParts = 0; // 0 → use ctx.size()
+    double imbalanceTol = 1.05;
 };
 
-class DomainPartition {
+struct DomainPlan
+{
+    std::vector<std::int32_t> cellRank;    // size = nGlobalCells
+    std::vector<std::int32_t> localCells;  // global cell ids owned by myRank
+    std::vector<std::int32_t> ghostCells;  // global cell ids in halo
+    std::vector<NeighbourComm> neighbours; // communication plan
+    std::size_t edgeCut = 0;
+};
+
+class DomainPartition
+{
 public:
     explicit DomainPartition(MpiContext& ctx);
 
@@ -63,16 +71,15 @@ public:
     /// `meshing::ops::extract_subdomain` using `ctx.rank()` as the local
     /// rank.  Returns the standard SubdomainStats reporting owned/ghost
     /// counts plus the wrapped split_mesh result.
-    meshing::ops::SubdomainStats extract_local_mesh(
-        const meshing::Mesh& globalMesh,
-        const DomainPlan&    plan,
-        meshing::Mesh&       outMesh) const;
+    meshing::ops::SubdomainStats extract_local_mesh(const meshing::Mesh& globalMesh,
+                                                    const DomainPlan& plan,
+                                                    meshing::Mesh& outMesh) const;
 
     const DomainPartitionProps& props() const noexcept { return p_; }
 
 private:
-    MpiContext&          ctx_;
+    MpiContext& ctx_;
     DomainPartitionProps p_{};
 };
 
-}  // namespace simall::parallel
+} // namespace simall::parallel

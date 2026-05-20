@@ -23,29 +23,33 @@
 #pragma once
 
 #include "solver/SimpleAlgorithm.hpp"
+
 #include <functional>
 #include <vector>
 
-namespace simall::solver {
+namespace simall::solver
+{
 
-struct DualTimeOptions {
-    int    maxPseudoIters = 50;
-    double absTol         = 1.0e-6;   // absolute convergence on max(mom, cont)
-    double relTol         = 1.0e-3;   // relative drop from first pseudo-iter
-    bool   verbose        = false;
+struct DualTimeOptions
+{
+    int maxPseudoIters = 50;
+    double absTol = 1.0e-6; // absolute convergence on max(mom, cont)
+    double relTol = 1.0e-3; // relative drop from first pseudo-iter
+    bool verbose = false;
 };
 
-struct DualTimeReport {
-    int    iters    = 0;
+struct DualTimeReport
+{
+    int iters = 0;
     double finalMom = 0.0;
-    double finalCont= 0.0;
-    bool   converged= false;
+    double finalCont = 0.0;
+    bool converged = false;
 };
 
-class DualTimeStepping {
+class DualTimeStepping
+{
 public:
-    DualTimeStepping(SimpleAlgorithm& alg, DualTimeOptions opts = {})
-        : alg_(alg), opt_(opts) {}
+    DualTimeStepping(SimpleAlgorithm& alg, DualTimeOptions opts = {}) : alg_(alg), opt_(opts) {}
 
     /// Advance ONE physical time step using pseudo-time sub-iterations.
     /// Internally calls alg_.iterate() until convergence; finalises by
@@ -61,7 +65,7 @@ public:
 
 private:
     SimpleAlgorithm& alg_;
-    DualTimeOptions  opt_;
+    DualTimeOptions opt_;
 };
 
-}  // namespace simall::solver
+} // namespace simall::solver

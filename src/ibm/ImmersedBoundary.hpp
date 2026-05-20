@@ -29,22 +29,29 @@
 #include <cstdint>
 #include <vector>
 
-namespace simall::ibm {
+namespace simall::ibm
+{
 
-enum class CellTag : std::int8_t { Fluid = 0, IB = 1, Solid = 2 };
+enum class CellTag : std::int8_t
+{
+    Fluid = 0,
+    IB = 1,
+    Solid = 2
+};
 
-struct RigidBodyKinematics {
+struct RigidBodyKinematics
+{
     util::Vec3d linearVelocity{0, 0, 0};
-    util::Vec3d angularVelocity{0, 0, 0};   // rad/s
+    util::Vec3d angularVelocity{0, 0, 0}; // rad/s
     util::Vec3d centreOfRotation{0, 0, 0};
 };
 
-class ImmersedBoundary {
+class ImmersedBoundary
+{
 public:
     /// Configure with the immersed surface and the background fluid mesh.
     /// Builds the per-cell signed-distance field and the cell tag array.
-    void initialize(const meshing::Mesh& fluid,
-                    const meshing::StlSurface& surface);
+    void initialize(const meshing::Mesh& fluid, const meshing::StlSurface& surface);
 
     /// Override / update the rigid body motion. Cheap; can be called every
     /// time step for moving / rotating bodies.
@@ -58,16 +65,16 @@ public:
     /// Should be called right after each pressure-correction sub-step.
     void enforce_solid(solver::FieldRegistry& fields);
 
-    const std::vector<CellTag>&              tags() const { return tag_; }
-    const util::aligned_vector<double>&      signed_distance() const { return sdf_; }
+    const std::vector<CellTag>& tags() const { return tag_; }
+    const util::aligned_vector<double>& signed_distance() const { return sdf_; }
 
 private:
     util::Vec3d body_velocity(const util::Vec3d& x) const;
 
     const meshing::Mesh* mesh_ = nullptr;
     RigidBodyKinematics kin_{};
-    std::vector<CellTag>            tag_;
-    util::aligned_vector<double>    sdf_;        // signed distance, < 0 inside
+    std::vector<CellTag> tag_;
+    util::aligned_vector<double> sdf_; // signed distance, < 0 inside
 };
 
-}  // namespace simall::ibm
+} // namespace simall::ibm

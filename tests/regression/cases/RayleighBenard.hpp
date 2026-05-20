@@ -8,14 +8,16 @@
 
 #include "../RegressionFramework.hpp"
 
-namespace simall::regression::rb {
+namespace simall::regression::rb
+{
 
 inline constexpr double kRayleighCritical = 1707.762;
 inline constexpr double kCriticalWavenumber = 3.117;
 
 // Linear-theory growth rate (positive when Ra > Ra_c, negative below).
-[[nodiscard]] inline double linear_growth_rate(double Ra) {
+[[nodiscard]] inline double linear_growth_rate(double Ra)
+{
     return (Ra - kRayleighCritical) / kRayleighCritical;
 }
 
-}  // namespace simall::regression::rb
+} // namespace simall::regression::rb

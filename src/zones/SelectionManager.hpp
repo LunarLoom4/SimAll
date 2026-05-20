@@ -15,9 +15,11 @@
 #include <string>
 #include <unordered_map>
 
-namespace simall::zones {
+namespace simall::zones
+{
 
-class SelectionManager {
+class SelectionManager
+{
 public:
     /// Insert (or replace) a selection.  Returns true if a previous
     /// definition with the same name was overwritten.
@@ -28,30 +30,33 @@ public:
 
     /// Lookup by name.  Returns `nullptr` if missing.
     const NamedSelection* find(const std::string& name) const noexcept;
-          NamedSelection* find(const std::string& name)       noexcept;
+    NamedSelection* find(const std::string& name) noexcept;
 
     /// Rename.  Fails if `newName` already exists.
     bool rename(const std::string& oldName, const std::string& newName);
 
     /// Set algebra — results are returned as fresh NamedSelections.
-    std::optional<NamedSelection> set_union     (const std::string& a, const std::string& b,
-                                                 const std::string& result) const;
-    std::optional<NamedSelection> set_intersect (const std::string& a, const std::string& b,
-                                                 const std::string& result) const;
-    std::optional<NamedSelection> set_subtract  (const std::string& a, const std::string& b,
-                                                 const std::string& result) const;
+    std::optional<NamedSelection> set_union(const std::string& a,
+                                            const std::string& b,
+                                            const std::string& result) const;
+    std::optional<NamedSelection> set_intersect(const std::string& a,
+                                                const std::string& b,
+                                                const std::string& result) const;
+    std::optional<NamedSelection> set_subtract(const std::string& a,
+                                               const std::string& b,
+                                               const std::string& result) const;
 
     /// Bulk access.
     std::vector<std::string> names() const;
-    std::size_t              size()  const noexcept { return store_.size(); }
-    void                     clear()         noexcept { store_.clear(); }
+    std::size_t size() const noexcept { return store_.size(); }
+    void clear() noexcept { store_.clear(); }
 
     /// Stable round-trip JSON serialization (used by the project I/O layer).
     std::string to_json() const;
-    bool        from_json(const std::string& json);
+    bool from_json(const std::string& json);
 
 private:
     std::unordered_map<std::string, NamedSelection> store_;
 };
 
-}  // namespace simall::zones
+} // namespace simall::zones

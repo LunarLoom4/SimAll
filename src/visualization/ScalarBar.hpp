@@ -14,24 +14,34 @@
 #include <string>
 #include <vector>
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-enum class ScalarBarOrientation : std::uint8_t { Vertical, Horizontal };
+enum class ScalarBarOrientation : std::uint8_t
+{
+    Vertical,
+    Horizontal
+};
 
-struct ScalarBar {
-    std::string          title;
-    std::string          units;
-    double               scalarMin = 0.0;
-    double               scalarMax = 1.0;
-    std::uint32_t        tickCount = 5;
-    int                  precision = 3;
+struct ScalarBar
+{
+    std::string title;
+    std::string units;
+    double scalarMin = 0.0;
+    double scalarMax = 1.0;
+    std::uint32_t tickCount = 5;
+    int precision = 3;
     ScalarBarOrientation orientation = ScalarBarOrientation::Vertical;
-    std::uint32_t        widthPx   = 32;
-    std::uint32_t        lengthPx  = 256;
-    TransferFunction     tf;
+    std::uint32_t widthPx = 32;
+    std::uint32_t lengthPx = 256;
+    TransferFunction tf;
 
     /// Sample tick positions and the printable text for each.
-    struct Tick { double scalar; std::string label; };
+    struct Tick
+    {
+        double scalar;
+        std::string label;
+    };
     std::vector<Tick> ticks() const;
 
     /// Rasterise the gradient ramp at the configured resolution.  Returns
@@ -39,4 +49,4 @@ struct ScalarBar {
     Image rasterise_gradient() const;
 };
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

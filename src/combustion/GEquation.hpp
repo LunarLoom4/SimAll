@@ -25,18 +25,21 @@
 #include "solver/FieldRegistry.hpp"
 #include "solver/Solver.hpp"
 
-namespace simall::combustion {
+namespace simall::combustion
+{
 
-struct GEquationParams {
-    double s_laminar       = 0.40;   // m/s  laminar flame speed
-    double C_damkohler     = 2.0;    // Damköhler constant in s_T law
-    int    reinitInterval  = 5;      // outer steps between reinitialisations
-    int    reinitSubSteps  = 10;     // pseudo-time sub-steps per reinit
-    double reinitDtFactor  = 0.4;    // CFL fraction on local cell size
-    double G_iso           = 0.0;
+struct GEquationParams
+{
+    double s_laminar = 0.40;     // m/s  laminar flame speed
+    double C_damkohler = 2.0;    // Damköhler constant in s_T law
+    int reinitInterval = 5;      // outer steps between reinitialisations
+    int reinitSubSteps = 10;     // pseudo-time sub-steps per reinit
+    double reinitDtFactor = 0.4; // CFL fraction on local cell size
+    double G_iso = 0.0;
 };
 
-class GEquation {
+class GEquation
+{
 public:
     void initialize(const meshing::Mesh& mesh,
                     solver::FieldRegistry& fields,
@@ -56,10 +59,10 @@ private:
     void reinitialise();
     double cell_size(meshing::CellId c) const;
 
-    const meshing::Mesh*   mesh_   = nullptr;
+    const meshing::Mesh* mesh_ = nullptr;
     solver::FieldRegistry* fields_ = nullptr;
-    GEquationParams        p_{};
-    int                    stepCounter_ = 0;
+    GEquationParams p_{};
+    int stepCounter_ = 0;
 };
 
-}  // namespace simall::combustion
+} // namespace simall::combustion

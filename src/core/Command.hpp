@@ -19,36 +19,51 @@
 #include <utility>
 #include <vector>
 
-namespace simall::core {
+namespace simall::core
+{
 
-class ICommand {
+class ICommand
+{
 public:
-    virtual ~ICommand()                = default;
-    virtual void        execute()      = 0;
-    virtual void        undo()         = 0;
+    virtual ~ICommand() = default;
+    virtual void execute() = 0;
+    virtual void undo() = 0;
     virtual std::string description() const = 0;
 };
 
-class CommandHistory {
+class CommandHistory
+{
 public:
     explicit CommandHistory(std::size_t limit = 256) : limit_(limit) {}
 
-    void execute(std::unique_ptr<ICommand> cmd) {
+    void execute(std::unique_ptr<ICommand> cmd)
+    {
         cmd->execute();
         std::lock_guard lk(mtx_);
         redo_.clear();
         undo_.emplace_back(std::move(cmd));
-        if (undo_.size() > limit_) undo_.pop_front();
+        if (undo_.size() > limit_)
+            undo_.pop_front();
     }
 
-    bool can_undo() const { std::lock_guard lk(mtx_); return !undo_.empty(); }
-    bool can_redo() const { std::lock_guard lk(mtx_); return !redo_.empty(); }
+    bool can_undo() const
+    {
+        std::lock_guard lk(mtx_);
+        return !undo_.empty();
+    }
+    bool can_redo() const
+    {
+        std::lock_guard lk(mtx_);
+        return !redo_.empty();
+    }
 
-    void undo() {
+    void undo()
+    {
         std::unique_ptr<ICommand> cmd;
         {
             std::lock_guard lk(mtx_);
-            if (undo_.empty()) return;
+            if (undo_.empty())
+                return;
             cmd = std::move(undo_.back());
             undo_.pop_back();
         }
@@ -57,11 +72,13 @@ public:
         redo_.emplace_back(std::move(cmd));
     }
 
-    void redo() {
+    void redo()
+    {
         std::unique_ptr<ICommand> cmd;
         {
             std::lock_guard lk(mtx_);
-            if (redo_.empty()) return;
+            if (redo_.empty())
+                return;
             cmd = std::move(redo_.back());
             redo_.pop_back();
         }
@@ -70,16 +87,18 @@ public:
         undo_.emplace_back(std::move(cmd));
     }
 
-    void clear() {
+    void clear()
+    {
         std::lock_guard lk(mtx_);
-        undo_.clear(); redo_.clear();
+        undo_.clear();
+        redo_.clear();
     }
 
 private:
-    mutable std::mutex                       mtx_;
-    std::size_t                              limit_;
-    std::deque<std::unique_ptr<ICommand>>    undo_;
-    std::deque<std::unique_ptr<ICommand>>    redo_;
+    mutable std::mutex mtx_;
+    std::size_t limit_;
+    std::deque<std::unique_ptr<ICommand>> undo_;
+    std::deque<std::unique_ptr<ICommand>> redo_;
 };
 
 // ----------------------------------------------------------------------------
@@ -91,42 +110,51 @@ private:
 // If any child throws during execute(), already-executed children are
 // rolled back so the system remains consistent.
 // ----------------------------------------------------------------------------
-class CompositeCommand : public ICommand {
+class CompositeCommand : public ICommand
+{
 public:
-    explicit CompositeCommand(std::string desc = "Composite")
-        : desc_(std::move(desc)) {}
+    explicit CompositeCommand(std::string desc = "Composite") : desc_(std::move(desc)) {}
 
-    void add(std::unique_ptr<ICommand> child) {
-        if (!child) throw std::invalid_argument("CompositeCommand: null child");
+    void add(std::unique_ptr<ICommand> child)
+    {
+        if (!child)
+            throw std::invalid_argument("CompositeCommand: null child");
         children_.push_back(std::move(child));
     }
 
     /// Build a composite from any number of commands in one expression:
     ///   auto c = CompositeCommand::of("Edit BC", std::move(a), std::move(b));
     template <class... Cmds>
-    static std::unique_ptr<CompositeCommand> of(std::string desc, Cmds&&... cs) {
+    static std::unique_ptr<CompositeCommand> of(std::string desc, Cmds&&... cs)
+    {
         auto c = std::make_unique<CompositeCommand>(std::move(desc));
         (c->add(std::forward<Cmds>(cs)), ...);
         return c;
     }
 
     std::size_t size() const noexcept { return children_.size(); }
-    bool        empty() const noexcept { return children_.empty(); }
+    bool empty() const noexcept { return children_.empty(); }
 
-    void execute() override {
+    void execute() override
+    {
         std::size_t i = 0;
         try {
-            for (; i < children_.size(); ++i) children_[i]->execute();
+            for (; i < children_.size(); ++i)
+                children_[i]->execute();
         } catch (...) {
             // Roll back already-executed children in reverse order.
             for (std::size_t k = i; k-- > 0;) {
-                try { children_[k]->undo(); } catch (...) { /* swallow */ }
+                try {
+                    children_[k]->undo();
+                } catch (...) { /* swallow */
+                }
             }
             throw;
         }
     }
 
-    void undo() override {
+    void undo() override
+    {
         for (std::size_t k = children_.size(); k-- > 0;) {
             children_[k]->undo();
         }
@@ -135,8 +163,8 @@ public:
     std::string description() const override { return desc_; }
 
 private:
-    std::string                                  desc_;
-    std::vector<std::unique_ptr<ICommand>>       children_;
+    std::string desc_;
+    std::vector<std::unique_ptr<ICommand>> children_;
 };
 
 // ----------------------------------------------------------------------------
@@ -146,23 +174,23 @@ private:
 //       [&]{ field.set("mu", v_new); },
 //       [&]{ field.set("mu", v_old); }));
 // ----------------------------------------------------------------------------
-class LambdaCommand : public ICommand {
+class LambdaCommand : public ICommand
+{
 public:
-    LambdaCommand(std::string desc,
-                  std::function<void()> doFn,
-                  std::function<void()> undoFn)
-        : desc_(std::move(desc)),
-          do_(std::move(doFn)),
-          undo_(std::move(undoFn)) {
-        if (!do_ || !undo_) throw std::invalid_argument("LambdaCommand: null functor");
+    LambdaCommand(std::string desc, std::function<void()> doFn, std::function<void()> undoFn)
+        : desc_(std::move(desc)), do_(std::move(doFn)), undo_(std::move(undoFn))
+    {
+        if (!do_ || !undo_)
+            throw std::invalid_argument("LambdaCommand: null functor");
     }
     void execute() override { do_(); }
-    void undo()    override { undo_(); }
+    void undo() override { undo_(); }
     std::string description() const override { return desc_; }
+
 private:
     std::string desc_;
     std::function<void()> do_;
     std::function<void()> undo_;
 };
 
-}  // namespace simall::core
+} // namespace simall::core

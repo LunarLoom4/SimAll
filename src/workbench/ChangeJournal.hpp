@@ -25,20 +25,26 @@
 #include <string>
 #include <vector>
 
-namespace simall::workbench {
+namespace simall::workbench
+{
 
-enum class ChangeDirection : std::uint8_t { Do, Undo };
-
-struct ChangeEntry {
-    std::uint64_t   sequence{};
-    ChangeDirection direction{ChangeDirection::Do};
-    std::string     description;
+enum class ChangeDirection : std::uint8_t
+{
+    Do,
+    Undo
 };
 
-class ChangeJournal {
+struct ChangeEntry
+{
+    std::uint64_t sequence{};
+    ChangeDirection direction{ChangeDirection::Do};
+    std::string description;
+};
+
+class ChangeJournal
+{
 public:
-    explicit ChangeJournal(std::size_t capacity = 1024) noexcept
-        : capacity_(capacity) {}
+    explicit ChangeJournal(std::size_t capacity = 1024) noexcept : capacity_(capacity) {}
 
     // Append a new entry.  Older entries are dropped from the front when
     // the buffer is full -- the journal is FIFO-bounded, never blocks.
@@ -51,16 +57,16 @@ public:
     void set_sink(Sink sink) noexcept;
 
     [[nodiscard]] std::vector<ChangeEntry> snapshot() const;
-    [[nodiscard]] std::size_t              size()     const noexcept;
-    [[nodiscard]] std::size_t              capacity() const noexcept { return capacity_; }
-    void                                   clear()          noexcept;
+    [[nodiscard]] std::size_t size() const noexcept;
+    [[nodiscard]] std::size_t capacity() const noexcept { return capacity_; }
+    void clear() noexcept;
 
 private:
-    mutable std::mutex      mtx_;
+    mutable std::mutex mtx_;
     std::deque<ChangeEntry> ring_;
-    std::size_t             capacity_;
-    std::uint64_t           next_seq_{0};
-    Sink                    sink_{};
+    std::size_t capacity_;
+    std::uint64_t next_seq_{0};
+    Sink sink_{};
 };
 
-}  // namespace simall::workbench
+} // namespace simall::workbench

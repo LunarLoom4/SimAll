@@ -10,11 +10,13 @@
 
 #include "../regression/RegressionFramework.hpp"
 
-namespace simall::golden {
+namespace simall::golden
+{
 
-struct GoldenEntry {
-    const char*   name;
+struct GoldenEntry
+{
+    const char* name;
     std::uint64_t hash;
 };
 
-}  // namespace simall::golden
+} // namespace simall::golden

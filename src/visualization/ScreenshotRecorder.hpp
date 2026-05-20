@@ -15,9 +15,11 @@
 #include <filesystem>
 #include <string>
 
-namespace simall::visualization {
+namespace simall::visualization
+{
 
-class ScreenshotRecorder {
+class ScreenshotRecorder
+{
 public:
     /// Write an Image to a binary PPM (P6) file.  Alpha is dropped because
     /// PPM is RGB-only; callers wanting alpha should use save_rgba_raw().
@@ -34,4 +36,4 @@ public:
     static Image load_ppm(const std::filesystem::path& path);
 };
 
-}  // namespace simall::visualization
+} // namespace simall::visualization

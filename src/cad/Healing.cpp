@@ -3,23 +3,27 @@
 // File   : src/cad/Healing.cpp
 // =============================================================================
 #include "cad/Healing.hpp"
+
 #include "cad/ShapeHandleInternal.hpp"
 #include "core/Logger.hpp"
 
-#include <ShapeFix_Shape.hxx>
-#include <ShapeFix_Wireframe.hxx>
-#include <ShapeFix_FixSmallFace.hxx>
-#include <ShapeFix_Shell.hxx>
-#include <ShapeUpgrade_RemoveInternalWires.hxx>
 #include <BRepCheck_Analyzer.hxx>
 #include <ShapeAnalysis_ShapeTolerance.hxx>
+#include <ShapeFix_FixSmallFace.hxx>
+#include <ShapeFix_Shape.hxx>
+#include <ShapeFix_Shell.hxx>
+#include <ShapeFix_Wireframe.hxx>
+#include <ShapeUpgrade_RemoveInternalWires.hxx>
 #include <TopAbs.hxx>
 
-namespace simall::cad {
+namespace simall::cad
+{
 
-void Healing::repair(ShapeHandle& shape, const HealingOptions& opts) {
+void Healing::repair(ShapeHandle& shape, const HealingOptions& opts)
+{
     report_ = {};
-    if (!shape.valid()) return;
+    if (!shape.valid())
+        return;
 
     TopoDS_Shape work = ShapeHandleAccess::shape(shape);
 
@@ -41,9 +45,16 @@ void Healing::repair(ShapeHandle& shape, const HealingOptions& opts) {
         wf->SetPrecision(opts.tolerance);
         wf->SetMaxTolerance(opts.tolerance * 100.0);
         wf->ModeDropSmallEdges() = opts.collapseTinyEdges ? Standard_True : Standard_False;
-        if (opts.stitchGaps        && wf->FixWireGaps())   { report_.gapsStitched   = 1; report_.anyChange = true; }
-        if (opts.collapseTinyEdges && wf->FixSmallEdges()) { report_.smallEdgesRemoved = 1; report_.anyChange = true; }
-        if (!wf->Shape().IsNull()) work = wf->Shape();
+        if (opts.stitchGaps && wf->FixWireGaps()) {
+            report_.gapsStitched = 1;
+            report_.anyChange = true;
+        }
+        if (opts.collapseTinyEdges && wf->FixSmallEdges()) {
+            report_.smallEdgesRemoved = 1;
+            report_.anyChange = true;
+        }
+        if (!wf->Shape().IsNull())
+            work = wf->Shape();
     }
 
     if (opts.removeSlivers) {
@@ -71,11 +82,16 @@ void Healing::repair(ShapeHandle& shape, const HealingOptions& opts) {
     rebuildTopologyGraph(work, ShapeHandleAccess::impl(shape).graph);
 
     SIMALL_LOG_INFO("CAD/Heal",
-                    "tol=", opts.tolerance,
-                    " changed=", (report_.anyChange ? "yes" : "no"),
-                    " stitched=", report_.gapsStitched,
-                    " smallEdges=", report_.smallEdgesRemoved,
-                    " slivers=", report_.sliverFacesRemoved);
+                    "tol=",
+                    opts.tolerance,
+                    " changed=",
+                    (report_.anyChange ? "yes" : "no"),
+                    " stitched=",
+                    report_.gapsStitched,
+                    " smallEdges=",
+                    report_.smallEdgesRemoved,
+                    " slivers=",
+                    report_.sliverFacesRemoved);
 }
 
-}  // namespace simall::cad
+} // namespace simall::cad

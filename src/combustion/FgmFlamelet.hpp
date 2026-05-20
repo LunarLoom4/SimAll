@@ -26,27 +26,34 @@
 #include <unordered_map>
 #include <vector>
 
-namespace simall::combustion {
+namespace simall::combustion
+{
 
-struct FgmTableAxis {
-    std::vector<double> Z;     // mixture fraction axis (sorted ascending)
-    std::vector<double> c;     // progress variable axis (sorted ascending)
+struct FgmTableAxis
+{
+    std::vector<double> Z; // mixture fraction axis (sorted ascending)
+    std::vector<double> c; // progress variable axis (sorted ascending)
 };
 
-struct FgmTable {
+struct FgmTable
+{
     FgmTableAxis axis;
     // table[var][iZ * Nc + ic] flat storage
     std::unordered_map<std::string, std::vector<double>> var;
 };
 
-class FgmFlamelet {
+class FgmFlamelet
+{
 public:
     /// Build a uniform analytic FGM table for a simple methane-air flame
     /// (Burke-Schumann limit with Damköhler-style progress variable).
     /// Useful for verification and unit testing without external data.
-    void build_analytic(std::size_t NZ = 21, std::size_t Nc = 21,
-                        double Z_st = 0.055, double T_un = 300.0,
-                        double T_ad = 2225.0, double rho_un = 1.18,
+    void build_analytic(std::size_t NZ = 21,
+                        std::size_t Nc = 21,
+                        double Z_st = 0.055,
+                        double T_un = 300.0,
+                        double T_ad = 2225.0,
+                        double rho_un = 1.18,
                         double rho_ad = 0.18);
 
     /// Replace the table with externally-supplied data (e.g. CANTERA output).
@@ -69,4 +76,4 @@ private:
     const meshing::Mesh* mesh_ = nullptr;
 };
 
-}  // namespace simall::combustion
+} // namespace simall::combustion

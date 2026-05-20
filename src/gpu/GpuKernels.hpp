@@ -39,13 +39,13 @@
 
 #include <cstddef>
 
-namespace simall::gpu {
+namespace simall::gpu
+{
 
 // ============================================================ vector ops
 
 /// y[i] += alpha * x[i],  i ∈ [0, n)
-void axpy(double alpha, const void* x, void* y, std::size_t n,
-          void* stream = nullptr);
+void axpy(double alpha, const void* x, void* y, std::size_t n, void* stream = nullptr);
 
 /// x[i] *= alpha
 void scal(double alpha, void* x, std::size_t n, void* stream = nullptr);
@@ -60,12 +60,10 @@ double dot(const void* x, const void* y, std::size_t n, void* stream = nullptr);
 double nrm2(const void* x, std::size_t n, void* stream = nullptr);
 
 /// y[i] = a*x[i] + b*y[i]  (BLAS-1 fused).
-void axpby(double a, const void* x, double b, void* y, std::size_t n,
-           void* stream = nullptr);
+void axpby(double a, const void* x, double b, void* y, std::size_t n, void* stream = nullptr);
 
 /// y[i] = x[i] + beta*y[i]      (CG's p ← r + β·p uses this).
-void xpby(const void* x, double beta, void* y, std::size_t n,
-          void* stream = nullptr);
+void xpby(const void* x, double beta, void* y, std::size_t n, void* stream = nullptr);
 
 // ============================================================ sparse ops
 
@@ -76,23 +74,24 @@ void xpby(const void* x, double beta, void* y, std::size_t n,
 ///   x      : double[n]
 ///   y      : double[n]
 void spmv_csr(std::size_t n,
-              const void* rowPtr, const void* colIdx, const void* values,
-              const void* x, void* y, void* stream = nullptr);
+              const void* rowPtr,
+              const void* colIdx,
+              const void* values,
+              const void* x,
+              void* y,
+              void* stream = nullptr);
 
 // ============================================================ preconditioners
 
 /// Diagonal (Jacobi) precondition:  z[i] = r[i] / diag[i].
-void jacobi_apply(const void* diag, const void* r, void* z,
-                  std::size_t n, void* stream = nullptr);
+void jacobi_apply(const void* diag, const void* r, void* z, std::size_t n, void* stream = nullptr);
 
 /// In-place ILU(0) factorisation of a CSR matrix.  The CSR pattern of
 /// (L+U-I) coincides with A — only the values array is mutated.  Pre-
 /// condition: ``A`` is structurally symmetric with non-zero diagonal.
 ///
 /// Returns false if a zero pivot was encountered (skip preconditioning).
-bool ilu0_factor_inplace(std::size_t n,
-                         const int* rowPtr, const int* colIdx,
-                         double* values);
+bool ilu0_factor_inplace(std::size_t n, const int* rowPtr, const int* colIdx, double* values);
 
 /// Apply M⁻¹ where M = LU was produced by ilu0_factor_inplace.  Performs
 /// a forward + backward triangular sweep.  z := L⁻¹·r ; z := U⁻¹·z.
@@ -101,7 +100,11 @@ bool ilu0_factor_inplace(std::size_t n,
 /// serial sweep — adequate for unit tests, not for production CPU runs
 /// (the CPU ILU(0) lives in solver::ILU0Preconditioner).
 void ilu0_apply(std::size_t n,
-                const int* rowPtr, const int* colIdx, const double* values,
-                const double* r, double* z, void* stream = nullptr);
+                const int* rowPtr,
+                const int* colIdx,
+                const double* values,
+                const double* r,
+                double* z,
+                void* stream = nullptr);
 
-}  // namespace simall::gpu
+} // namespace simall::gpu

@@ -7,9 +7,11 @@
 #include <algorithm>
 #include <cmath>
 
-namespace simall::optimization {
+namespace simall::optimization
+{
 
-MmaResult run_mma(MmaProblem p, MmaOptions opt) {
+MmaResult run_mma(MmaProblem p, MmaOptions opt)
+{
     MmaResult r;
     const std::size_t n = p.n;
     const std::size_t m = p.m;
@@ -19,7 +21,7 @@ MmaResult run_mma(MmaProblem p, MmaOptions opt) {
     }
     r.x = p.x0;
     std::vector<double> xPrev = r.x;
-    std::vector<double> xPP   = r.x;
+    std::vector<double> xPP = r.x;
     std::vector<double> low(n), up(n);
     std::vector<double> df(n), dg(m * n);
     std::vector<double> g(m);
@@ -34,21 +36,23 @@ MmaResult run_mma(MmaProblem p, MmaOptions opt) {
             const double range = std::max(p.xUp[i] - p.xLow[i], 1e-30);
             if (k < 2) {
                 low[i] = r.x[i] - opt.asyInit * range;
-                up [i] = r.x[i] + opt.asyInit * range;
+                up[i] = r.x[i] + opt.asyInit * range;
             } else {
                 const double s = (r.x[i] - xPrev[i]) * (xPrev[i] - xPP[i]);
-                double gamma   = 1.0;
-                if      (s > 0) gamma = opt.asyIncr;
-                else if (s < 0) gamma = opt.asyDecr;
+                double gamma = 1.0;
+                if (s > 0)
+                    gamma = opt.asyIncr;
+                else if (s < 0)
+                    gamma = opt.asyDecr;
                 low[i] = r.x[i] - gamma * (xPrev[i] - low[i]);
-                up [i] = r.x[i] + gamma * (up[i]    - xPrev[i]);
+                up[i] = r.x[i] + gamma * (up[i] - xPrev[i]);
             }
             // Tighten by move limit.
             const double ml = opt.moveLimit * range;
             low[i] = std::max(low[i], r.x[i] - ml);
-            up [i] = std::min(up[i],  r.x[i] + ml);
+            up[i] = std::min(up[i], r.x[i] + ml);
             low[i] = std::max(low[i], p.xLow[i]);
-            up [i] = std::min(up[i],  p.xUp[i]);
+            up[i] = std::min(up[i], p.xUp[i]);
         }
 
         // ---- MMA convex subproblem: minimise separable approximation -----
@@ -58,7 +62,7 @@ MmaResult run_mma(MmaProblem p, MmaOptions opt) {
         std::vector<double> p0(n), q0(n);
         std::vector<double> pj(m * n), qj(m * n);
         for (std::size_t i = 0; i < n; ++i) {
-            const double up_x = std::max(up[i]  - r.x[i], 1e-12);
+            const double up_x = std::max(up[i] - r.x[i], 1e-12);
             const double x_lo = std::max(r.x[i] - low[i], 1e-12);
             p0[i] = up_x * up_x * std::max(df[i], 0.0);
             q0[i] = x_lo * x_lo * std::max(-df[i], 0.0);
@@ -75,7 +79,7 @@ MmaResult run_mma(MmaProblem p, MmaOptions opt) {
         for (std::size_t it = 0; it < opt.subIters; ++it) {
             std::vector<double> grad(n, 0.0);
             for (std::size_t i = 0; i < n; ++i) {
-                const double up_x = std::max(up[i]  - xs[i], 1e-12);
+                const double up_x = std::max(up[i] - xs[i], 1e-12);
                 const double x_lo = std::max(xs[i] - low[i], 1e-12);
                 grad[i] = p0[i] / (up_x * up_x) - q0[i] / (x_lo * x_lo);
             }
@@ -83,19 +87,19 @@ MmaResult run_mma(MmaProblem p, MmaOptions opt) {
             for (std::size_t j = 0; j < m; ++j) {
                 double gApprox = g[j];
                 for (std::size_t i = 0; i < n; ++i) {
-                    const double up_x = std::max(up[i]  - xs[i], 1e-12);
+                    const double up_x = std::max(up[i] - xs[i], 1e-12);
                     const double x_lo = std::max(xs[i] - low[i], 1e-12);
                     gApprox += pj[j * n + i] / up_x + qj[j * n + i] / x_lo
-                            -  pj[j * n + i] / std::max(up[i]  - r.x[i], 1e-12)
-                            -  qj[j * n + i] / std::max(r.x[i] - low[i], 1e-12);
+                               - pj[j * n + i] / std::max(up[i] - r.x[i], 1e-12)
+                               - qj[j * n + i] / std::max(r.x[i] - low[i], 1e-12);
                 }
                 if (gApprox > 0.0) {
                     for (std::size_t i = 0; i < n; ++i) {
-                        const double up_x = std::max(up[i]  - xs[i], 1e-12);
+                        const double up_x = std::max(up[i] - xs[i], 1e-12);
                         const double x_lo = std::max(xs[i] - low[i], 1e-12);
-                        grad[i] += penalty * gApprox *
-                                   ( pj[j * n + i] / (up_x * up_x)
-                                   - qj[j * n + i] / (x_lo * x_lo));
+                        grad[i] +=
+                            penalty * gApprox
+                            * (pj[j * n + i] / (up_x * up_x) - qj[j * n + i] / (x_lo * x_lo));
                     }
                 }
             }
@@ -111,15 +115,16 @@ MmaResult run_mma(MmaProblem p, MmaOptions opt) {
         for (std::size_t i = 0; i < n; ++i) {
             dx = std::max(dx, std::abs(xs[i] - r.x[i]));
         }
-        xPP   = xPrev;
+        xPP = xPrev;
         xPrev = r.x;
-        r.x   = xs;
+        r.x = xs;
         r.iterations = k + 1;
-        if (dx < opt.tolX) break;
+        if (dx < opt.tolX)
+            break;
     }
     p.evaluate(r.x, r.f, r.g, df, dg);
     r.ok = true;
     return r;
 }
 
-}  // namespace simall::optimization
+} // namespace simall::optimization
