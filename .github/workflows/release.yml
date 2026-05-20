@@ -48,22 +48,44 @@ jobs:
     timeout-minutes: 360  # 6 h (vcpkg first build can use most of this)
 
     env:
-      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+      # Persistent binary cache dir on the runner workspace.  actions/cache
+      # snapshots this between runs so already-built ports (Qt6, VTK, OCCT,
+      # ...) are restored as binary packages instead of rebuilt from source.
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg-cache
+      # files,<dir>,readwrite is vcpkg's standard local-filesystem binary
+      # cache backend.  Replaces the deprecated/removed x-gha backend.
+      VCPKG_BINARY_SOURCES: 'clear;files,${{ github.workspace }}/vcpkg-cache,readwrite'
+      # Use our overlay triplet that skips Debug builds of every dep --
+      # halves the first-time build (we never ship Debug binaries).
+      VCPKG_DEFAULT_TRIPLET: x64-windows-release
+      VCPKG_OVERLAY_TRIPLETS: ${{ github.workspace }}/triplets
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 1
 
-      - name: Export GitHub Actions cache env (for vcpkg)
-        uses: actions/github-script@v7
-        with:
-          script: |
-            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+      - name: Prepare binary cache dir
+        shell: pwsh
+        run: New-Item -ItemType Directory -Force -Path "$env:VCPKG_DEFAULT_BINARY_CACHE" | Out-Null
 
-      - name: Set up vcpkg (with binary cache)
+      - name: Restore vcpkg binary cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/vcpkg-cache
+          # Bust the cache when vcpkg.json or the triplet changes; otherwise
+          # fall back to the most recent compatible cache via restore-keys.
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'triplets/x64-windows-release.cmake') }}-${{ github.run_id }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'triplets/x64-windows-release.cmake') }}-
+            vcpkg-${{ runner.os }}-
+          # CRITICAL: save the cache even if the job is cancelled (e.g. 6 h
+          # timeout) -- this lets the next run pick up where this one left
+          # off instead of starting from zero.
+          save-always: true
+
+      - name: Set up vcpkg
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgDirectory: ${{ github.workspace }}/vcpkg

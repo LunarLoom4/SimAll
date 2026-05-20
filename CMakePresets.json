@@ -21,7 +21,8 @@
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "VCPKG_TARGET_TRIPLET": "x64-windows-release",
+                "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/triplets",
                 "SIMALL_BUILD_TESTS": "ON",
                 "SIMALL_USE_AVX2": "ON"
             },
@@ -35,7 +36,8 @@
             "displayName": "Windows Debug (Ninja + vcpkg)",
             "binaryDir": "${sourceDir}/build/windows-vcpkg-debug",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "VCPKG_TARGET_TRIPLET": "x64-windows"
             }
         },
         {
