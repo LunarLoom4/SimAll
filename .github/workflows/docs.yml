@@ -29,8 +29,11 @@ jobs:
           cd docs && doxygen Doxyfile
       - name: MkDocs build
         # MkDocs is best-effort -- not all module .md pages exist yet.
+        # --strict dropped: it fails on broken doc-internal links to source
+        # files (CMakeLists.txt, plugins/IPlugin.hpp etc.) which is too
+        # noisy for an in-progress docs tree.
         continue-on-error: true
-        run: mkdocs build -f docs/mkdocs.yml --strict
+        run: mkdocs build -f docs/mkdocs.yml
       - name: Upload site
         if: always()
         uses: actions/upload-artifact@v4

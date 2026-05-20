@@ -25,12 +25,23 @@ $files = foreach ($p in $paths) {
 }
 
 if ($Check) {
-    # clang-format >= 10 supports --dry-run -Werror; non-zero exit if any
-    # file would be modified. This is robust to line-ending differences
-    # whereas an in-process diff is not.
-    & clang-format --dry-run -Werror -style=file @($files.FullName)
-    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    Write-Host "All formatted." -ForegroundColor Green
+    # CI-friendly mode: per-file --dry-run, collect names of files that would
+    # change, print a summary list (NOT the full diffs -- the diff output for
+    # this codebase exceeds 10 MB, which floods CI logs unhelpfully).
+    $needs = New-Object System.Collections.Generic.List[string]
+    foreach ($f in $files) {
+        & clang-format --dry-run -Werror -style=file -- $f.FullName 2>$null
+        if ($LASTEXITCODE -ne 0) { $needs.Add((Resolve-Path -Relative $f.FullName)) }
+    }
+    if ($needs.Count -eq 0) {
+        Write-Host "All $($files.Count) files conform to .clang-format." -ForegroundColor Green
+        exit 0
+    }
+    Write-Host "$($needs.Count) of $($files.Count) files would be reformatted by clang-format:" -ForegroundColor Yellow
+    $needs | ForEach-Object { Write-Host "  $_" }
+    Write-Host ""
+    Write-Host "Run 'pwsh scripts/format.ps1' locally to fix." -ForegroundColor Yellow
+    exit 1
 }
 else {
     & clang-format -i -style=file @($files.FullName)
