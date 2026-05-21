@@ -15,7 +15,11 @@ set(FETCHCONTENT_QUIET OFF CACHE BOOL "" FORCE)
 # on PATH (e.g. mingw gfortran with MSVC linker flags) this aborts the
 # whole configure. We sidestep that entirely when a CONFIG package exists.
 if(NOT TARGET Eigen3::Eigen)
-    find_package(Eigen3 3.4 CONFIG QUIET)
+    # No version pin: vcpkg currently ships Eigen 5.x, whose
+    # Eigen3ConfigVersion.cmake uses SameMajorVersion compatibility and
+    # would reject a request for 3.4 -- causing us to fall through to
+    # FetchContent and trigger the eigen/blas/ Fortran detect.
+    find_package(Eigen3 CONFIG QUIET)
 endif()
 if(NOT TARGET Eigen3::Eigen)
     FetchContent_Declare(eigen

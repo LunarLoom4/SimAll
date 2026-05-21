@@ -26,7 +26,7 @@ function(simall_find_required_dependencies)
     find_package(OpenCASCADE 7.6 REQUIRED)
 
     # ---- Eigen3 (linear algebra) --------------------------------------------
-    find_package(Eigen3 3.4 REQUIRED NO_MODULE)
+    find_package(Eigen3 REQUIRED NO_MODULE)
 endfunction()
 
 function(simall_find_optional_dependencies)
