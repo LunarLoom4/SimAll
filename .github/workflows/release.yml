@@ -70,20 +70,35 @@ jobs:
         shell: pwsh
         run: New-Item -ItemType Directory -Force -Path "$env:VCPKG_DEFAULT_BINARY_CACHE" | Out-Null
 
+      # actions/cache@v4 deprecated `save-always` and recommends splitting
+      # restore + save into two steps. The save step runs with if: always()
+      # so that even a cancelled / timed-out run preserves whatever vcpkg
+      # built so far, letting the next run resume instead of restart.
       - name: Restore vcpkg binary cache
-        uses: actions/cache@v4
+        id: vcpkg-cache-restore
+        uses: actions/cache/restore@v4
         with:
           path: ${{ github.workspace }}/vcpkg-cache
-          # Bust the cache when vcpkg.json or the triplet changes; otherwise
-          # fall back to the most recent compatible cache via restore-keys.
           key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'triplets/x64-windows-release.cmake') }}-${{ github.run_id }}
           restore-keys: |
             vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'triplets/x64-windows-release.cmake') }}-
             vcpkg-${{ runner.os }}-
-          # CRITICAL: save the cache even if the job is cancelled (e.g. 6 h
-          # timeout) -- this lets the next run pick up where this one left
-          # off instead of starting from zero.
-          save-always: true
+
+      # Pre-built Qt 6.8 LTS from the Qt CDN, ~5 min install.  Avoids the
+      # 2-3 hour qtbase+qttools build inside vcpkg that was eating most of
+      # the 6 h job budget.  Qt6_DIR / CMAKE_PREFIX_PATH are exported by the
+      # action so find_package(Qt6) in our CMakeLists just works, and
+      # windeployqt (used by simall_install_runtime_deps) is on PATH for
+      # the install step.
+      - name: Install Qt 6.8 (pre-built)
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.1'
+          host: 'windows'
+          target: 'desktop'
+          arch: 'win64_msvc2022_64'
+          modules: 'qttools'
+          cache: true
 
       - name: Set up vcpkg
         uses: lukka/run-vcpkg@v11
@@ -98,6 +113,22 @@ jobs:
 
       - name: Set up CMake + Ninja
         uses: lukka/get-cmake@latest
+
+      # Explicit pre-install with --triplet to make absolutely sure vcpkg
+      # uses the release-only overlay. Previous runs observed packages
+      # installed under plain x64-windows (Debug+Release) despite env vars
+      # being set, which doubled the build time. Doing the install here as
+      # an explicit shell call removes any ambiguity about which triplet
+      # was used.
+      - name: Install vcpkg dependencies (release-only triplet)
+        shell: pwsh
+        run: |
+          & "${{ github.workspace }}/vcpkg/vcpkg.exe" install `
+            --triplet x64-windows-release `
+            --overlay-triplets "${{ github.workspace }}/triplets" `
+            --x-manifest-root="${{ github.workspace }}" `
+            --x-install-root="${{ github.workspace }}/build/windows-vcpkg/vcpkg_installed"
+          if ($LASTEXITCODE -ne 0) { throw "vcpkg install failed with exit $LASTEXITCODE" }
 
       - name: Configure (vcpkg manifest mode)
         env:
@@ -117,6 +148,16 @@ jobs:
       - name: Package (NSIS installer + portable ZIP)
         working-directory: build/windows-vcpkg
         run: cpack -G "NSIS;ZIP" -C Release
+
+      # Save the cache REGARDLESS of build outcome (success / fail / timeout)
+      # so partially-built vcpkg ports are preserved for the next run.
+      # No-op when the restore step already produced an exact key hit.
+      - name: Save vcpkg binary cache
+        if: always() && steps.vcpkg-cache-restore.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ github.workspace }}/vcpkg-cache
+          key: vcpkg-${{ runner.os }}-${{ hashFiles('vcpkg.json', 'triplets/x64-windows-release.cmake') }}-${{ github.run_id }}
 
       - name: List produced artefacts
         working-directory: build/windows-vcpkg

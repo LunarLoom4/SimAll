@@ -7,17 +7,6 @@
   "builtin-baseline": "b4097dd14b05a86289e1eaa20387e09d16c7bb36",
   "dependencies": [
     "eigen3",
-    {
-      "name": "qtbase",
-      "default-features": false,
-      "features": [
-        "gui",
-        "network",
-        "opengl",
-        "widgets"
-      ]
-    },
-    "qttools",
     "vtk",
     "opencascade",
     {
