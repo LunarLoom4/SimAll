@@ -9,6 +9,14 @@ include(FetchContent)
 set(FETCHCONTENT_QUIET OFF CACHE BOOL "" FORCE)
 
 # ---- Eigen -----------------------------------------------------------
+# Prefer a packaged Eigen3 (e.g. from vcpkg). Fetching upstream Eigen and
+# add_subdirectory'ing it pulls in eigen/blas/CMakeLists.txt, which calls
+# enable_language(Fortran). On runners that have a non-functional gfortran
+# on PATH (e.g. mingw gfortran with MSVC linker flags) this aborts the
+# whole configure. We sidestep that entirely when a CONFIG package exists.
+if(NOT TARGET Eigen3::Eigen)
+    find_package(Eigen3 3.4 CONFIG QUIET)
+endif()
 if(NOT TARGET Eigen3::Eigen)
     FetchContent_Declare(eigen
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
